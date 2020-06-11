@@ -1,0 +1,8 @@
+!Texture
+Id: ba7b5d49-c767-42aa-b848-d1bbec3f50be
+SerializedVersion: {Stride: 2.0.0.0}
+Tags: []
+Source: !file ../../../Resources/Characters/Player_Assassin/Textures/Player_assassin_leg.tga
+Type: !ColorTextureType
+    ColorKeyColor: {R: 255, G: 0, B: 255, A: 255}
+    PremultiplyAlpha: false

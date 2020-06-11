@@ -1,0 +1,43 @@
+!Model
+Id: 53fbcac6-3238-4496-a5c0-46ec9f0ad49c
+SerializedVersion: {Stride: 2.0.0.0}
+Tags: []
+Source: !file ../../../Resources/Characters/Player_Assassin/Player_assassin_chuangong01.FBX
+Skeleton: 25d73662-366e-48fb-b37c-ecc4c07a7f58:Characters/Player_Assassin/Player_assassin_chuangong01 Skeleton
+PivotPosition: {X: 0.0, Y: 0.0, Z: 0.0}
+Materials:
+    26b8bed8428cb63db50e079ed05fd067:
+        Name: Material_1
+        MaterialInstance:
+            Material: 75ca46fc-4153-4fae-96c5-1c22cc2dcc04:Characters/Player_Assassin/Material_1
+    4b3c69fbbe97e71e12985006e1ccdba0:
+        Name: Material_2
+        MaterialInstance:
+            Material: 340ea3a3-befd-4598-bda6-fa1d3527a500:Characters/Player_Assassin/Material_2
+    5bd6857a149635d6cf92bd8f6ad6ace5:
+        Name: Material_3
+        MaterialInstance:
+            Material: 807abf05-fd86-416c-8e2c-93cf3eabaccb:Characters/Player_Assassin/Material_3
+    a57c30998a5116abca34fb2d533d7b17:
+        Name: Material_4
+        MaterialInstance:
+            Material: 8a7797ce-1658-438e-a93d-bc70b2b384be:Characters/Player_Assassin/Material_4
+    1f3248424c20be574b58143f3f843480:
+        Name: Player_assassin_scimitar
+        MaterialInstance:
+            Material: 3a9ff3c6-8d19-4226-b3fa-a74fa20057f3:Characters/Player_Assassin/Player_assassin_scimitar_2
+    7c6a9e000edc7fa2c77feb098fcc4ea9:
+        Name: Player_assassin_crook_weapon
+        MaterialInstance:
+            Material: f1b49cd4-62eb-4600-a3e2-afc69ea9789e:Characters/Player_Assassin/Player_assassin_crook_weapon_2
+    eb6914f7876a05863ef5bdc0208cdfa9:
+        Name: Player_assassin_hair01
+        MaterialInstance:
+            Material: f1f3652d-1100-4fca-9497-c56d9700817b:Characters/Player_Assassin/Player_assassin_hair01_2
+    ed2c806bc354b2974f61b4e56bed5cca:
+        Name: Player_assassin_head
+        MaterialInstance:
+            Material: d1b4080c-be1b-4b0e-92b5-64290c60dfc9:Characters/Player_Assassin/Player_assassin_head_2
+Modifiers: {}
+~SourceHashes:
+    e32524e00a549f80e23ba2badcfc317e~../../../Resources/Characters/Player_Assassin/Player_assassin_chuangong01.FBX: c2c0ea23935c394f91de23bfce5c410c

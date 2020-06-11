@@ -1,0 +1,19 @@
+!Animation
+Id: 04a77af1-bacd-493b-a169-e36f7a387f80
+SerializedVersion: {Stride: 2.0.0.0}
+Tags: []
+Source: !file ../../../../Resources/Characters/Player_Warrior/Player_warrior_dead.FBX
+ClipDuration:
+    Enabled: false
+    StartAnimationTime: 0:00:00:00.0000000
+    EndAnimationTime: 0:00:30:00.0000000
+PivotPosition: {X: 0.0, Y: 0.0, Z: 0.0}
+RepeatMode: LoopInfinite
+Type: !StandardAnimationAssetType {}
+Skeleton: 8acf5790-b816-44dc-aaa0-5a12376c8a74:Characters/Player_Warrior/Player_warrior_bandpose Skeleton
+RootMotion: false
+PreviewModel: 40949449-260d-435a-8755-bdf56410f775:Characters/Player_Warrior/Player_warrior_bandpose
+AnimationTimeMinimum: 0:00:00:00.0000000
+AnimationTimeMaximum: 0:00:00:01.6670000
+~SourceHashes:
+    263b1f13fa42eacf3e35eadb25adb964~../../../../Resources/Characters/Player_Warrior/Player_warrior_dead.FBX: 357addbbda9a1a9fed6abc5b3092b78c

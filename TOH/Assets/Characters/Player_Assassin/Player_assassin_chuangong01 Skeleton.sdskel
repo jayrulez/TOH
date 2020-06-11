@@ -1,0 +1,70 @@
+!Skeleton
+Id: 25d73662-366e-48fb-b37c-ecc4c07a7f58
+SerializedVersion: {Stride: 2.0.0.0}
+Tags: []
+Source: !file ../../../Resources/Characters/Player_Assassin/Player_assassin_chuangong01.FBX
+PivotPosition: {X: 0.0, Y: 0.0, Z: 0.0}
+Nodes:
+    825e8d4517f6d90ad45f076fa55c34ce: {Name: RootNode, Depth: 0}
+    26467ec9291be33629eb2560cf4d98fa: {Name: As_Nasaru_B01_Body_M, Depth: 1}
+    1ab39513e3f2a8206ecf887c987e1107: {Name: As_Nasaru_B01_Leg, Depth: 1}
+    f6da67a5cfb7064b54ffe7607460c798: {Name: As_Nasaru_B01_Boots, Depth: 1}
+    975e1afe3f389b2822d90f8c68283f13: {Name: As_Nasaru_B01_Glove, Depth: 1}
+    01b8641c2ffc98e6fafebe43ec665098: {Name: Bip01_assassin, Depth: 1}
+    d5561159d3d74efffd90f7f2f75e4750: {Name: Bip01 Footsteps, Depth: 2}
+    3e096650f4b00d5ff15e4f3e65396eda: {Name: Bip01 Pelvis_assassin, Depth: 2}
+    35ee7c67dc804fa3624d3005456145e6: {Name: Bip01 L Thigh_assassin, Depth: 3}
+    d99d6c78a8f76a42450f8bcb51883ddc: {Name: Bip01 L Calf_assassin, Depth: 4}
+    db8d616adbea2d91c4f478f7e62db793: {Name: Bip01 L Foot_assassin, Depth: 5}
+    b7b0ddbe3a47749252152c361b7b49d1: {Name: Bip01 L Toe0_assassin, Depth: 6}
+    813b0053de216a390a144798c171cc63: {Name: Bip01 L Toe0Nub, Depth: 7}
+    7151c949bddc3497a04df3c8983edc87: {Name: Bip01 R Thigh_assassin, Depth: 3}
+    da7114ebfd84db243e8f145a57c0258f: {Name: Bip01 R Calf_assassin, Depth: 4}
+    78bad49d4698da1cbd25db6865f0df6e: {Name: Bip01 R Foot_assassin, Depth: 5}
+    d83a4ce9e63b90b1f18446f35ecc6180: {Name: Bip01 R Toe0_assassin, Depth: 6}
+    fa941af7103e827d2b2986a51a0497a5: {Name: Bip01 R Toe0Nub, Depth: 7}
+    1ead67739356e6b2f4e078fa3bcce4cd: {Name: Bip01 Spine_assassin, Depth: 3}
+    746ed841fc75f4f4dbbc98bf07a1dfbe: {Name: Bip01 Spine1_assassin, Depth: 4}
+    9091e29b899d03932159e7dc13f0aff8: {Name: Bip01 Neck_assassin, Depth: 5}
+    f4e0e83d3063616a7ca05576ec132ac3: {Name: Bip01 Head_assassin, Depth: 6}
+    3082f66faf55d8328dfcddf618879da8: {Name: Bip01 HeadNub, Depth: 7}
+    c9a07831cfe705718904dcb85560f964: {Name: Bone01_assassin, Depth: 7}
+    b60f7eaf5cd96c6f8401b77b96bcb24d: {Name: Bone02_assassin, Depth: 8}
+    20a05edfeca40a574b7ee24c3c214996: {Name: Bone03_assassin, Depth: 9}
+    5a70d9895af7c2008d42f2b957b60804: {Name: Bone04, Depth: 10}
+    321b98145dfcb9c5b912ff07880d09bf: {Name: Bip01 L Clavicle_assassin, Depth: 6}
+    a801f316316c68cc6a756117dc9cc478: {Name: Bip01 L UpperArm_assassin, Depth: 7}
+    7e719a7ad7c415fe009aea56c04e80ad: {Name: Bip01 L Forearm_assassin, Depth: 8}
+    5d6ae984d857b1e10ebc44c809be535b: {Name: Bip01 L Hand_assassin, Depth: 9}
+    a33534e543c9a736c192842be74fc106: {Name: Bip01 L Finger0_assassin, Depth: 10}
+    ba95c80c2133aa2358840ed8ccbf4a28: {Name: Bip01 L Finger0Nub, Depth: 11}
+    b7ff941f2dfd74185a8876c56a808728: {Name: ~BoxBone03~, Depth: 9}
+    d487fe0258849e15c5d10fc54e9e106c: {Name: BoxBone03_assassin, Depth: 9}
+    2d5592f2a2c584b1cc46a619bc482599: {Name: Dummy003_assassin, Depth: 10}
+    87e8c8d019af57ca2f6f4cb44de59524: {Name: Dummy004_assassin, Depth: 11}
+    bdbd16a705e845afc8d610ffb200686f: {Name: Bip01 R Clavicle_assassin, Depth: 6}
+    3177395fadbfedd2ca8ffe65662cf252: {Name: Bip01 R UpperArm_assassin, Depth: 7}
+    0ad442854cba4bd282018f0f6a60e5d0: {Name: Bip01 R Forearm_assassin, Depth: 8}
+    c3a1f322d6686439f54b34b9183dd8b4: {Name: Bip01 R Hand_assassin, Depth: 9}
+    0b771db8958a12ccffc7ecd5cfff2968: {Name: Bip01 R Finger0_assassin, Depth: 10}
+    6c3586c3e82e94a3a01b9451f26eb0a9: {Name: Bip01 R Finger0Nub, Depth: 11}
+    3bd3dab4fa3a7c75635cbe19153268b7: {Name: ~BoxBone02~, Depth: 9}
+    3e6f7ab3b95088a9c32a942ad3a957ab: {Name: BoxBone02_assassin, Depth: 9}
+    8def79ceb9556ce25fde2ccf2c8f7bae: {Name: Dummy02_assassin, Depth: 10}
+    83a5b587cf7848bc39703064d620478f: {Name: Dummy01_assassin, Depth: 11}
+    bff6d913d5bd69df05bd20f08dfece63: {Name: Bone05_assassin, Depth: 5}
+    3489feeef42a4dcc76f72455d56db636: {Name: Bone06_assassin, Depth: 6}
+    5a66e396ee73780f5f7cbabba7b8b754: {Name: Bone07_assassin, Depth: 7}
+    110c4fcd2cfe2db3e3ee79c1ef819528: {Name: Bone08_assassin, Depth: 8}
+    e10196078141a15f8d7e66c0cadbac83: {Name: Bone09_assassin, Depth: 9}
+    d6c54206696db70b404abc1da3b25990: {Name: Bone10_assassin, Depth: 10}
+    48dc2a71a92d799927a7132baba4d141: {Name: Bone11, Depth: 11}
+    9863df35e158c4bc64a6a08cba1acc05: {Name: ~BoxBone01~, Depth: 3}
+    36ea0a44945a6da68e317377846c7a3c: {Name: ~BoxBone01, Depth: 3}
+    e831e718a0fd73af8d8ffe4afaa4b022: {Name: BoxBone01_assassin, Depth: 3}
+    7c3d188737d168cb50b3ac6c4d187d1f: {Name: Player_assassin_scimitar, Depth: 4}
+    834267c76cf7697dae146fc0fb769abd: {Name: Player_assassin_crook_weapon, Depth: 1}
+    6b14e7058373bba54bf326f4aee4fa8c: {Name: Player_assassin_hair01, Depth: 1}
+    85e632ee7dae59c4836e987a5ccba96f: {Name: Player_assassin_head, Depth: 1}
+~SourceHashes:
+    5136540b847f91f75118e7c17dce2965~../../../Resources/Characters/Player_Assassin/Player_assassin_chuangong01.FBX: c2c0ea23935c394f91de23bfce5c410c

@@ -1,0 +1,19 @@
+!Animation
+Id: 710b53b1-4318-4ae8-bc8a-f9e88afac446
+SerializedVersion: {Stride: 2.0.0.0}
+Tags: []
+Source: !file ../../../../Resources/Characters/Player_Warrior/Player_warrior_skill_2.FBX
+ClipDuration:
+    Enabled: false
+    StartAnimationTime: 0:00:00:00.0000000
+    EndAnimationTime: 0:00:30:00.0000000
+PivotPosition: {X: 0.0, Y: 0.0, Z: 0.0}
+RepeatMode: LoopInfinite
+Type: !StandardAnimationAssetType {}
+Skeleton: 8acf5790-b816-44dc-aaa0-5a12376c8a74:Characters/Player_Warrior/Player_warrior_bandpose Skeleton
+RootMotion: false
+PreviewModel: 40949449-260d-435a-8755-bdf56410f775:Characters/Player_Warrior/Player_warrior_bandpose
+AnimationTimeMinimum: 0:00:00:00.0000000
+AnimationTimeMaximum: 0:00:00:02.5000000
+~SourceHashes:
+    ae62643ca9cc3943536aee648eb0010d~../../../../Resources/Characters/Player_Warrior/Player_warrior_skill_2.FBX: 9e343e6ece7282af2c6c809a3e0bdc51

@@ -1,0 +1,19 @@
+!Animation
+Id: 57244814-bafd-4087-9299-7db6aa51aa48
+SerializedVersion: {Stride: 2.0.0.0}
+Tags: []
+Source: !file ../../../../Resources/Characters/Player_Assassin/Player_assassin_dance1.FBX
+ClipDuration:
+    Enabled: false
+    StartAnimationTime: 0:00:00:00.0000000
+    EndAnimationTime: 0:00:30:00.0000000
+PivotPosition: {X: 0.0, Y: 0.0, Z: 0.0}
+RepeatMode: LoopInfinite
+Type: !StandardAnimationAssetType {}
+Skeleton: 25d73662-366e-48fb-b37c-ecc4c07a7f58:Characters/Player_Assassin/Player_assassin_chuangong01 Skeleton
+RootMotion: false
+PreviewModel: 53fbcac6-3238-4496-a5c0-46ec9f0ad49c:Characters/Player_Assassin/Player_assassin_chuangong01
+AnimationTimeMinimum: 0:00:00:00.0000000
+AnimationTimeMaximum: 0:00:00:20.0000000
+~SourceHashes:
+    cc1843bb76bc4270365b6dd2af6f38b6~../../../../Resources/Characters/Player_Assassin/Player_assassin_dance1.FBX: c9e9062af3e45d582a7c91538c536029

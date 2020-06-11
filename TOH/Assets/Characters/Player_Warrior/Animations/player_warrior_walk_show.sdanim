@@ -1,0 +1,19 @@
+!Animation
+Id: 00226d8b-e692-498e-b0d2-0b735f864ba8
+SerializedVersion: {Stride: 2.0.0.0}
+Tags: []
+Source: !file ../../../../Resources/Characters/Player_Warrior/player_warrior_walk_show.FBX
+ClipDuration:
+    Enabled: false
+    StartAnimationTime: 0:00:00:00.0000000
+    EndAnimationTime: 0:00:30:00.0000000
+PivotPosition: {X: 0.0, Y: 0.0, Z: 0.0}
+RepeatMode: LoopInfinite
+Type: !StandardAnimationAssetType {}
+Skeleton: 8acf5790-b816-44dc-aaa0-5a12376c8a74:Characters/Player_Warrior/Player_warrior_bandpose Skeleton
+RootMotion: false
+PreviewModel: 40949449-260d-435a-8755-bdf56410f775:Characters/Player_Warrior/Player_warrior_bandpose
+AnimationTimeMinimum: 0:00:00:00.0000000
+AnimationTimeMaximum: 0:00:00:01.2000000
+~SourceHashes:
+    bf79fe757b77a4e444a799dfb0569eeb~../../../../Resources/Characters/Player_Warrior/player_warrior_walk_show.FBX: 2ca4a1e14e4480b9e41723e9b03aa062

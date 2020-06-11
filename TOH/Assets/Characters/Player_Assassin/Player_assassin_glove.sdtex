@@ -1,0 +1,8 @@
+!Texture
+Id: 85474d2e-77e6-4520-84e1-5a46da89490d
+SerializedVersion: {Stride: 2.0.0.0}
+Tags: []
+Source: !file ../../../Resources/Characters/Player_Assassin/Textures/Player_assassin_glove.tga
+Type: !ColorTextureType
+    ColorKeyColor: {R: 255, G: 0, B: 255, A: 255}
+    PremultiplyAlpha: false

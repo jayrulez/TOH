@@ -1,0 +1,19 @@
+!Model
+Id: 40949449-260d-435a-8755-bdf56410f775
+SerializedVersion: {Stride: 2.0.0.0}
+Tags: []
+Source: !file ../../../Resources/Characters/Player_Warrior/Player_warrior_bandpose.FBX
+Skeleton: 8acf5790-b816-44dc-aaa0-5a12376c8a74:Characters/Player_Warrior/Player_warrior_bandpose Skeleton
+PivotPosition: {X: 0.0, Y: 0.0, Z: 0.0}
+Materials:
+    1f876403a85ca713143f5af0262637bc:
+        Name: zhanshi_clothes
+        MaterialInstance:
+            Material: 0dc1914c-058f-4f50-8c28-8665caefbdfa:Characters/Player_Warrior/zhanshi_clothes
+    3f79e7b4b6930760d7233af16ed29d5a:
+        Name: zhanshi_weapon
+        MaterialInstance:
+            Material: 74bcaf77-562b-4b07-9a13-369c12f873df:Characters/Player_Warrior/zhanshi_weapon
+Modifiers: {}
+~SourceHashes:
+    982141a2a8f45ca50752757b3b54b62c~../../../Resources/Characters/Player_Warrior/Player_warrior_bandpose.FBX: ee9bbbd5c4e63c54f240699b4251db15

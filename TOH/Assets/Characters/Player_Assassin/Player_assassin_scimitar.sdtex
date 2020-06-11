@@ -1,0 +1,8 @@
+!Texture
+Id: 3cc1de43-8854-4834-8037-52114c0fb250
+SerializedVersion: {Stride: 2.0.0.0}
+Tags: []
+Source: !file ../../../Resources/Characters/Player_Assassin/Textures/Player_assassin_scimitar.tga
+Type: !ColorTextureType
+    ColorKeyColor: {R: 255, G: 0, B: 255, A: 255}
+    PremultiplyAlpha: false

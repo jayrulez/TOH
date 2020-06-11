@@ -1,0 +1,8 @@
+!Texture
+Id: 2c334d78-a9ce-441c-af56-fbb2163ffc78
+SerializedVersion: {Stride: 2.0.0.0}
+Tags: []
+Source: !file ../../../Resources/Characters/Player_Warrior/Textures/zhanshi_weapon_d.tga
+Type: !ColorTextureType
+    ColorKeyColor: {R: 255, G: 0, B: 255, A: 255}
+    PremultiplyAlpha: false

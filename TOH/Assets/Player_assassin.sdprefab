@@ -1,0 +1,45 @@
+!PrefabAsset
+Id: 3d4bbedb-8bd0-4b75-ae15-172eaf5770e6
+SerializedVersion: {Stride: 3.1.0.1}
+Tags: []
+Hierarchy:
+    RootParts:
+        - ref!! 8ecf4ab0-688e-413b-bc7e-e9a4dfc10a68
+    Parts:
+        -   Entity:
+                Id: 8ecf4ab0-688e-413b-bc7e-e9a4dfc10a68
+                Name: Player_assassin
+                Components:
+                    f8500d01a3299b23822a8cc491878e0a: !TransformComponent
+                        Id: c5ed9588-e721-4012-8d90-682e45a23fc5
+                        Position: {X: 1.69850683, Y: 0.5142227, Z: 0.971484661}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children: {}
+                    abaa168e76c4ac90297d7b52ecf437ca: !ModelComponent
+                        Id: cec8686d-ccfd-4641-b72d-cfe3df51f189
+                        Model: 53fbcac6-3238-4496-a5c0-46ec9f0ad49c:Characters/Player_Assassin/Player_assassin_chuangong01
+                        Materials: {}
+                    8b717be0602030716197d9832d7ffef0: !AnimationComponent
+                        Id: 123f7db2-9993-419f-9d27-2d828320c177
+                        Animations:
+                            22a347671aa1cea4b8865e0b0dde2e56~dance: ae71de4e-c3c0-4883-8f9a-4e1579cb3f39:Characters/Player_Assassin/Animations/Player_assassin_dance
+                            326499bd793500758315bfa606fa8246~walk: 3e6222f2-6554-4763-b0cf-2f9a43ce5882:Characters/Player_Assassin/Animations/Player_assassin_walk
+                    0f8bda4166e170b2981515a5e0995783: !CharacterComponent
+                        Id: 917d57b7-bc32-449d-af6b-ba4cacce3c32
+                        CanSleep: false
+                        Restitution: 0.0
+                        Friction: 0.5
+                        RollingFriction: 0.0
+                        CcdMotionThreshold: 0.0
+                        CcdSweptSphereRadius: 0.0
+                        FallSpeed: 10.0
+                        MaxSlope: {Radians: 0.7853982}
+                        JumpSpeed: 5.0
+                        Gravity: {X: 0.0, Y: -10.0, Z: 0.0}
+                        ColliderShapes:
+                            e7ae6adad0259516bd6c3db492408ecc: !CapsuleColliderShapeDesc
+                                Length: 0.8
+                                Radius: 0.125
+                                LocalOffset: {X: 0.0, Y: 0.5, Z: 0.0}
+                                LocalRotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
