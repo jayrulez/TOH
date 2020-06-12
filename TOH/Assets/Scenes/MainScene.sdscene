@@ -1,0 +1,25 @@
+!SceneAsset
+Id: c1771411-c90f-430a-97d8-33a0405d4c70
+SerializedVersion: {Stride: 3.1.0.1}
+Tags: []
+ChildrenIds: []
+Offset: {X: 0.0, Y: 0.0, Z: 0.0}
+Hierarchy:
+    RootParts:
+        - ref!! 3cb0d898-0ae5-47fc-851a-7929e728ddb7
+    Parts:
+        -   Entity:
+                Id: 3cb0d898-0ae5-47fc-851a-7929e728ddb7
+                Name: UnitViewerUI
+                Components:
+                    5704f65414b496c134abf6f0e6d67bbf: !TransformComponent
+                        Id: 13290707-79c4-4afe-b73e-6b418f05ed48
+                        Position: {X: 0.0, Y: 0.0, Z: 0.0}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children: {}
+                    2cef8f1033e9a63848a90f1f3d451d97: !UIComponent
+                        Id: b7df4ee9-ad5d-4e76-bcc8-2c8c77a066ed
+                        Page: 1ac9d86b-2a10-4f44-911d-1175919e76e6:UI/UnitViewerUI
+                        Resolution: {X: 1280.0, Y: 720.0, Z: 1000.0}
+                        Size: {X: 1.0, Y: 1.0, Z: 1.0}
