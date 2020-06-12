@@ -1,12 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using TOH.Server.ServerData;
 
 namespace TOH.Server
 {
-    class Program
+    public class Program
     {
+        
+
+        private static ServerSetup Server;
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.Title = "Server";
+            Server = new ServerSetup();
+            Server.InitServer();
+            Console.ReadKey();
         }
+
+       
     }
 }

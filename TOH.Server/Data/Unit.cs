@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TOH.Server.Data
 {
-    class Unit
+    public class Unit
     {
         public int Id { get; set; }
         public int PlayerId { get; set; }
