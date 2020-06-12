@@ -1,0 +1,57 @@
+!UIPageAsset
+Id: 896a78dd-5c6f-4bab-bfa8-c94fbcd1ac9d
+SerializedVersion: {Stride: 2.1.0.1}
+Tags: []
+Design:
+    Resolution: {X: 1280.0, Y: 720.0, Z: 1000.0}
+Hierarchy:
+    RootParts:
+        - !Grid ref!! 5c806bac-72d7-4b0f-a13f-eb83902db578
+    Parts:
+        -   UIElement: !Grid
+                Id: 5c806bac-72d7-4b0f-a13f-eb83902db578
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                Margin: {}
+                MaximumWidth: 3.40282347E+38
+                MaximumHeight: 3.40282347E+38
+                MaximumDepth: 3.40282347E+38
+                Children:
+                    1a493cf5e6e727ce61e876322fcc4a59: !Button ref!! d4f61382-52ac-4e62-b71c-561c167fb650
+                RowDefinitions: {}
+                ColumnDefinitions: {}
+                LayerDefinitions: {}
+        -   UIElement: !TextBlock
+                Id: ac330755-3819-4e26-84ef-4c5833e3a865
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                HorizontalAlignment: Center
+                VerticalAlignment: Center
+                Margin: {}
+                MaximumWidth: 3.40282347E+38
+                MaximumHeight: 3.40282347E+38
+                MaximumDepth: 3.40282347E+38
+                Text: Battle
+                Font: c90f3988-0544-4cbe-993f-13af7d9c23c6:StrideDefaultFont
+                TextSize: 40.0
+                TextColor: {R: 240, G: 240, B: 240, A: 255}
+        -   UIElement: !Button
+                Id: d4f61382-52ac-4e62-b71c-561c167fb650
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                DrawLayerNumber: 2
+                Width: 300.0
+                Height: 180.0
+                Margin: {Left: 490.0, Top: 270.0, Right: 490.0, Bottom: 270.0}
+                MaximumWidth: 3.40282347E+38
+                MaximumHeight: 3.40282347E+38
+                MaximumDepth: 3.40282347E+38
+                Content: !TextBlock ref!! ac330755-3819-4e26-84ef-4c5833e3a865
+                PressedImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:StrideUIDesigns
+                    CurrentFrame: 2
+                NotPressedImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:StrideUIDesigns
+                    CurrentFrame: 1
+                MouseOverImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:StrideUIDesigns

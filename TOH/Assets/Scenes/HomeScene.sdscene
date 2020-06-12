@@ -1,0 +1,28 @@
+!SceneAsset
+Id: ebb25339-5223-4baf-8ffb-f681b37bb409
+SerializedVersion: {Stride: 3.1.0.1}
+Tags: []
+ChildrenIds: []
+Parent: c1771411-c90f-430a-97d8-33a0405d4c70:Scenes/MainScene
+Offset: {X: 0.0, Y: 0.0, Z: 0.0}
+Hierarchy:
+    RootParts:
+        - ref!! ff5db48a-4d19-402d-9a92-d5c8a317512d
+    Parts:
+        -   Entity:
+                Id: ff5db48a-4d19-402d-9a92-d5c8a317512d
+                Name: HomeUI
+                Components:
+                    1d09009abdc8f11344dd34566a1605f6: !TransformComponent
+                        Id: e95235cc-5178-435a-813b-fb477917e4a6
+                        Position: {X: 0.0, Y: 0.0, Z: 0.0}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children: {}
+                    64210a0d08488fc4d7a5f0f80b4c7235: !UIComponent
+                        Id: 6f354a9a-3898-43c7-a6c2-8678dbd716f6
+                        Page: 896a78dd-5c6f-4bab-bfa8-c94fbcd1ac9d:UI/HomeUI
+                        Resolution: {X: 1280.0, Y: 720.0, Z: 1000.0}
+                        Size: {X: 1.0, Y: 1.0, Z: 1.0}
+                    b37f823725a411ed4e10c4de7177ab08: !TOH.HomeUIScript,TOH
+                        Id: db787632-26b0-498e-9add-d8d00160f061

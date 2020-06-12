@@ -1,0 +1,50 @@
+[
+  {
+    "Id": 1,
+    "Name": "Punch",
+    "Description": "Lands a heavy punch on the target to deal 120% damage.",
+    "Target": "SingleEnemy",
+    "Cooldown": 0,
+    "Actions": [
+      {
+        "Type": "Damage",
+        "Target": "SkillTarget",
+        "DamageAmount": 120,
+        "ScaleType": "CasterAttack",
+        "Accuracy": 100
+      }
+    ]
+  },
+  {
+    "Id": 2,
+    "Name": "Kick",
+    "Description": "Lands a heavy kick on the target to deal 150% damage.",
+    "Target": "SingleEnemy",
+    "Cooldown": 0,
+    "Actions": [
+      {
+        "Type": "Damage",
+        "Target": "SkillTarget",
+        "DamageAmount": 150,
+        "ScaleType": "CasterAttack",
+        "Accuracy": 90
+      }
+    ]
+  },
+  {
+    "Id": 3,
+    "Name": "Super Kick",
+    "Description": "Lands a deadly kick on the target to deal 250% damage.",
+    "Target": "SingleEnemy",
+    "Cooldown": 0,
+    "Actions": [
+      {
+        "Type": "Damage",
+        "Target": "SkillTarget",
+        "DamageAmount": 250,
+        "ScaleType": "CasterAttack",
+        "Accuracy": 80
+      }
+    ]
+  }
+]

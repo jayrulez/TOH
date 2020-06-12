@@ -2,7 +2,7 @@
 Id: 7f45b53a-eb78-409a-859d-8cf66bf9e1fd
 SerializedVersion: {Stride: 2.0.0.0}
 Tags: []
-Source: !file ../Resources/skybox_texture_hdr.dds
+Source: !file ../../Resources/skybox_texture_hdr.dds
 Type: !ColorTextureType
     UseSRgbSampling: false
     ColorKeyColor: {R: 255, G: 0, B: 255, A: 255}
