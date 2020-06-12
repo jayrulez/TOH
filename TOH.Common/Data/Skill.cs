@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using static TOH.Common.Data.DataManager;
 
 namespace TOH.Common.Data
 {
@@ -89,11 +91,31 @@ namespace TOH.Common.Data
 
     public class Skill
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public SkillTarget Target { get; set; }
-        public int Cooldown { get; set; }
-        public List<SkillAction> Actions { get; set; }
+        public int Id { get; private set; }
+        public string Name { get; private set; }
+        public string Description { get; private set; }
+        public SkillTarget Target { get; private set; }
+        public int Cooldown { get; private set; }
+        public List<SkillAction> Actions { get; private set; }
+
+        public static Skill Load(int id)
+        {
+            return Instance.Skills.FirstOrDefault(s => s.Id == id);
+        }
+
+        public static Skill Create(SkillConfig skillConfig, List<SkillAction> skillActions)
+        {
+            return new Skill(skillConfig, skillActions);
+        }
+
+        private Skill(SkillConfig skillConfig, List<SkillAction> skillActions)
+        {
+            Id = skillConfig.Id;
+            Name = skillConfig.Name;
+            Description = skillConfig.Description;
+            Target = skillConfig.Target;
+            Cooldown = skillConfig.Cooldown;
+            Actions = skillActions;
+        }
     }
 }
