@@ -1,0 +1,106 @@
+!UIPageAsset
+Id: 1eee9528-fcd4-4f99-943d-8bba5657b549
+SerializedVersion: {Stride: 2.1.0.1}
+Tags: []
+Design:
+    Resolution: {X: 1280.0, Y: 720.0, Z: 1000.0}
+Hierarchy:
+    RootParts:
+        - !Grid ref!! 924eb81b-1b2d-4ee6-add0-ca6e57f56321
+    Parts:
+        -   UIElement: !TextBlock
+                Id: 4bf933d2-23a9-4023-9dd9-dccfb56c0f76
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                Width: 133.0
+                Height: 27.0
+                VerticalAlignment: Top
+                Margin: {Left: 577.0, Top: 116.0, Right: 570.0}
+                MaximumWidth: 3.40282347E+38
+                MaximumHeight: 3.40282347E+38
+                MaximumDepth: 3.40282347E+38
+                Text: Username
+                Font: c90f3988-0544-4cbe-993f-13af7d9c23c6:StrideDefaultFont
+                TextSize: 20.0
+                TextColor: {R: 240, G: 240, B: 240, A: 255}
+        -   UIElement: !Button
+                Id: 5b869993-1bb7-4fe5-ad6c-89b3a3535ae2
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                DrawLayerNumber: 2
+                Width: 484.0
+                Height: 73.0
+                VerticalAlignment: Top
+                Margin: {Left: 399.0, Top: 264.0, Right: 397.0}
+                MaximumWidth: 3.40282347E+38
+                MaximumHeight: 3.40282347E+38
+                MaximumDepth: 3.40282347E+38
+                Content: !TextBlock ref!! d4256bcb-2872-454e-b7cf-2e912e4478da
+                PressedImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:StrideUIDesigns
+                    CurrentFrame: 2
+                NotPressedImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:StrideUIDesigns
+                    CurrentFrame: 1
+                MouseOverImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:StrideUIDesigns
+        -   UIElement: !EditText
+                Id: 79f2252a-a2d7-4352-b930-677a3f695284
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                DrawLayerNumber: 5
+                CanBeHitByUser: true
+                Width: 442.0
+                Height: 58.0
+                VerticalAlignment: Top
+                Margin: {Left: 415.0, Top: 159.0, Right: 423.0}
+                MaximumWidth: 3.40282347E+38
+                MaximumHeight: 3.40282347E+38
+                MaximumDepth: 3.40282347E+38
+                Padding: {Left: 8.0, Top: 4.0, Right: 8.0, Bottom: 8.0}
+                Font: c90f3988-0544-4cbe-993f-13af7d9c23c6:StrideDefaultFont
+                TextSize: 20.0
+                TextColor: {R: 240, G: 240, B: 240, A: 255}
+                ActiveImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:StrideUIDesigns
+                    CurrentFrame: 3
+                InactiveImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:StrideUIDesigns
+                    CurrentFrame: 4
+                MouseOverImage: !SpriteFromSheet
+                    Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:StrideUIDesigns
+                    CurrentFrame: 5
+                CaretColor: {R: 240, G: 240, B: 240, A: 255}
+                CaretWidth: 1.0
+                SelectionColor: {R: 240, G: 240, B: 240, A: 255}
+                IMESelectionColor: {R: 240, G: 255, B: 240, A: 255}
+                CaretFrequency: 1.0
+        -   UIElement: !Grid
+                Id: 924eb81b-1b2d-4ee6-add0-ca6e57f56321
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                Margin: {}
+                MaximumWidth: 3.40282347E+38
+                MaximumHeight: 3.40282347E+38
+                MaximumDepth: 3.40282347E+38
+                Children:
+                    8c6ee8fd45e5c704e6e6086f40a1556e: !EditText ref!! 79f2252a-a2d7-4352-b930-677a3f695284
+                    a500ed83096e5ef25151516018f74631: !Button ref!! 5b869993-1bb7-4fe5-ad6c-89b3a3535ae2
+                    69fdeed700e50cf2bb9ab8e0f7d0f7d6: !TextBlock ref!! 4bf933d2-23a9-4023-9dd9-dccfb56c0f76
+                RowDefinitions: {}
+                ColumnDefinitions: {}
+                LayerDefinitions: {}
+        -   UIElement: !TextBlock
+                Id: d4256bcb-2872-454e-b7cf-2e912e4478da
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                HorizontalAlignment: Center
+                VerticalAlignment: Center
+                Margin: {}
+                MaximumWidth: 3.40282347E+38
+                MaximumHeight: 3.40282347E+38
+                MaximumDepth: 3.40282347E+38
+                Text: Login
+                Font: c90f3988-0544-4cbe-993f-13af7d9c23c6:StrideDefaultFont
+                TextSize: 20.0
+                TextColor: {R: 240, G: 240, B: 240, A: 255}

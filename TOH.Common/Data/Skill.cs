@@ -23,7 +23,8 @@ namespace TOH.Common.Data
     public enum SkillActionType
     {
         Damage,
-        Heal
+        Heal,
+        Leader
     }
 
     public enum SkillActionScaleType
@@ -38,18 +39,24 @@ namespace TOH.Common.Data
         TargetSpeed
     }
 
+    public enum LeaderSkillArea
+    {
+        Arena,
+        Scenario,
+        Dungeon
+    }
+
     public class SkillAction
     {
-        public SkillActionType ActionType { get; protected set; }
+        public SkillActionType Type { get; protected set; }
         public SkillActionTarget Target { get; set; }
-        public int Cooldown { get; set; }
     }
 
     public class DamageSkillAction : SkillAction
     {
         public DamageSkillAction()
         {
-            ActionType = SkillActionType.Damage;
+            Type = SkillActionType.Damage;
         }
 
         public int DamageAmount { get; set; }
@@ -61,11 +68,23 @@ namespace TOH.Common.Data
     {
         public HealSkillAction()
         {
-            ActionType = SkillActionType.Heal;
+            Type = SkillActionType.Heal;
         }
 
         public int HealAmount { get; set; }
         public SkillActionScaleType ScaleType { get; set; }
+    }
+
+    public class LeaderSkillAction : SkillAction
+    {
+        public LeaderSkillAction()
+        {
+            Type = SkillActionType.Leader;
+        }
+
+        public LeaderSkillArea Area { get; set; }
+        public UnitStatType StatType { get; set; }
+        public int StatIncreaseAmount { get; set; }
     }
 
     public class Skill
@@ -74,6 +93,7 @@ namespace TOH.Common.Data
         public string Name { get; set; }
         public string Description { get; set; }
         public SkillTarget Target { get; set; }
+        public int Cooldown { get; set; }
         public List<SkillAction> Actions { get; set; }
     }
 }

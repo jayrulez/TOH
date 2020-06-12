@@ -1,0 +1,28 @@
+!SceneAsset
+Id: 7cb99cc5-071a-4f38-920a-1a27305a42b3
+SerializedVersion: {Stride: 3.1.0.1}
+Tags: []
+ChildrenIds: []
+Parent: c1771411-c90f-430a-97d8-33a0405d4c70:Scenes/MainScene
+Offset: {X: 0.0, Y: 0.0, Z: 0.0}
+Hierarchy:
+    RootParts:
+        - ref!! c4217967-54f7-4d0d-ae59-7b73dbb0f99f
+    Parts:
+        -   Entity:
+                Id: c4217967-54f7-4d0d-ae59-7b73dbb0f99f
+                Name: LoginUI
+                Components:
+                    9db70c28dbc79e06e18fca33f2d0c4e5: !TransformComponent
+                        Id: 42870837-919a-4e10-9cc1-9723fe137e08
+                        Position: {X: 0.0, Y: 0.0, Z: 0.0}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children: {}
+                    bc503394f78c3a58aa3463aadd60fd95: !UIComponent
+                        Id: 4675b43c-2bca-408d-a5e0-5159ae20a8d4
+                        Page: 1eee9528-fcd4-4f99-943d-8bba5657b549:UI/LoginUI
+                        Resolution: {X: 1280.0, Y: 720.0, Z: 1000.0}
+                        Size: {X: 1.0, Y: 1.0, Z: 1.0}
+                    6119724d32bef5b3200002dd49d89fcc: !TOH.LoginUIScript,TOH
+                        Id: adaddf69-8d9a-4f83-b7e0-8dbcf3ef5d96
