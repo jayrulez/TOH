@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using static TOH.Common.Data.DataManager;
 
 namespace TOH.Common.Data
 {
@@ -54,34 +55,37 @@ namespace TOH.Common.Data
         public string Name { get; private set; }
         private Dictionary<UnitStatType, int> Stats { get; set; }
         private Dictionary<UnitSkillSlot, Skill> Skills { get; set; }
-        private Dictionary<int, Dictionary<UnitStatType, double>> LevelConfig { get; set; }
 
-        public static Unit Load(string data)
+        public static Unit Load(int id)
         {
-            var unit = new Unit();
-
-            // Todo:
-            // Set Id
-            // Set Type
-            // Set Grade
-            // Set Element
-            // Set Name
-            // Set Stats
-            // Set Skills
-            // Set LevelConfig
-
-            return unit;
+            return Instance.Units.FirstOrDefault(u => u.Id == id);
         }
 
-        private Unit()
+        public static Unit Create(UnitConfig unitConfig, Dictionary<UnitSkillSlot, Skill> skills)
         {
-            Stats = new Dictionary<UnitStatType, int>();
-            Skills = new Dictionary<UnitSkillSlot, Skill>();
-            LevelConfig = new Dictionary<int, Dictionary<UnitStatType, double>>();
+            return new Unit(unitConfig, skills);
+        }
 
+        private Unit(UnitConfig unitConfig, Dictionary<UnitSkillSlot, Skill> skills)
+        {
+            Id = unitConfig.Id;
+            Type = unitConfig.Type;
+            Grade = unitConfig.Grade;
+            Element = unitConfig.Element;
+            Name = unitConfig.Name;
+
+            Stats = unitConfig.Stats;
             foreach (var stat in Enum.GetValues(typeof(UnitStatType)).Cast<UnitStatType>())
             {
-                Stats.Add(stat, 0);
+                if (!Stats.ContainsKey(stat))
+                    Stats.Add(stat, 0);
+            }
+
+            Skills = skills;
+            foreach (var skillSlot in Enum.GetValues(typeof(UnitSkillSlot)).Cast<UnitSkillSlot>())
+            {
+                if (!Skills.ContainsKey(skillSlot))
+                    Skills.Add(skillSlot, null);
             }
         }
 
@@ -89,9 +93,9 @@ namespace TOH.Common.Data
         {
             var statValue = Stats[statType];
 
-            if (LevelConfig.ContainsKey(level))
+            if (Instance.LevelConfig.ContainsKey(level))
             {
-                var levelConfig = LevelConfig[level];
+                var levelConfig = Instance.LevelConfig[level];
 
                 statValue = (int)(statValue * levelConfig[statType]);
             }

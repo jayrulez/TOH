@@ -3,12 +3,16 @@ using Stride.Engine;
 using Stride.Engine.Events;
 using Stride.Games;
 using System;
+using System.IO;
+using System.Threading.Tasks;
+using TOH.Common.Data;
 
 namespace TOH.Systems
 {
     public enum GameState
     {
         None,
+        InitializeData,
         Login,
         Home,
         Battle
@@ -31,7 +35,7 @@ namespace TOH.Systems
         public GameManagerSystem(IServiceRegistry registry) : base(registry)
         {
             CurrentGameState = GameState.None;
-            NextGameState = GameState.Login;
+            NextGameState = GameState.InitializeData;
         }
 
         public override void Initialize()
@@ -80,7 +84,7 @@ namespace TOH.Systems
 
             var game = Game as TOHGame;
 
-            if(StateScene != null)
+            if (StateScene != null)
             {
                 StateScene.Parent = null;
                 game.Content.Unload(StateScene);
@@ -99,8 +103,9 @@ namespace TOH.Systems
                     break;
             }
 
-            var rootScene = game.SceneSystem.SceneInstance.RootScene;
-            StateScene.Parent = rootScene;
+            if (StateScene != null)
+                StateScene.Parent = game.SceneSystem.SceneInstance.RootScene;
+
             CurrentGameState = NextGameState;
         }
 
@@ -108,7 +113,12 @@ namespace TOH.Systems
         {
             base.Update(gameTime);
 
-            if(OnGameStateChangedEventListener.TryReceive(out GameState gameState))
+            if (CurrentGameState == GameState.InitializeData)
+            {
+                InitializeData();
+            }
+
+            if (OnGameStateChangedEventListener.TryReceive(out GameState gameState))
             {
                 NextGameState = gameState;
             }
@@ -116,6 +126,33 @@ namespace TOH.Systems
             if (CurrentGameState != NextGameState)
             {
                 LoadGameState(NextGameState);
+            }
+        }
+
+        private void InitializeData()
+        {
+            if (DataManager.Instance.State == DataManagerState.None)
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        var dataPath = Path.Combine(PlatformFolders.ApplicationDataDirectory, "Config");
+                        await DataManager.Instance.Initialize(dataPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        // TODO: Present this to player in a user friendly way
+                        Console.WriteLine(ex.Message);
+                    }
+                });
+            }
+            else if (DataManager.Instance.State == DataManagerState.Initialized)
+            {
+                GameEvents.ChangeStateEventKey.Broadcast(GameState.Login);
+            }
+            else
+            {
             }
         }
     }

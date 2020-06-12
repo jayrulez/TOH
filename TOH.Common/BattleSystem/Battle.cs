@@ -15,6 +15,8 @@ namespace TOH.Common.BattleSystem
     {
         public string Id { get; private set; }
         public BattleState State { get; private set; }
+        public BattlePlayer Player1 { get; private set; }
+        public BattlePlayer Player2 { get; private set; }
 
         private DateTime StartTime;
 
