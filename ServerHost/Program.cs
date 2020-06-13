@@ -10,7 +10,7 @@ namespace ServerHost
 
         static void Main(string[] args)
         {
-            ServerSetup Server = new ServerSetup();
+            ServerSetup Server = new ServerSetup();                                              
             Server.InitServer();
             Console.ReadLine();
         }
