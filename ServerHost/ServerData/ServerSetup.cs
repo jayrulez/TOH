@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using TOH.Common.ServerData;
 
-namespace TOH.Server.ServerData
+namespace ServerHost.ServerData
 {
     public class ServerSetup
     {
@@ -13,7 +13,7 @@ namespace TOH.Server.ServerData
         private TcpListener ServerSocket;
         public Dictionary<int, ServerTcp> ClientSockets = new Dictionary<int, ServerTcp>();
         private byte[] Buffer = new byte[1024];
-        private int PortNumber = 8593;
+        private int PortNumber = 8595;
         private int MaxConnections = 10;
 
 

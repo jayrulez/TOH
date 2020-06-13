@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System.IO;
+using TOH.Server.ServerData;
 
 namespace TOH.Server
 {
@@ -9,7 +10,9 @@ namespace TOH.Server
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            //CreateHostBuilder(args).Build().Run();
+            ServerSetup Server = new ServerSetup();
+            Server.InitServer();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args)

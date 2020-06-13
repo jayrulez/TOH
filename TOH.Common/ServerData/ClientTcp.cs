@@ -25,6 +25,7 @@ namespace TOH.Common.ServerData
 
         public void Connect()
         {
+            Console.WriteLine("Connecting to server");
             Socket = new TcpClient()
             {
                 ReceiveBufferSize = BufferSize,

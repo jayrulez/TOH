@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ProtoBuf.Grpc.Server;
 using System;
+using System.Linq;
 using System.Reflection;
 using TOH.Server.Data;
 using TOH.Server.Services;
@@ -61,7 +62,9 @@ namespace TOH.Server
 
                 endpoints.MapGet("/", async context =>
                 {
-                    await context.Response.WriteAsync("TOH.Server");
+                    await context.Response.WriteAsync("Server Pong");
+                    var req = context.Request.Query.Keys.FirstOrDefault();
+                    await context.Response.WriteAsync($"REQUEST > {req}");
                 });
             });
         }
