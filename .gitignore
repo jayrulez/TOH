@@ -13,3 +13,4 @@ _ReSharper*
 obj/
 Cache/
 TOH/Resources/**
+TOH.Server/appsettings.json
