@@ -5,7 +5,7 @@ namespace TOH.Common.BattleSystem
     public enum BattleState
     {
         Start,
-        Loading,
+        Waiting,
         Combat,
         TurnEnd,
         End
