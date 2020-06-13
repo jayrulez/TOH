@@ -1,25 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using TOH.Server.ServerData;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using System.IO;
 
 namespace TOH.Server
 {
     public class Program
     {
-        
-
-        private static ServerSetup Server;
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            Console.Title = "Server";
-            Server = new ServerSetup();
-            Server.InitServer();
-            Console.ReadKey();
+            CreateHostBuilder(args).Build().Run();
         }
 
-       
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("hostsettings.json", optional: false)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .AddCommandLine(args)
+                .Build();
+
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseConfiguration(configuration);
+                    webBuilder.UseStartup<Startup>();
+                });
+        }
     }
 }

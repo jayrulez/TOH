@@ -5,7 +5,7 @@ namespace TOH.Common.BattleSystem
     public enum BattleState
     {
         Start,
-        Loading,
+        Waiting,
         Combat,
         TurnEnd,
         End
@@ -24,6 +24,11 @@ namespace TOH.Common.BattleSystem
         {
             Id = Guid.NewGuid().ToString();
             State = BattleState.Start;
+        }
+
+        public void Update()
+        {
+
         }
     }
 }
