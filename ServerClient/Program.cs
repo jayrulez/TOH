@@ -14,8 +14,7 @@ namespace ServerClient
         static void Main(string[] args)
         {
             Console.Title = "Client";
-            TryConnect();
-            SendCommands();
+            ClientWrapper.Instance.ConnectToServer();
             Console.ReadLine();
         }
 
