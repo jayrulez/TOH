@@ -25,5 +25,10 @@ namespace TOH.Common.BattleSystem
             Id = Guid.NewGuid().ToString();
             State = BattleState.Start;
         }
+
+        public void Update()
+        {
+
+        }
     }
 }
