@@ -29,7 +29,7 @@ namespace TOH.Server.ServerData
             ClientSocks.Add(sock);
             
             sock.BeginReceive(Buffer, 0, Buffer.Length, SocketFlags.None, new AsyncCallback(ReceivedCallback), sock);
-            ServerSocket.BeginAccept(new AsyncCallback(AcceptedCallBack), null);
+            ServerSocket.BeginAccept(new AsyncCallback(AcceptedCallBack), sock);
             Console.WriteLine("Client connected...");
         }
 
@@ -58,7 +58,7 @@ namespace TOH.Server.ServerData
             byte[] data = Encoding.ASCII.GetBytes(text);
             Console.WriteLine("testing received");
             sock.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendCallback), sock);
-            sock.BeginReceive(Buffer, 0, Buffer.Length, SocketFlags.None, new AsyncCallback(ReceivedCallback), null);
+            sock.BeginReceive(Buffer, 0, Buffer.Length, SocketFlags.None, new AsyncCallback(ReceivedCallback), sock);
         }
 
 
