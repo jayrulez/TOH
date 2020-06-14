@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using TOH.Common.ServerData;
+﻿using TOH.Common.ServerData;
 
-namespace ServerClient
+namespace GameClient
 {
     public class ClientSend
     {
@@ -18,7 +15,7 @@ namespace ServerClient
             using(Packet packet = new Packet((int)ServerPackets.welcome))
             {
                 packet.Write(ClientWrapper.Instance.Id);
-                packet.Write("Client boss");
+                packet.Write("Client 1");
 
                 SendTcpData(packet);
             }

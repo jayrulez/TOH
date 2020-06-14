@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using TOH.Common.ServerData;
 
-namespace ServerClient
+namespace GameClient
 {
     public class ClientHandler
     {

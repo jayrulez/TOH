@@ -5,45 +5,11 @@ using System.Net.Sockets;
 using System.Text;
 using TOH.Common.ServerData;
 
-namespace ServerClient
+namespace GameClient
 {
-    public sealed class ClientWrapper
-    {
-        private static readonly ClientWrapper instance = new ClientWrapper();
-        public int BufferSize = 1024;
-        public IPAddress IP = IPAddress.Loopback;
-        public int PortNumber = 8595;
-        public int Id { get; set; }
-        public ClientTcp Tcp;
-
-        public static ClientWrapper Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
-
-        private ClientWrapper()
-        {
-            Tcp = new ClientTcp(BufferSize,IP,PortNumber);
-        }
-
-        static ClientWrapper() { }
-
-
-
-
-        public void ConnectToServer()
-        {
-            Tcp.Connect();
-            Tcp.InitializeHandlers();
-        }
-
-    }
-
     public class ClientTcp
     {
+
         public TcpClient Socket;
         private NetworkStream NetStream;
         private byte[] Buffer;
@@ -53,7 +19,6 @@ namespace ServerClient
         private Packet ReceivedData;
         private delegate void PacketHandler(Packet packet);
         private static Dictionary<int, PacketHandler> PacketHandlers;
-
 
         public ClientTcp(int bufferSize, IPAddress ip, int port)
         {
@@ -89,36 +54,6 @@ namespace ServerClient
             Console.WriteLine("Connected to server");
         }
 
-        public void SendData(Packet packet)
-        {
-            try
-            {
-                if (Socket != null)
-                {
-                    NetStream.BeginWrite(packet.ToArray(), 0, packet.Length(), null, null);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
-        private void SendPacket(Packet packet)
-        {
-            try
-            {
-                if (Socket != null)
-                {
-                    NetStream.BeginWrite(packet.ToArray(), 0, packet.Length(), null, null);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
         private void ReceivedCallback(IAsyncResult result)
         {
             try
@@ -131,7 +66,7 @@ namespace ServerClient
                 Array.Copy(Buffer, data, byteLength);
 
                 ReceivedData.Reset(HandleData(data));
-                NetStream.BeginRead(Buffer, 0, 1024, ReceivedCallback, null);
+                NetStream.BeginRead(Buffer, 0, BufferSize, ReceivedCallback, null);
             }
             catch (Exception ex)
             {
@@ -176,6 +111,20 @@ namespace ServerClient
             return (packetLength <= 1);
         }
 
+        public void SendData(Packet packet)
+        {
+            try
+            {
+                if (Socket != null)
+                {
+                    NetStream.BeginWrite(packet.ToArray(), 0, packet.Length(), null, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
 
         public void InitializeHandlers()
         {
@@ -187,6 +136,4 @@ namespace ServerClient
             Console.WriteLine("Initialized packets");
         }
     }
-
-
 }
