@@ -13,5 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TOH.Common\TOH.Common.csproj" />
+    <ProjectReference Include="..\TOH.Networking.Packets\TOH.Network.Packets.csproj" />
+    <ProjectReference Include="..\TOH.Networking\TOH.Network.csproj" />
   </ItemGroup>
 </Project>

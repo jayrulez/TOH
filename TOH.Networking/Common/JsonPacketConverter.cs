@@ -34,7 +34,7 @@ namespace TOH.Network.Common
             var packets = new List<Packet>();
             var data = Encoding.UTF8.GetString(streamBytes).Trim('\0');
 
-            var packetsData = data.Split(PacketTerminator);
+            var packetsData = data.Split(new string[] { PacketTerminator }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (var packetData in packetsData)
             {
