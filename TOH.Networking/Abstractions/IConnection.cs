@@ -1,13 +1,14 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace TOH.Networking.Abstractions
+namespace TOH.Network.Abstractions
 {
-    public interface IConnection<TPacket> where TPacket : Packet
+    public interface IConnection
     {
         string Id { get; }
         bool IsClosed { get; }
-        Task Send(TPacket packet);
-        Task<Packet> GetPacket();
+        Task Send<T>(T packet) where T : Packet;
+        IAsyncEnumerable<Packet> GetPackets();
         void Close();
     }
 }

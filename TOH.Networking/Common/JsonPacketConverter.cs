@@ -1,20 +1,23 @@
-﻿using Newtonsoft.Json;
+﻿using TOH.Network.Abstractions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Text;
-using TOH.Networking.Abstractions;
+using System.Threading.Tasks;
 
-namespace TOH.Networking.Common
+namespace TOH.Network.Common
 {
-    public class JsonPacketConverter : IPacketConverter<Packet>
+    public class JsonPacketConverter : IPacketConverter
     {
-        public Packet FromBytes(byte[] packetBytes)
+        private const string PacketTerminator = "::+**+::";
+        public T FromBytes<T>(byte[] packetBytes) where T : Packet
         {
             try
             {
                 var data = Encoding.UTF8.GetString(packetBytes).Trim('\0');
 
-                var packet = JsonConvert.DeserializeObject<Packet>(data);
+                var packet = JsonConvert.DeserializeObject<T>(data);
 
                 packet.SetData(packetBytes);
 
@@ -22,8 +25,31 @@ namespace TOH.Networking.Common
             }
             catch (Exception)
             {
-                return null;
+                return default(T);
             }
+        }
+
+        public async IAsyncEnumerable<T> StreamFromBytes<T>(byte[] streamBytes) where T : Packet
+        {
+            var packets = new List<Packet>();
+            var data = Encoding.UTF8.GetString(streamBytes).Trim('\0');
+
+            var packetsData = data.Split(PacketTerminator);
+
+            foreach (var packetData in packetsData)
+            {
+                if (string.IsNullOrEmpty(packetData))
+                    continue;
+
+                var packet = JsonConvert.DeserializeObject<T>(packetData);
+                var packetBytes = Encoding.UTF8.GetBytes(packetData);
+                packet.SetData(packetBytes);
+                packets.Add(packet);
+
+                yield return packet;
+            }
+
+            await Task.Yield();
         }
 
         public byte[] ToBytes<T>(T packet) where T : Packet
@@ -31,6 +57,8 @@ namespace TOH.Networking.Common
             packet.Type = packet.GetType().FullName;
 
             var data = JsonConvert.SerializeObject(packet);
+
+            data += PacketTerminator;
 
             return Encoding.UTF8.GetBytes(data);
         }
@@ -44,17 +72,6 @@ namespace TOH.Networking.Common
             var unwrappedPacket = JsonConvert.DeserializeObject(data) as JObject;
 
             return unwrappedPacket.ToObject<T>();
-        }
-
-        public Packet Unwrap(Packet packet)
-        {
-            var packetBytes = packet.GetData();
-
-            var data = Encoding.UTF8.GetString(packetBytes).Trim('\0');
-
-            var unwrappedPacket = JsonConvert.DeserializeObject(data) as JObject;
-
-            return unwrappedPacket.ToObject(Type.GetType(packet.Type)) as Packet;
         }
     }
 }

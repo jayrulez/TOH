@@ -1,10 +1,9 @@
 ﻿using System;
-using TOH.Networking.Abstractions;
+using TOH.Network.Abstractions;
 
-namespace TOH.Networking.Packets
+namespace TOH.Network.Packets
 {
     public class PingPacket : Packet
     {
-        public DateTime Timestamp { get; set; }
     }
 }

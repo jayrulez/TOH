@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using TOH.Networking.Abstractions;
+﻿using TOH.Network.Abstractions;
 
-namespace TOH.Networking.Packets
+namespace TOH.Network.Packets
 {
     public class PongPacket : Packet
     {
-        public string Message { get; set; }
     }
 }

@@ -1,60 +1,86 @@
-﻿using Grpc.Core;
-using Grpc.Net.Client;
-using ProtoBuf.Grpc;
-using ProtoBuf.Grpc.Client;
+﻿using TOH.Network.Abstractions;
+using TOH.Network.Common;
+using TOH.Network.Packets;
 using System;
-using System.Collections.Generic;
-using System.Net.Http;
+using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
-using TOH.Common.Services;
 
-namespace TOH.ServerTest
+namespace CardWar.TestClient
 {
     class Program
     {
-        static async IAsyncEnumerable<PingRequest> GetMessages()
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                yield return new PingRequest()
-                {
-                    Message = $"Message {i + 1}"
-                };
-
-                await Task.Delay(1000);
-            }
-        }
+        static Socket Socket;
 
         static async Task Main(string[] args)
         {
-            var httpClientHandler = new HttpClientHandler();
+            Thread.Sleep(5000);
 
-            var httpClient = new HttpClient(httpClientHandler);
+            Console.WriteLine("Connecting...");
+            Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            Socket.Connect("127.0.0.1", 5000);
+            Console.WriteLine("Connected.");
 
-            GrpcClientFactory.AllowUnencryptedHttp2 = true;
+            var connection = new TcpConnection(Socket, new JsonPacketConverter());
 
-            var client = GrpcChannel.ForAddress("https://localhost:6501", new GrpcChannelOptions
+            await Task.Factory.StartNew(() => GetMessages(connection));
+
+            try
             {
-                HttpClient = httpClient
-            });
-
-            var context = new CallContext(new CallOptions(headers: new Metadata()));
-
-            var playerService = client.CreateGrpcService<IPlayerService>();
-
-            var loginResponse = playerService.Login(new LoginRequest
+                while (true)
+                {
+                    if (!connection.IsClosed)
+                    {
+                        await PingServer(connection);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+            finally
             {
-                Username = "Bob"
-            }, context);
-
-            context.RequestHeaders.Add("token", loginResponse.Data.Token);
-
-            await foreach (var pingResponse in playerService.Ping(GetMessages(), context))
-            {
-                Console.WriteLine($"Reply: {pingResponse.Message}");
             }
 
-            Console.ReadKey();
+            //Console.ReadKey();
+        }
+
+        public static async Task GetMessages(IConnection connection)
+        {
+            while (!connection.IsClosed)
+            {
+                try
+                {
+                    await foreach (var packet in connection.GetPackets())
+                    {
+                        Console.WriteLine($"Packet received: {packet.Type}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
+
+        public static async Task PingServer(IConnection connection)
+        {
+            while (!connection.IsClosed)
+            {
+                try
+                {
+                    await connection.Send(new PingPacket
+                    {
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+                Thread.Sleep(100);
+            }
         }
     }
 }

@@ -4,6 +4,9 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>7.2</LangVersion>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
@@ -21,6 +24,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TOH.Common\TOH.Common.csproj" />
+    <ProjectReference Include="..\TOH.Networking.Packets\TOH.Network.Packets.csproj" />
+    <ProjectReference Include="..\TOH.Networking\TOH.Network.csproj" />
   </ItemGroup>
 
 </Project>

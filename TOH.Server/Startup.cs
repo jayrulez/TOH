@@ -9,8 +9,12 @@ using Microsoft.Extensions.Hosting;
 using ProtoBuf.Grpc.Server;
 using System;
 using System.Reflection;
+using TOH.Network.Abstractions;
+using TOH.Network.Common;
+using TOH.Network.Packets;
+using TOH.Network.Server;
 using TOH.Server.Data;
-using TOH.Server.Services;
+using TOH.Server.PacketHandlers;
 
 namespace TOH.Server
 {
@@ -26,6 +30,7 @@ namespace TOH.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOptions();
+            services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
 
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
@@ -45,8 +50,11 @@ namespace TOH.Server
                 .PersistKeysToDbContext<GameDbContext>()
                 .SetDefaultKeyLifetime(TimeSpan.FromDays(1825));
 
-            services.AddSingleton<PingService, PingService>();
-            services.AddSingleton<SessionService, SessionService>();
+            services.AddTransient<TimerService, TimerService>();
+            services.AddTransient<IPacketConverter, JsonPacketConverter>();
+            services.AddSingleton<ConnectionManager, ConnectionManager>();
+
+            services.AddTransient<IPacketHandler<PingPacket>, PingPacketHandler>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -60,8 +68,6 @@ namespace TOH.Server
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<PlayerService>();
-
                 endpoints.MapGet("/", async context =>
                 {
                     await context.Response.WriteAsync("TOH.Server");

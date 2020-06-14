@@ -1,11 +1,12 @@
-﻿namespace TOH.Networking.Abstractions
+﻿using System.Collections.Generic;
+
+namespace TOH.Network.Abstractions
 {
-    public interface IPacketConverter<TPacket> where TPacket : Packet
+    public interface IPacketConverter
     {
-        byte[] ToBytes<T>(T packet) where T : TPacket;
-
-        TPacket FromBytes(byte[] packetBytes);
-
-        T Unwrap<T>(TPacket packet) where T : TPacket;
+        byte[] ToBytes<T>(T packet) where T : Packet;
+        T FromBytes<T>(byte[] packetBytes) where T : Packet;
+        IAsyncEnumerable<T> StreamFromBytes<T>(byte[] packetBytes) where T : Packet;
+        T Unwrap<T>(Packet packet) where T : Packet;
     }
 }

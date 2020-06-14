@@ -5,80 +5,33 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using TOH.Networking.Abstractions;
-using TOH.Networking.Common;
+using TOH.Network.Abstractions;
+using TOH.Network.Common;
 
-namespace TOH.Networking.Server
+namespace TOH.Network.Server
 {
-    public class ServerConfiguration
-    {
-        public int Port { get; set; }
-    }
-
-    public class TimerService
-    {
-        private Stopwatch stopwatch = new Stopwatch();
-
-        private readonly ILogger _logger;
-
-        public TimerService(ILogger<TimerService> logger)
-        {
-            _logger = logger;
-        }
-
-        public void Start(CancellationToken cancellationToken)
-        {
-            if (!stopwatch.IsRunning)
-            {
-                stopwatch.Start();
-            }
-            else
-            {
-                _logger.LogWarning("The stopwatch is already running.");
-            }
-        }
-
-        public long GetTicks()
-        {
-            if (!stopwatch.IsRunning)
-            {
-                throw new Exception("The stopwatch is not running.");
-            }
-
-            return stopwatch.ElapsedTicks;
-        }
-
-        public void Stop()
-        {
-            if (stopwatch.IsRunning)
-            {
-                stopwatch.Stop();
-            }
-        }
-    }
-
     public abstract class AbstractTcpServer
     {
-        protected readonly ServerConfiguration _configuration;
+        protected readonly ServerOptions _configuration;
+        protected readonly TimerService _timerService;
         protected readonly ConnectionManager _connectionManager;
+        protected readonly IPacketConverter _packetSerializer;
+
         protected readonly CancellationTokenSource _tasksCancellationTokenSource;
         protected readonly CancellationToken _tasksCancellationToken;
-        protected readonly TimerService _timerService;
-        protected readonly JsonPacketConverter _packetConverter;
-        protected readonly ConcurrentDictionary<string, IPacketHandler<Packet>> _packetHandlers = new ConcurrentDictionary<string, IPacketHandler<Packet>>();
 
         protected readonly ConcurrentBag<Task> _serverTasks;
+        protected readonly Dictionary<string, IPacketHandler> _packetHandlers;
 
         protected ILogger _logger;
         protected TcpListener _listener;
         protected Task _listenerTask;
         protected IServiceProvider _serviceProvider;
+
         private IHost _host;
 
         public AbstractTcpServer(IHost host)
@@ -90,20 +43,22 @@ namespace TOH.Networking.Server
             _tasksCancellationTokenSource = new CancellationTokenSource();
             _tasksCancellationToken = _tasksCancellationTokenSource.Token;
 
-            _packetConverter = _serviceProvider.GetRequiredService<JsonPacketConverter>();
-
-            _configuration = _serviceProvider.GetRequiredService<IOptions<ServerConfiguration>>().Value;
+            _configuration = _serviceProvider.GetRequiredService<IOptions<ServerOptions>>().Value;
 
             _timerService = _serviceProvider.GetRequiredService<TimerService>();
 
             _connectionManager = _serviceProvider.GetRequiredService<ConnectionManager>();
 
+            _packetSerializer = _serviceProvider.GetRequiredService<IPacketConverter>();
+
             _logger = _serviceProvider.GetRequiredService<ILogger<AbstractTcpServer>>();
 
             _serverTasks = new ConcurrentBag<Task>();
+
+            _packetHandlers = new Dictionary<string, IPacketHandler>();
         }
 
-        public virtual Task OnConnected(TcpConnection connection, CancellationToken cancellationToken)
+        public virtual Task OnConnected(IConnection connection, CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -117,14 +72,14 @@ namespace TOH.Networking.Server
             return Task.CompletedTask;
         }
 
-        public virtual Task OnDisconnected(TcpConnection connection)
+        public virtual Task OnDisconnected(IConnection connection)
         {
             _connectionManager.RemoveConnection(connection);
 
             return Task.CompletedTask;
         }
 
-        public async Task SendPacket<T>(TcpConnection connection, T packet) where T : Packet
+        public async Task SendPacket<T>(IConnection connection, T packet) where T : Packet
         {
             await connection.Send(packet);
         }
@@ -138,12 +93,27 @@ namespace TOH.Networking.Server
                 await SendPacket(connection, packet);
             }
         }
+
         public async Task BroadcastPacket<T>(T packet) where T : Packet
         {
             foreach (var connection in _connectionManager.Connections)
             {
-                await SendPacket(connection.Value, packet);
+                await SendPacket(connection, packet);
             }
+        }
+
+        public AbstractTcpServer AddPacketHandler<TPacket, TPacketHandler>() where TPacket : Packet where TPacketHandler : PacketHandler<TPacket>
+        {
+            var packetHandler = _serviceProvider.GetService<IPacketHandler<TPacket>>();
+
+            if (packetHandler != null)
+            {
+                _packetHandlers.Add(typeof(TPacket).FullName, packetHandler);
+
+                _logger.LogInformation($"Packet '{packetHandler.GetType().Name}' registered for packet type '{typeof(TPacket).Name}'.");
+            }
+
+            return this;
         }
 
         protected async void ListenLoop(CancellationToken cancellationToken)
@@ -154,6 +124,8 @@ namespace TOH.Networking.Server
                 {
                     _logger.LogInformation("The ListenLoop task was cancelled.");
 
+                    //cancellationToken.ThrowIfCancellationRequested();
+
                     break;
                 }
 
@@ -161,7 +133,7 @@ namespace TOH.Networking.Server
 
                 if (socket != null)
                 {
-                    var connection = new TcpConnection(socket, _packetConverter);
+                    var connection = new TcpConnection(socket, _packetSerializer);
 
                     var handlerTask = Task.Factory.StartNew(() => HandleConnection(connection, cancellationToken), cancellationToken);
 
@@ -170,7 +142,7 @@ namespace TOH.Networking.Server
             }
         }
 
-        protected async Task HandleConnection(TcpConnection connection, CancellationToken cancellationToken)
+        protected async Task HandleConnection(IConnection connection, CancellationToken cancellationToken)
         {
             await OnConnected(connection, cancellationToken);
 
@@ -180,38 +152,40 @@ namespace TOH.Networking.Server
                 {
                     _logger.LogInformation("The HandleSocket task was cancelled.");
 
+                    //cancellationToken.ThrowIfCancellationRequested();
+
                     break;
                 }
 
-                var packet = await connection.GetPacket();
-
-                await OnPacketReceived(connection, packet);
+                await foreach (var packet in connection.GetPackets())
+                {
+                    await OnPacketReceived(connection, packet);
+                }
             }
 
             await OnDisconnected(connection);
         }
 
-        protected async Task OnPacketReceived(TcpConnection connection, Packet packet)
+        protected async Task OnPacketReceived(IConnection connection, Packet packet)
         {
             if (string.IsNullOrEmpty(packet.Type))
             {
-                //Invalid packet.
+                //throw new Exception($"Invalid packet.");
                 return;
             }
 
             if (_packetHandlers.ContainsKey(packet.Type))
             {
                 var handler = _packetHandlers[packet.Type];
-
-                await handler.Handle(connection, _packetConverter.Unwrap(packet));
+                await handler.Handle(connection, packet);
             }
             else
             {
-                _logger.LogWarning($"No Packet Handler has been registered for packet with 'Key'='{packet.Type}'.");
+                throw new NotImplementedException($"No Packet Handler has been registered for packet with 'Key'='{packet.Type}'.");
             }
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken = default)
+        public Task StartAsync(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Starting service");
 
@@ -229,9 +203,13 @@ namespace TOH.Networking.Server
 
             _serverTasks.Add(_listenerTask);
 
-            _host.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping.Register(StopAsync);
+            /*
+            var applicationLifetime = _serviceProvider.GetRequiredService<IApplicationLifetime>();
 
-            await _host.RunAsync();
+            applicationLifetime.ApplicationStopping.Register(OnShutdown);
+            */
+
+            return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken = default)

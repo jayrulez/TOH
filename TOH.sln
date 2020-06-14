@@ -12,9 +12,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TOH.Server", "TOH.Server\TO
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TOH.ServerTest", "TOH.ServerTest\TOH.ServerTest.csproj", "{114C8D69-46C8-4FA8-A343-0233F91F1EA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TOH.Networking", "TOH.Networking\TOH.Networking.csproj", "{5768AF0D-F87B-4D21-B635-FC7A62C1BD42}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TOH.Network", "TOH.Networking\TOH.Network.csproj", "{5768AF0D-F87B-4D21-B635-FC7A62C1BD42}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TOH.Networking.Packets", "TOH.Networking.Packets\TOH.Networking.Packets.csproj", "{606E2205-8AE0-49D0-9794-73C2A030B9E0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TOH.Network.Packets", "TOH.Networking.Packets\TOH.Network.Packets.csproj", "{606E2205-8AE0-49D0-9794-73C2A030B9E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
