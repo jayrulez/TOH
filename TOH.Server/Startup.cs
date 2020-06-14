@@ -44,6 +44,9 @@ namespace TOH.Server
                 .SetApplicationName("TOH.Server")
                 .PersistKeysToDbContext<GameDbContext>()
                 .SetDefaultKeyLifetime(TimeSpan.FromDays(1825));
+
+            services.AddSingleton<PingService, PingService>();
+            services.AddSingleton<SessionService, SessionService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

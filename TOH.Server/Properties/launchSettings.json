@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TOH.Server": {
+      "commandName": "Project",
+      "workingDirectory": "E:\\StrideProjects\\TOH\\TOH.Server"
+    }
+  }
+}
