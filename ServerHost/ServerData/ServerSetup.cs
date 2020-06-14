@@ -11,10 +11,12 @@ namespace ServerHost.ServerData
     {
         //private Socket ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         private TcpListener ServerSocket;
-        public Dictionary<int, ServerTcp> ClientSockets = new Dictionary<int, ServerTcp>();
+        public static Dictionary<int, ServerTcp> ClientSockets = new Dictionary<int, ServerTcp>();
+        public delegate void PacketHandler(int id, Packet packet);
+        public static Dictionary<int, PacketHandler> PacketHandlers;
         private byte[] Buffer = new byte[1024];
         private int PortNumber = 8595;
-        private int MaxConnections = 10;
+        public static int MaxConnections = 10;
 
 
         public ServerSetup() { }
@@ -56,6 +58,13 @@ namespace ServerHost.ServerData
             {
                 ClientSockets.Add(i, new ServerTcp(i));
             }
+
+            PacketHandlers = new Dictionary<int, PacketHandler>()
+            {
+                { (int)ClientPackets.welcomeReceived,ServerHandler.Welcomereceived }
+            };
+
+            Console.WriteLine("Initialized packets on server");
         }
 
         private void ReceivedCallback(IAsyncResult result)
@@ -95,6 +104,121 @@ namespace ServerHost.ServerData
             Socket sock = (Socket)result.AsyncState;
             sock.EndSend(result);
             Console.WriteLine("Send complete!");
+        }
+    }
+
+    public class ServerTcp
+    {
+        public int Id { get; set; }
+        public TCP Tcp { get; set; }
+        public static int DataBufferSize = 1024;
+
+
+        public ServerTcp(int _id)
+        {
+            Id = _id;
+            Tcp = new TCP(_id);
+        }
+    }
+
+
+    public class TCP
+    {
+        public TcpClient Socket { get; set; }
+        private readonly int Id;
+        private byte[] ReceivedBuffer;
+        private NetworkStream NetStream;
+        private Packet ReceivedPacket;
+
+
+        public TCP(int _id)
+        {
+            Id = _id;
+        }
+
+        public void Conenct(TcpClient socket)
+        {
+            ReceivedPacket = new Packet();
+            Socket = socket;
+            Socket.ReceiveBufferSize = ServerTcp.DataBufferSize;
+            Socket.SendBufferSize = ServerTcp.DataBufferSize;
+
+            NetStream = Socket.GetStream();
+            ReceivedBuffer = new byte[ServerTcp.DataBufferSize];
+
+            NetStream.BeginRead(ReceivedBuffer, 0, ServerTcp.DataBufferSize, ReceivedCallback, null);
+        }
+
+        public void SendPacket(Packet packet)
+        {
+            try
+            {
+                if (Socket != null)
+                {
+                    NetStream.BeginWrite(packet.ToArray(), 0, packet.Length(), null, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private void ReceivedCallback(IAsyncResult result)
+        {
+            try
+            {
+                int byteLength = NetStream.EndRead(result);
+                if (byteLength <= 0)
+                    return;
+
+                byte[] data = new byte[byteLength];
+                Array.Copy(ReceivedBuffer, data, byteLength);
+
+                ReceivedPacket.Reset(HandleData(data));
+                NetStream.BeginRead(ReceivedBuffer, 0, ServerTcp.DataBufferSize, ReceivedCallback, null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message.ToString());
+            }
+        }
+
+        private bool HandleData(byte[] data)
+        {
+            int packetLength = 0;
+            ReceivedPacket.SetBytes(data);
+
+            if (ReceivedPacket.UnreadLength() >= 4)
+            {
+                packetLength = ReceivedPacket.ReadInt();
+                if (packetLength <= 0)
+                {
+                    return true;
+                }
+            }
+
+            while (packetLength > 0 && packetLength < ReceivedPacket.UnreadLength())
+            {
+                byte[] packetBytes = ReceivedPacket.ReadBytes(packetLength);
+                using (Packet packet = new Packet(packetBytes))
+                {
+                    int packetId = packet.ReadInt();
+                    ServerSetup.PacketHandlers[packetId](Id,packet);
+                }
+
+                packetLength = 0;
+                if (ReceivedPacket.UnreadLength() >= 4)
+                {
+                    packetLength = ReceivedPacket.ReadInt();
+                    if (packetLength <= 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return (packetLength <= 1);
         }
     }
 }
