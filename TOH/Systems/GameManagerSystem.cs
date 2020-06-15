@@ -4,10 +4,12 @@ using Stride.Engine.Events;
 using Stride.Games;
 using System;
 using System.IO;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using TOH.Common.Data;
 using TOH.Network;
 using TOH.Network.Client;
+using TOH.Network.Packets;
 
 namespace TOH.Systems
 {
@@ -24,6 +26,11 @@ namespace TOH.Systems
     public class GameEvents
     {
         public static EventKey<GameState> ChangeStateEventKey = new EventKey<GameState>();
+    }
+
+    public class NetworkEvents
+    {
+        public static EventKey<PongPacket> PongPacketEventKey = new EventKey<PongPacket>();
     }
 
     public class GameManagerSystem : GameSystemBase
@@ -181,6 +188,26 @@ namespace TOH.Systems
             if (NetworkClient.State == TcpClientState.None)
             {
                 NetworkClient.Connect();
+
+                Task.Factory.StartNew(async () =>
+                {
+                    while (!NetworkClient.Connection.IsClosed)
+                    {
+                        await foreach (var packet in NetworkClient.Connection.GetPackets())
+                        {
+                            if (packet.Type.Equals(typeof(PongPacket).FullName))
+                            {
+                                var pongPacket = NetworkClient.Connection.Unwrap<PongPacket>(packet);
+
+                                NetworkEvents.PongPacketEventKey.Broadcast(pongPacket);
+                            }
+                            else
+                            {
+
+                            }
+                        }
+                    }
+                });
             }
 
             if (NetworkClient.State == TcpClientState.Connected)

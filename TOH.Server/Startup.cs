@@ -15,6 +15,7 @@ using TOH.Network.Packets;
 using TOH.Network.Server;
 using TOH.Server.Data;
 using TOH.Server.PacketHandlers;
+using TOH.Server.Systems;
 
 namespace TOH.Server
 {
@@ -53,8 +54,11 @@ namespace TOH.Server
             services.AddTransient<TimerService, TimerService>();
             services.AddTransient<IPacketConverter, JsonPacketConverter>();
             services.AddSingleton<ConnectionManager, ConnectionManager>();
+            services.AddSingleton<MatchLobbyService, MatchLobbyService>();
+            services.AddSingleton<MatchService, MatchService>();
 
             services.AddTransient<IPacketHandler<PingPacket>, PingPacketHandler>();
+            services.AddTransient<IPacketHandler<FindMatchPacket>, FindMatchPacketHandler>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

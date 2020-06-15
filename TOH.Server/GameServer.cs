@@ -1,22 +1,29 @@
-﻿using TOH.Network.Abstractions;
-using TOH.Network.Server;
-using TOH.Network.Packets;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
+using TOH.Network.Abstractions;
+using TOH.Network.Server;
+using TOH.Server.Systems;
 
 namespace TOH.Server
 {
     public class GameServer : AbstractTcpServer
     {
+        private readonly MatchLobbyService _matchLobbyService;
+        private readonly MatchService _matchService;
+
         public GameServer(IHost host) : base(host)
         {
+            _matchLobbyService = host.Services.GetRequiredService<MatchLobbyService>();
+            _matchService = host.Services.GetRequiredService<MatchService>();
             _logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger<GameServer>();
+        }
+
+        protected override async Task TickSystems()
+        {
+            await _matchLobbyService.Tick();
+            await _matchService.Tick();
         }
 
 

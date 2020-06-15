@@ -30,6 +30,7 @@ namespace TOH.Network.Server
         protected ILogger _logger;
         protected TcpListener _listener;
         protected Task _listenerTask;
+        protected Task _tickSystemsTask;
         protected IServiceProvider _serviceProvider;
 
         private IHost _host;
@@ -181,7 +182,7 @@ namespace TOH.Network.Server
             }
             else
             {
-                throw new NotImplementedException($"No Packet Handler has been registered for packet with 'Key'='{packet.Type}'.");
+                _logger.LogError($"No Packet Handler has been registered for packet with 'Key'='{packet.Type}'.");
             }
         }
 
@@ -209,6 +210,21 @@ namespace TOH.Network.Server
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             */
 
+            _tickSystemsTask = Task.Factory.StartNew(async () =>
+            {
+                while (true)
+                {
+                    await TickSystems();
+                }
+            }, _tasksCancellationToken);
+
+            _serverTasks.Add(_tickSystemsTask);
+
+            return Task.CompletedTask;
+        }
+
+        protected virtual Task TickSystems()
+        {
             return Task.CompletedTask;
         }
 

@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Stride.Core.Mathematics;
-using Stride.Input;
-using Stride.Engine;
+﻿using Stride.Engine;
+using Stride.Engine.Events;
 using Stride.UI;
 using Stride.UI.Controls;
 using Stride.UI.Events;
-using TOH.Systems;
 using TOH.Network.Packets;
-using TOH.Network.Client;
+using TOH.Systems;
 
 namespace TOH
 {
@@ -22,6 +15,8 @@ namespace TOH
 
         private TextBlock PingRequestTextBlock;
         private TextBlock PingResponseTextBlock;
+
+        private EventReceiver<PongPacket> PongPacketListener = new EventReceiver<PongPacket>(NetworkEvents.PongPacketEventKey);
 
         public override void Start()
         {
@@ -53,29 +48,16 @@ namespace TOH
                         //GameEvents.ChangeStateEventKey.Broadcast(GameState.Home);
                     };
                 }
-
-                Task.Factory.StartNew( async () =>
-                {
-                    while(netClient.State == TcpClientState.Connected)
-                    {
-                        await foreach (var packet in netClient.Connection.GetPackets())
-                        {
-                            if(packet.Type.Equals(typeof(PongPacket).FullName))
-                            {
-                                var pongPacket = netClient.Connection.Unwrap<PongPacket>(packet);
-
-                                Log.Debug($"Recevied packet '{pongPacket.PacketId}' with type '{pongPacket.Type}' and PingId='{pongPacket.PingId}'.");
-                                PingResponseTextBlock.Text = $"Recevied Pong '{packet.PacketId}' from Ping '{pongPacket.PingId}'.";
-                            }
-                        }
-                    }
-                });
             }
 
         }
 
         public override void Update()
         {
+            if (PongPacketListener.TryReceive(out PongPacket packet))
+            {
+                PingResponseTextBlock.Text = $"Recevied Pong '{packet.PacketId}' from Ping '{packet.PingId}'.";
+            }
             // Do stuff every new frame
         }
     }
