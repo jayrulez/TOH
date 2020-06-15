@@ -18,6 +18,7 @@ namespace TOH.Server
             var server = new GameServer(host);
 
             server.AddPacketHandler<PingPacket, PingPacketHandler>();
+            server.AddPacketHandler<FindMatchPacket, FindMatchPacketHandler>();
 
             await server.StartAsync();
 

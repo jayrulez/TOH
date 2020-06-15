@@ -42,12 +42,12 @@ namespace TOH.Server.Systems
 
             await connection1.Send(matchInfoPacket);
             await connection2.Send(matchInfoPacket);
+
+            _logger.LogInformation($"Match created: {match.Id} with clients '{connection1.Id}' and '{connection2.Id}'.");
         }
 
         public async Task Tick()
         {
-            _logger.LogInformation("Lobby Tick");
-
             if (Connections.Count > 1)
             {
                 var players = Connections.Take(2).ToList();

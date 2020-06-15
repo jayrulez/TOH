@@ -31,6 +31,7 @@ namespace TOH.Systems
     public class NetworkEvents
     {
         public static EventKey<PongPacket> PongPacketEventKey = new EventKey<PongPacket>();
+        public static EventKey<MatchInfoPacket> MatchInfoPacketEventKey = new EventKey<MatchInfoPacket>();
     }
 
     public class GameManagerSystem : GameSystemBase
@@ -193,13 +194,19 @@ namespace TOH.Systems
                 {
                     while (!NetworkClient.Connection.IsClosed)
                     {
-                        await foreach (var packet in NetworkClient.Connection.GetPackets())
+                        await foreach (var wrappedPacket in NetworkClient.Connection.GetPackets())
                         {
-                            if (packet.Type.Equals(typeof(PongPacket).FullName))
+                            if (wrappedPacket.Type.Equals(typeof(PongPacket).FullName))
                             {
-                                var pongPacket = NetworkClient.Connection.Unwrap<PongPacket>(packet);
+                                var packet = NetworkClient.Connection.Unwrap<PongPacket>(wrappedPacket);
 
-                                NetworkEvents.PongPacketEventKey.Broadcast(pongPacket);
+                                NetworkEvents.PongPacketEventKey.Broadcast(packet);
+                            }
+                            else if(wrappedPacket.Type.Equals(typeof(MatchInfoPacket).FullName))
+                            {
+                                var packet = NetworkClient.Connection.Unwrap<MatchInfoPacket>(wrappedPacket);
+
+                                NetworkEvents.MatchInfoPacketEventKey.Broadcast(packet);
                             }
                             else
                             {
