@@ -2,6 +2,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Stride.Engine" Version="4.0.0.1-beta03-1036" />
     <PackageReference Include="Stride.Video" Version="4.0.0.1-beta03-1036" />

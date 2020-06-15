@@ -17,9 +17,9 @@ namespace TOH.Server.PacketHandlers
 
         public override async Task HandleImp(IConnection connection, PingPacket packet)
         {
-            _logger.LogInformation($"{packet} from {connection.Id}");
+            _logger.LogInformation($"{packet} {packet.PacketId}");
 
-            await connection.Send(new PongPacket { });
+            await connection.Send(new PongPacket { PingId = packet.PacketId });
         }
     }
 }

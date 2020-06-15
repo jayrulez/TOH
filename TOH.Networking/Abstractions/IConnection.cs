@@ -9,6 +9,9 @@ namespace TOH.Network.Abstractions
         bool IsClosed { get; }
         Task Send<T>(T packet) where T : Packet;
         IAsyncEnumerable<Packet> GetPackets();
+
+        T Unwrap<T>(Packet packet) where T : Packet;
+
         void Close();
     }
 }

@@ -18,6 +18,11 @@ namespace TOH.Network.Abstractions
 
                 return _packetId;
             }
+
+            set
+            {
+                _packetId = value;
+            }
         }
 
         public string Type { get; set; }

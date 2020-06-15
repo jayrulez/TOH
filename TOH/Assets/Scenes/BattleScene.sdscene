@@ -6,5 +6,23 @@ ChildrenIds: []
 Parent: c1771411-c90f-430a-97d8-33a0405d4c70:Scenes/MainScene
 Offset: {X: 0.0, Y: 0.0, Z: 0.0}
 Hierarchy:
-    RootParts: []
-    Parts: []
+    RootParts:
+        - ref!! 95b443d9-4ae4-4a99-8e76-0ca60172e9bd
+    Parts:
+        -   Entity:
+                Id: 95b443d9-4ae4-4a99-8e76-0ca60172e9bd
+                Name: BattleUI
+                Components:
+                    31852b8559999174cfd56e7003e12643: !TransformComponent
+                        Id: b7e5d4e2-4a4f-4cc0-890b-f69a9f586cbb
+                        Position: {X: 0.0, Y: 0.0, Z: 0.0}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children: {}
+                    e4937f7d23b7631559c6dda7eaac48b2: !UIComponent
+                        Id: 91ea8cc0-1bea-478b-83cb-9ec365db6f43
+                        Page: 46f75e84-3d66-4bfe-86e8-a2cf08433c59:UI/BattleUI
+                        Resolution: {X: 1280.0, Y: 720.0, Z: 1000.0}
+                        Size: {X: 1.0, Y: 1.0, Z: 1.0}
+                    2959db54d07d3aeb6a47dd84533321f8: !TOH.BattleUIScript,TOH
+                        Id: acc0d04a-61c9-484f-8105-0647b590329f

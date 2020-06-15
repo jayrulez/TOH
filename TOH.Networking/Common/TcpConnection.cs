@@ -70,5 +70,10 @@ namespace TOH.Network.Common
 
             await Task.Yield();
         }
+
+        public T Unwrap<T>(Packet packet) where T : Packet
+        {
+            return _packetConverter.Unwrap<T>(packet);
+        }
     }
 }

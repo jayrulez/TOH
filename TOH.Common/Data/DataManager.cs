@@ -45,6 +45,14 @@ namespace TOH.Common.Data
 
         public string ConfigDataPath { get; private set; } = "Assets/Config";
 
+        public class TcpServerConfig
+        {
+            public string Host { get; set; }
+            public int Port { get; set; }
+        }
+
+        public TcpServerConfig ServerConfig { get; private set; }
+
         public ReadOnlyCollection<Skill> Skills { get; private set; } = new ReadOnlyCollection<Skill>(new List<Skill>());
         public ReadOnlyCollection<Unit> Units { get; private set; } = new ReadOnlyCollection<Unit>(new List<Unit>());
         public Dictionary<int, Dictionary<UnitStatType, double>> LevelConfig { get; private set; } = new Dictionary<int, Dictionary<UnitStatType, double>>();
@@ -63,6 +71,7 @@ namespace TOH.Common.Data
 
             State = DataManagerState.Initializing;
 
+            await LoadServerConfig();
             await LoadUnitsData();
             await LoadUnitLevelData();
 
@@ -75,6 +84,13 @@ namespace TOH.Common.Data
             var contents = File.ReadAllText(filePath);
 
             return JsonConvert.DeserializeObject<T>(contents);
+        }
+
+        private Task LoadServerConfig()
+        {
+            ServerConfig = LoadConfigConfig<TcpServerConfig>("TcpServerConfig.json");
+
+            return Task.CompletedTask;
         }
 
         private Task LoadSkillsData()

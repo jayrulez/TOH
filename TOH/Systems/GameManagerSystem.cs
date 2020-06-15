@@ -6,6 +6,8 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using TOH.Common.Data;
+using TOH.Network;
+using TOH.Network.Client;
 
 namespace TOH.Systems
 {
@@ -13,6 +15,7 @@ namespace TOH.Systems
     {
         None,
         InitializeData,
+        ConnectToServer,
         Login,
         Home,
         Battle
@@ -25,6 +28,7 @@ namespace TOH.Systems
 
     public class GameManagerSystem : GameSystemBase
     {
+        public GameTcpClient NetworkClient { get; private set; }
         public GameState CurrentGameState { get; private set; }
         public GameState NextGameState { get; private set; }
 
@@ -118,6 +122,11 @@ namespace TOH.Systems
                 InitializeData();
             }
 
+            if (CurrentGameState == GameState.ConnectToServer)
+            {
+                ConnectToServer();
+            }
+
             if (OnGameStateChangedEventListener.TryReceive(out GameState gameState))
             {
                 NextGameState = gameState;
@@ -149,10 +158,34 @@ namespace TOH.Systems
             }
             else if (DataManager.Instance.State == DataManagerState.Initialized)
             {
-                GameEvents.ChangeStateEventKey.Broadcast(GameState.Login);
+                GameEvents.ChangeStateEventKey.Broadcast(GameState.ConnectToServer);
             }
             else
             {
+            }
+        }
+
+        private void ConnectToServer()
+        {
+            if (NetworkClient == null)
+            {
+                var serverConfig = DataManager.Instance.ServerConfig;
+
+                NetworkClient = new GameTcpClient(new TcpClientOptions
+                {
+                    Host = serverConfig.Host,
+                    Port = serverConfig.Port
+                });
+            }
+
+            if (NetworkClient.State == TcpClientState.None)
+            {
+                NetworkClient.Connect();
+            }
+
+            if (NetworkClient.State == TcpClientState.Connected)
+            {
+                GameEvents.ChangeStateEventKey.Broadcast(GameState.Login);
             }
         }
     }
