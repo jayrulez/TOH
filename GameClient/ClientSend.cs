@@ -1,4 +1,7 @@
-﻿using TOH.Common.ServerData;
+﻿
+
+using Bases;
+using System;
 
 namespace GameClient
 {
@@ -6,19 +9,20 @@ namespace GameClient
     {
         private static void SendTcpData(Packet packet)
         {
-            packet.WriteLength();
+            
             ClientWrapper.Instance.Tcp.SendData(packet);
+        }
+
+        public static void SendData()
+        {
+            Packet p = new Packet();
+            p.Data = BitConverter.GetBytes(334);
+            SendTcpData(p);
         }
 
         public static void WelcomeReceived()
         {
-            using(Packet packet = new Packet((int)ServerPackets.welcome))
-            {
-                packet.Write(ClientWrapper.Instance.Id);
-                packet.Write("Client 1");
-
-                SendTcpData(packet);
-            }
+          
         }
 
     }

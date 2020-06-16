@@ -4,8 +4,10 @@ using System.Text;
 
 namespace Bases
 {
-    interface PacketConverter
+    class Program
     {
-       
+        static void Main(string[] args)
+        {
+        }
     }
 }

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Bases;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using TOH.Common.ServerData;
 
 namespace GameClient
 {
@@ -65,7 +65,7 @@ namespace GameClient
                 byte[] data = new byte[byteLength];
                 Array.Copy(Buffer, data, byteLength);
 
-                ReceivedData.Reset(HandleData(data));
+
                 NetStream.BeginRead(Buffer, 0, BufferSize, ReceivedCallback, null);
             }
             catch (Exception ex)
@@ -74,42 +74,7 @@ namespace GameClient
             }
         }
 
-        private bool HandleData(byte[] data)
-        {
-            int packetLength = 0;
-            ReceivedData.SetBytes(data);
-
-            if (ReceivedData.UnreadLength() >= 4)
-            {
-                packetLength = ReceivedData.ReadInt();
-                if (packetLength <= 0)
-                {
-                    return true;
-                }
-            }
-
-            while (packetLength > 0 && packetLength < ReceivedData.UnreadLength())
-            {
-                byte[] packetBytes = ReceivedData.ReadBytes(packetLength);
-                using (Packet packet = new Packet(packetBytes))
-                {
-                    int packetId = packet.ReadInt();
-                    PacketHandlers[packetId](packet);
-                }
-
-                packetLength = 0;
-                if (ReceivedData.UnreadLength() >= 4)
-                {
-                    packetLength = ReceivedData.ReadInt();
-                    if (packetLength <= 0)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return (packetLength <= 1);
-        }
+        
 
         public void SendData(Packet packet)
         {
@@ -117,7 +82,7 @@ namespace GameClient
             {
                 if (Socket != null)
                 {
-                    NetStream.BeginWrite(packet.ToArray(), 0, packet.Length(), null, null);
+                    NetStream.BeginWrite(packet.Data, 0, packet.Data.Length, null, null);
                 }
             }
             catch (Exception ex)

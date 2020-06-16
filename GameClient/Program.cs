@@ -1,16 +1,17 @@
 ﻿using System;
-using TOH.Common.ServerData;
 
 namespace GameClient
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
             Console.Title = "Client";
             string command = "";
-            const int CLIENT_ID = 1;
+
             ClientWrapper.Instance.ConnectToServer();
+            ClientSend.WelcomeReceived();
+
             while (!command.ToLower().Equals("exit"))
             {
                 switch (command)

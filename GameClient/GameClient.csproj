@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Bases\Bases.csproj" />
     <ProjectReference Include="..\TOH.Common\TOH.Common.csproj" />
   </ItemGroup>
 

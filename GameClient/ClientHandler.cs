@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Bases;
+using System;
 using System.Collections.Generic;
 using System.Text;
-using TOH.Common.ServerData;
+
 
 namespace GameClient
 {
@@ -9,12 +10,9 @@ namespace GameClient
     {
         public static void Welcome(Packet packet)
         {
-            string msg = packet.ReadString();
-            int id = packet.ReadInt();
 
-            Console.WriteLine($"Server says {msg}");
-            ClientWrapper.Instance.Id = id;
-            ClientSend.WelcomeReceived();
+
+            Console.WriteLine($"Server says {packet}");
         }
     }
 }

@@ -14,7 +14,7 @@ namespace GameServer
                 packet.Write(msg);
                 packet.Write(toClient);
 
-                SendTcpData(toClient, packet);
+                SendTcpToAll( packet);
             }
         }
 

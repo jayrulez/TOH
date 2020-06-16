@@ -11,12 +11,6 @@ namespace Bases
 
         public Welcome() { }
 
-        public Welcome(byte[] data)
-        {
-            Id = BitConverter.ToInt32(data, 0);
-            Name = Encoding.ASCII.GetString(data);
-        }
-
 
        
     }

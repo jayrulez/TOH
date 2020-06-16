@@ -61,7 +61,7 @@ namespace GameServer
                 byte[] data = new byte[byteLength];
                 Array.Copy(data, ReceivedBuffer, byteLength);
 
-                
+                Console.WriteLine(data);
                 NetStream.BeginRead(ReceivedBuffer, 0, DataBufferSize, ReceivedCallback, null);
             }
             catch (Exception ex)
