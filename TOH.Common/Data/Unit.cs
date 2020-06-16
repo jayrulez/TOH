@@ -54,7 +54,7 @@ namespace TOH.Common.Data
         public UnitElement Element { get; private set; }
         public string Name { get; private set; }
         private Dictionary<UnitStatType, int> Stats { get; set; }
-        private Dictionary<UnitSkillSlot, Skill> Skills { get; set; }
+        public Dictionary<UnitSkillSlot, Skill> Skills { get; private set; }
 
         public static Unit Load(int id)
         {

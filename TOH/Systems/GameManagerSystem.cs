@@ -32,6 +32,7 @@ namespace TOH.Systems
     {
         public static EventKey<PongPacket> PongPacketEventKey = new EventKey<PongPacket>();
         public static EventKey<MatchInfoPacket> MatchInfoPacketEventKey = new EventKey<MatchInfoPacket>();
+        public static EventKey<MatchReadyPacket> MatchReadyPacketEventKey = new EventKey<MatchReadyPacket>();
     }
 
     public class GameManagerSystem : GameSystemBase
@@ -207,6 +208,12 @@ namespace TOH.Systems
                                 var packet = NetworkClient.Connection.Unwrap<MatchInfoPacket>(wrappedPacket);
 
                                 NetworkEvents.MatchInfoPacketEventKey.Broadcast(packet);
+                            }
+                            else if (wrappedPacket.Type.Equals(typeof(MatchReadyPacket).FullName))
+                            {
+                                var packet = NetworkClient.Connection.Unwrap<MatchReadyPacket>(wrappedPacket);
+
+                                NetworkEvents.MatchReadyPacketEventKey.Broadcast(packet);
                             }
                             else
                             {

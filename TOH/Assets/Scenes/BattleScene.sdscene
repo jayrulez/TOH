@@ -24,5 +24,3 @@ Hierarchy:
                         Page: 46f75e84-3d66-4bfe-86e8-a2cf08433c59:UI/BattleUI
                         Resolution: {X: 1280.0, Y: 720.0, Z: 1000.0}
                         Size: {X: 1.0, Y: 1.0, Z: 1.0}
-                    2959db54d07d3aeb6a47dd84533321f8: !TOH.BattleUIScript,TOH
-                        Id: acc0d04a-61c9-484f-8105-0647b590329f

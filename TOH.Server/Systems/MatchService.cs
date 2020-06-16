@@ -2,34 +2,14 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using TOH.Network.Abstractions;
+using TOH.Network.Packets;
 
 namespace TOH.Server.Systems
 {
-    public class Match
-    {
-        private readonly ILogger _logger;
-
-        public string Id { get; private set; }
-
-        public List<IConnection> Connections { get; private set; } = new List<IConnection>();
-
-        public Match(IConnection connection1, IConnection connection2, ILoggerFactory loggerFactory)
-        {
-            _logger = loggerFactory.CreateLogger<Match>();
-            Id = Guid.NewGuid().ToString();
-
-            Connections.Add(connection1);
-            Connections.Add(connection2);
-        }
-
-        public Task Tick()
-        {
-            _logger.LogInformation($"Ticking Match '{Id}'.");
-            return Task.CompletedTask;
-        }
-    }
 
     public class MatchService
     {
@@ -51,6 +31,26 @@ namespace TOH.Server.Systems
             Matches.TryAdd(match.Id, match);
 
             return Task.FromResult(match);
+        }
+
+        public Task PushTurnCommand(MatchTurnCommandPacket packet)
+        {
+            if(Matches.TryGetValue(packet.MatchId, out var match))
+            {
+                match.SetTurnCommand(packet.UnitId, packet.SkillId, packet.TargetUnitId);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task SetMatchTeam(string matchId, string connectionId, List<int> units)
+        {
+            if (Matches.TryGetValue(matchId, out var match))
+            {
+                match.SetTeam(connectionId, units);
+            }
+
+            return Task.CompletedTask;
         }
 
         public Task Tick()

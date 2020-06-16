@@ -11,16 +11,25 @@ namespace TOH
     public enum HomeState
     {
         None,
-        Matching
+        Matching,
+        SelectUnits,
+        MatchReadyWait
+    }
+
+    public class MatchInfo
+    {
+        public string MatchId { get; set; }
     }
 
     public class HomeUIScript : SyncScript
     {
         private EventReceiver<MatchInfoPacket> MatchInfoEventListener = new EventReceiver<MatchInfoPacket>(NetworkEvents.MatchInfoPacketEventKey);
+        private EventReceiver<MatchReadyPacket> MatchReadyEventListener = new EventReceiver<MatchReadyPacket>(NetworkEvents.MatchReadyPacketEventKey);
 
         private HomeState HomeState;
         private GameManagerSystem GameManager;
         private Button MatchButton;
+        private MatchInfo MatchInfo;
 
         // Declared public member fields and properties will show in the game studio
         private UIComponent HomeUI;
@@ -43,7 +52,7 @@ namespace TOH
                 {
                     MatchButton.Click += (object sender, RoutedEventArgs args) =>
                     {
-                        if(HomeState == HomeState.None)
+                        if (HomeState == HomeState.None)
                         {
                             GameManager.NetworkClient.Connection.Send(new FindMatchPacket());
 
@@ -58,17 +67,44 @@ namespace TOH
 
         public override void Update()
         {
-            if(HomeState == HomeState.Matching)
+            if (HomeState == HomeState.Matching)
             {
                 var buttonText = MatchButton.FindVisualChildOfType<TextBlock>();
                 buttonText.Text = "Matching";
             }
 
-
-            if (MatchInfoEventListener.TryReceive(out MatchInfoPacket packet))
+            if (HomeState == HomeState.SelectUnits)
             {
-                GameEvents.ChangeStateEventKey.Broadcast(GameState.Battle);
-                //PingResponseTextBlock.Text = $"Recevied Pong '{packet.PacketId}' from Ping '{packet.PingId}'.";
+                //if(MatchInfo == null)
+                //TODO: Send back to state before find match
+
+                //TODO, listen for packet that shows opponents units and update UI
+
+                GameManager.NetworkClient.Connection.Send(new SetMatchTeamPacket()
+                {
+                    MatchId = MatchInfo.MatchId,
+                    Units = new System.Collections.Generic.List<int> { 1, 2, 3 }
+                });
+
+                HomeState = HomeState.MatchReadyWait;
+            }
+
+            if(HomeState == HomeState.MatchReadyWait)
+            {
+                if (MatchReadyEventListener.TryReceive(out MatchReadyPacket matchReadyPacket))
+                {
+                    GameEvents.ChangeStateEventKey.Broadcast(GameState.Battle);
+                }
+            }
+
+            if (MatchInfoEventListener.TryReceive(out MatchInfoPacket matchInfoPacket))
+            {
+                MatchInfo = new MatchInfo
+                {
+                    MatchId = matchInfoPacket.MatchId
+                };
+
+                HomeState = HomeState.SelectUnits;
             }
         }
     }

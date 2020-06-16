@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using TOH.Network.Abstractions;
 using TOH.Network.Common;
 
@@ -27,11 +28,13 @@ namespace TOH.Network.Server
         protected readonly ConcurrentBag<Task> _serverTasks;
         protected readonly Dictionary<string, IPacketHandler> _packetHandlers;
 
-        protected ILogger _logger;
+        protected ILogger Logger;
         protected TcpListener _listener;
         protected Task _listenerTask;
         protected Task _tickSystemsTask;
         protected IServiceProvider _serviceProvider;
+        private System.Timers.Timer _tickTimer;
+        private const int TickInterval = 2000;// milliseconds
 
         private IHost _host;
 
@@ -52,11 +55,20 @@ namespace TOH.Network.Server
 
             _packetSerializer = _serviceProvider.GetRequiredService<IPacketConverter>();
 
-            _logger = _serviceProvider.GetRequiredService<ILogger<AbstractTcpServer>>();
+            Logger = _serviceProvider.GetRequiredService<ILogger<AbstractTcpServer>>();
 
             _serverTasks = new ConcurrentBag<Task>();
 
             _packetHandlers = new Dictionary<string, IPacketHandler>();
+
+            _tickTimer = new System.Timers.Timer(TickInterval);
+
+            _tickTimer.Elapsed += OnTimedEvent;
+        }
+
+        private void OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            Logger.LogInformation($"Time elapsed: {e.SignalTime}");
         }
 
         public virtual Task OnConnected(IConnection connection, CancellationToken cancellationToken)
@@ -111,7 +123,7 @@ namespace TOH.Network.Server
             {
                 _packetHandlers.Add(typeof(TPacket).FullName, packetHandler);
 
-                _logger.LogInformation($"Packet '{packetHandler.GetType().Name}' registered for packet type '{typeof(TPacket).Name}'.");
+                Logger.LogInformation($"Packet '{packetHandler.GetType().Name}' registered for packet type '{typeof(TPacket).Name}'.");
             }
 
             return this;
@@ -123,7 +135,7 @@ namespace TOH.Network.Server
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    _logger.LogInformation("The ListenLoop task was cancelled.");
+                    Logger.LogInformation("The ListenLoop task was cancelled.");
 
                     //cancellationToken.ThrowIfCancellationRequested();
 
@@ -151,7 +163,7 @@ namespace TOH.Network.Server
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    _logger.LogInformation("The HandleSocket task was cancelled.");
+                    Logger.LogInformation("The HandleSocket task was cancelled.");
 
                     //cancellationToken.ThrowIfCancellationRequested();
 
@@ -182,13 +194,13 @@ namespace TOH.Network.Server
             }
             else
             {
-                _logger.LogError($"No Packet Handler has been registered for packet with 'Key'='{packet.Type}'.");
+                Logger.LogError($"No Packet Handler has been registered for packet with 'Key'='{packet.Type}'.");
             }
         }
 
-        public Task StartAsync(CancellationToken cancellationToken = default)
+        public virtual Task StartAsync(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Starting service");
+            Logger.LogInformation("Starting service");
 
             _timerService.Start(_tasksCancellationToken);
 
@@ -198,7 +210,7 @@ namespace TOH.Network.Server
 
             _listener.Start();
 
-            _logger.LogInformation($"Listening on {ipAddress}:{_configuration.Port}");
+            Logger.LogInformation($"Listening on {ipAddress}:{_configuration.Port}");
 
             _listenerTask = Task.Factory.StartNew(() => ListenLoop(_tasksCancellationToken), _tasksCancellationToken);
 
@@ -210,6 +222,8 @@ namespace TOH.Network.Server
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             */
 
+            
+
             _tickSystemsTask = Task.Factory.StartNew(async () =>
             {
                 while (true)
@@ -219,6 +233,8 @@ namespace TOH.Network.Server
             }, _tasksCancellationToken);
 
             _serverTasks.Add(_tickSystemsTask);
+
+            //_tickTimer.Start();
 
             return Task.CompletedTask;
         }
@@ -230,7 +246,7 @@ namespace TOH.Network.Server
 
         public Task StopAsync(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Stopping service");
+            Logger.LogInformation("Stopping service");
 
             _tasksCancellationTokenSource.Cancel();
 
@@ -240,17 +256,17 @@ namespace TOH.Network.Server
             }
             catch (AggregateException ex)
             {
-                _logger.LogInformation("AggregateException thrown with the following inner exceptions:");
+                Logger.LogInformation("AggregateException thrown with the following inner exceptions:");
 
                 foreach (var exception in ex.InnerExceptions)
                 {
                     if (exception is TaskCanceledException)
                     {
-                        _logger.LogInformation($"TaskCanceledException: Task {((TaskCanceledException)exception).Task.Id}");
+                        Logger.LogInformation($"TaskCanceledException: Task {((TaskCanceledException)exception).Task.Id}");
                     }
                     else
                     {
-                        _logger.LogInformation($"Exception: {exception.GetType().Name}");
+                        Logger.LogInformation($"Exception: {exception.GetType().Name}");
                     }
                 }
             }
@@ -261,7 +277,7 @@ namespace TOH.Network.Server
 
             foreach (var task in _serverTasks)
             {
-                _logger.LogInformation($"Task '{task.Id}' is now '{task.Status}'.");
+                Logger.LogInformation($"Task '{task.Id}' is now '{task.Status}'.");
             }
 
             return Task.CompletedTask;

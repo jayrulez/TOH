@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 using System.Threading.Tasks;
+using TOH.Common.Data;
 using TOH.Network.Abstractions;
 using TOH.Network.Server;
 using TOH.Server.Systems;
@@ -17,7 +19,20 @@ namespace TOH.Server
         {
             _matchLobbyService = host.Services.GetRequiredService<MatchLobbyService>();
             _matchService = host.Services.GetRequiredService<MatchService>();
-            _logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger<GameServer>();
+            Logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger<GameServer>();
+        }
+
+        public async override Task StartAsync(CancellationToken cancellationToken = default)
+        {
+            Logger.LogInformation($"Loading data...");
+            await DataManager.Instance.Initialize("Config");
+            while(DataManager.Instance.State != DataManagerState.Initialized)
+            {
+
+            }
+            Logger.LogInformation($"Loaded data successfully.");
+
+            await base.StartAsync(cancellationToken);
         }
 
         protected override async Task TickSystems()

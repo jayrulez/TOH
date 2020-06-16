@@ -35,5 +35,21 @@ namespace TOH.Common.Data
         {
             return Stats[statType];
         }
+
+        public Skill GetRandomSkill()
+        {
+            var skillsCount = Unit.Skills.Count();
+
+            var skills = Unit.Skills.Values.ToList();
+
+            //TODO: use random number generator to select skill
+
+            return skills.FirstOrDefault();
+        }
+
+        public Skill GetSkill(int skillId)
+        {
+            return Unit.Skills.Values.ToList().FirstOrDefault(s => s.Id == skillId);
+        }
     }
 }

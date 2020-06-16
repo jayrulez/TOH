@@ -1,0 +1,110 @@
+[
+  {
+    "Id": 1,
+    "Type": "DPS",
+    "Grade": "Rare",
+    "Element": "Fire",
+    "Name": "Trevor",
+    "Stats": {
+      "HP": 99,
+      "Attack": 95,
+      "Defense": 120,
+      "Speed": 87
+    },
+    "Skills": {
+      "Default": 1,
+      "Second": 2,
+      "Third": 3
+    }
+  },
+  {
+    "Id": 2,
+    "Type": "DPS",
+    "Grade": "Rare",
+    "Element": "Fire",
+    "Name": "Arnold",
+    "Stats": {
+      "HP": 140,
+      "Attack": 70,
+      "Defense": 125,
+      "Speed": 75
+    },
+    "Skills": {
+      "Default": 1,
+      "Second": 2,
+      "Third": 3
+    }
+  },
+  {
+    "Id": 3,
+    "Type": "DPS",
+    "Grade": "Rare",
+    "Element": "Water",
+    "Name": "John",
+    "Stats": {
+      "HP": 114,
+      "Attack": 88,
+      "Defense": 88,
+      "Speed": 85
+    },
+    "Skills": {
+      "Default": 1,
+      "Second": 2,
+      "Third": 3
+    }
+  },
+  {
+    "Id": 4,
+    "Type": "DPS",
+    "Grade": "Rare",
+    "Element": "Fire",
+    "Name": "Bird",
+    "Stats": {
+      "HP": 80,
+      "Attack": 120,
+      "Defense": 75,
+      "Speed": 120
+    },
+    "Skills": {
+      "Default": 1,
+      "Second": 2,
+      "Third": 3
+    }
+  },
+  {
+    "Id": 5,
+    "Type": "DPS",
+    "Grade": "Rare",
+    "Element": "Fire",
+    "Name": "Cat",
+    "Stats": {
+      "HP": 115,
+      "Attack": 85,
+      "Defense": 75,
+      "Speed": 112
+    },
+    "Skills": {
+      "Default": 1,
+      "Second": 2,
+      "Third": 3
+    }
+  },
+  {
+    "Id": 6,
+    "Type": "DPS",
+    "Grade": "Rare",
+    "Element": "Water",
+    "Name": "Dog",
+    "Stats": {
+      "HP": 120,
+      "Attack": 80,
+      "Defense": 120,
+      "Speed": 80
+    },
+    "Skills": {
+      "Default": 1,
+      "Second": 2,
+      "Third": 3
+    }
+  }
+]

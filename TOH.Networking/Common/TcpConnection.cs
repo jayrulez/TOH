@@ -10,6 +10,8 @@ namespace TOH.Network.Common
     {
         const int BufferSize = 4096;
 
+        //private byte[] ReceiveBuffer;
+
         public string Id { get; }
 
         public bool IsClosed => !_socket.Connected;
@@ -55,6 +57,8 @@ namespace TOH.Network.Common
         {
             var networkStream = new NetworkStream(_socket, false);
             byte[] streamBuffer = new byte[BufferSize];
+
+
 
             var streamSize = await networkStream.ReadAsync(streamBuffer, 0, streamBuffer.Length);
 

@@ -19,6 +19,8 @@ namespace TOH.Server
 
             server.AddPacketHandler<PingPacket, PingPacketHandler>();
             server.AddPacketHandler<FindMatchPacket, FindMatchPacketHandler>();
+            server.AddPacketHandler<SetMatchTeamPacket, SetMatchTeamPacketHandler>();
+            server.AddPacketHandler<MatchTurnCommandPacket, MatchTurnCommandPacketHandler>();
 
             await server.StartAsync();
 

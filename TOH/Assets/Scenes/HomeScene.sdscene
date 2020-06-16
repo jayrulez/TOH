@@ -24,5 +24,5 @@ Hierarchy:
                         Page: 896a78dd-5c6f-4bab-bfa8-c94fbcd1ac9d:UI/HomeUI
                         Resolution: {X: 1280.0, Y: 720.0, Z: 1000.0}
                         Size: {X: 1.0, Y: 1.0, Z: 1.0}
-                    b37f823725a411ed4e10c4de7177ab08: !TOH.HomeUIScript,TOH
-                        Id: db787632-26b0-498e-9add-d8d00160f061
+                    4722d1daee1e0125eead4eeb5f9cdaa4: !TOH.HomeUIScript,TOH
+                        Id: 2bb0f51e-d605-46c3-b424-f13bfe37f96e

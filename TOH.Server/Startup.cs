@@ -59,6 +59,8 @@ namespace TOH.Server
 
             services.AddTransient<IPacketHandler<PingPacket>, PingPacketHandler>();
             services.AddTransient<IPacketHandler<FindMatchPacket>, FindMatchPacketHandler>();
+            services.AddTransient<IPacketHandler<SetMatchTeamPacket>, SetMatchTeamPacketHandler>();
+            services.AddTransient<IPacketHandler<MatchTurnCommandPacket>, MatchTurnCommandPacketHandler>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
