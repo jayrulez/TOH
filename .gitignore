@@ -12,5 +12,4 @@ _ReSharper*
 [Bb]in/
 obj/
 Cache/
-TOH/Resources/**
 TOH.Server/appsettings.json
