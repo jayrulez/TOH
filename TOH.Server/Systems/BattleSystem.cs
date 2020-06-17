@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using TOH.Network.Abstractions;
 using TOH.Network.Packets;
@@ -11,29 +8,29 @@ using TOH.Network.Packets;
 namespace TOH.Server.Systems
 {
 
-    public class MatchService
+    public class BattleSystem
     {
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
 
-        private ConcurrentDictionary<string, Match> Matches = new ConcurrentDictionary<string, Match>();
+        private ConcurrentDictionary<string, PVPBattle> Matches = new ConcurrentDictionary<string, PVPBattle>();
 
-        public MatchService(ILogger<MatchService> logger, ILoggerFactory loggerFactory)
+        public BattleSystem(ILogger<BattleSystem> logger, ILoggerFactory loggerFactory)
         {
             _logger = logger;
             _loggerFactory = loggerFactory;
         }
 
-        public Task<Match> CreateMatch(IConnection connection1, IConnection connection2)
+        public Task<PVPBattle> CreateBattle(IConnection connection1, IConnection connection2)
         {
-            var match = new Match(connection1, connection2, _loggerFactory);
+            var match = new PVPBattle(connection1, connection2, _loggerFactory);
 
             Matches.TryAdd(match.Id, match);
 
             return Task.FromResult(match);
         }
 
-        public Task PushTurnCommand(MatchTurnCommandPacket packet)
+        public Task PushTurnCommand(BattleTurnCommandPacket packet)
         {
             if(Matches.TryGetValue(packet.MatchId, out var match))
             {
@@ -47,7 +44,7 @@ namespace TOH.Server.Systems
         {
             if (Matches.TryGetValue(matchId, out var match))
             {
-                match.SetTeam(connectionId, units);
+                match.SetUnits(connectionId, units);
             }
 
             return Task.CompletedTask;

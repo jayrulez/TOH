@@ -6,16 +6,16 @@ using TOH.Server.Systems;
 
 namespace TOH.Server.PacketHandlers
 {
-    public class SetMatchTeamPacketHandler : PacketHandler<SetMatchTeamPacket>
+    public class SetBattleUnitsPacketHandler : PacketHandler<SetBattleUnitsPacket>
     {
-        private readonly MatchService _matchService;
+        private readonly BattleSystem _matchService;
 
-        public SetMatchTeamPacketHandler(MatchService matchService, IPacketConverter packetConverter) : base(packetConverter)
+        public SetBattleUnitsPacketHandler(BattleSystem matchService, IPacketConverter packetConverter) : base(packetConverter)
         {
             _matchService = matchService;
         }
 
-        public override async Task HandleImp(IConnection connection, SetMatchTeamPacket Packet)
+        public override async Task HandleImp(IConnection connection, SetBattleUnitsPacket Packet)
         {
             await _matchService.SetMatchTeam(Packet.MatchId, connection.Id, Packet.Units);
         }

@@ -8,7 +8,7 @@ namespace TOH.Network.Common
 {
     public class TcpConnection : IConnection
     {
-        const int BufferSize = 4096;
+        const int BufferSize = 4096 * 2;
 
         //private byte[] ReceiveBuffer;
 
@@ -17,6 +17,7 @@ namespace TOH.Network.Common
         public bool IsClosed => !_socket.Connected;
 
         private readonly Socket _socket;
+        private NetworkStream _stream;
         private readonly IPacketConverter _packetConverter;
 
         public TcpConnection(Socket socket, IPacketConverter packetConverter)
@@ -24,6 +25,7 @@ namespace TOH.Network.Common
             Id = Guid.NewGuid().ToString();
 
             _socket = socket;
+            _stream = new NetworkStream(_socket, false);
             _packetConverter = packetConverter;
         }
 
@@ -37,42 +39,65 @@ namespace TOH.Network.Common
 
         public async Task Send<T>(T packet) where T : Packet
         {
-            var packetBuffer = new byte[BufferSize];
-
             var packetBytes = _packetConverter.ToBytes(packet);
+
+            var packetLengthSize = sizeof(int);
+
+            var packetSize = packetBytes.Length;
+
+            var packetSizeBytes = BitConverter.GetBytes(packetSize);
 
             if (packetBytes.Length > BufferSize)
             {
                 throw new Exception($"Serialized packet is larger than buffer size of '{BufferSize}' bytes.");
             }
 
-            packetBytes.CopyTo(packetBuffer, 0);
+            var packetBuffer = new byte[packetSize + packetLengthSize];
+
+            packetSizeBytes.CopyTo(packetBuffer, 0);
+            packetBytes.CopyTo(packetBuffer, packetLengthSize);
+
+
 
             //await _socket.SendAsync(buffer: new ArraySegment<byte>(array: packetBuffer, offset: 0, count: packetBuffer.Length), socketFlags: SocketFlags.None);
-            await _socket.SendAsync(buffer: new ArraySegment<byte>(array: packetBytes, offset: 0, count: packetBytes.Length), socketFlags: SocketFlags.None);
+            await _socket.SendAsync(buffer: new ArraySegment<byte>(array: packetBuffer, offset: 0, count: packetBuffer.Length), socketFlags: SocketFlags.None);
             //await _socket.SendAsync(buffer: new ArraySegment<byte>(array: serializedPacketBuffer, offset: 0, count: serializedPacketBuffer.Length), socketFlags: SocketFlags.None);
         }
 
         public async IAsyncEnumerable<Packet> GetPackets()
         {
-            var networkStream = new NetworkStream(_socket, false);
-            byte[] streamBuffer = new byte[BufferSize];
+            //while (_stream.DataAvailable)
+            //{
+                byte[] streamBuffer = new byte[BufferSize];
 
+                var packetSizeBytes = new byte[sizeof(int)];
 
+                var sizeBytesRead = await _stream.ReadAsync(packetSizeBytes, 0, sizeof(int));
 
-            var streamSize = await networkStream.ReadAsync(streamBuffer, 0, streamBuffer.Length);
-
-            if (streamSize > 0)
-            {
-                Array.Resize(ref streamBuffer, streamSize);
-
-                await foreach (var packet in _packetConverter.StreamFromBytes<Packet>(streamBuffer))
+                if (sizeBytesRead == sizeof(int))
                 {
-                    yield return packet;
-                }
-            }
+                    var packetSize = BitConverter.ToInt32(packetSizeBytes, 0);
 
-            await Task.Yield();
+                    if (packetSize > BufferSize)
+                    {
+                        throw new Exception($"Packet size is larger than buffer size.");
+                    }
+
+                    var streamSize = await _stream.ReadAsync(streamBuffer, 0, packetSize);
+
+                    if (streamSize > 0)
+                    {
+                        Array.Resize(ref streamBuffer, streamSize);
+
+                        await foreach (var packet in _packetConverter.StreamFromBytes<Packet>(streamBuffer))
+                        {
+                            yield return packet;
+                        }
+                    }
+                }
+            //}
+
+            //await Task.Yield();
         }
 
         public T Unwrap<T>(Packet packet) where T : Packet

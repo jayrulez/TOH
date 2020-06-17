@@ -79,9 +79,9 @@ namespace TOH.Common.BattleSystem
     public class BattleTurnCommand
     {
         public int SkillId { get; }
-        public List<string> TargetUnitIds { get; }
+        public List<int> TargetUnitIds { get; }
 
-        public BattleTurnCommand(int skillId, List<string> targetUnitId)
+        public BattleTurnCommand(int skillId, List<int> targetUnitId)
         {
             SkillId = skillId;
             TargetUnitIds = targetUnitId;
@@ -90,22 +90,21 @@ namespace TOH.Common.BattleSystem
 
     public class BattleUnit
     {
-        public string Id { get; private set; }
-        public PlayerUnit PlayerUnit { get; private set; }
-        public BattleUnitState State { get; private set; }
-        public StatModifier StatModifier { get; private set; }
-
-        public BattleTurnCommand TurnCommand { get; private set; } = null;
+        public PlayerUnit PlayerUnit { get; set; }
+        public BattleUnitState State { get; set; }
+        public StatModifier StatModifier { get; set; }
 
         public int CurrentSpeed => GetStatValue(UnitStatType.Speed);
 
-        public int Turnbar { get; private set; }
+        public Dictionary<UnitStatType, int> Stats { get; set; } = new Dictionary<UnitStatType, int>();
 
-        private Dictionary<UnitStatType, int> Stats = new Dictionary<UnitStatType, int>();
+        public BattleUnit()
+        {
+
+        }
 
         public BattleUnit(PlayerUnit playerUnit)
         {
-            Id = Guid.NewGuid().ToString();
             PlayerUnit = playerUnit;
             State = BattleUnitState.Alive;
             StatModifier = new StatModifier();
@@ -130,55 +129,9 @@ namespace TOH.Common.BattleSystem
             return statValue;
         }
 
-        private void ResetTurnbar()
-        {
-            Turnbar = 0;
-        }
-
-        public void OnBattleStart()
-        {
-
-        }
-
-        public void OnTurnStart()
-        {
-
-        }
-
-        public void OnTurnEnd()
-        {
-            ResetTurnbar();
-            TurnCommand = null;
-        }
-
-        public void Kill()
-        {
-
-        }
-
-        public void UpdateTurn()
-        {
-
-        }
-
-        public void AdvanceTurnBar()
-        {
-            Turnbar += CurrentSpeed * 2;
-        }
-
         public Skill GetRandomSkill()
         {
             return PlayerUnit.GetRandomSkill();
-        }
-
-        public void SetTurnCommand(int skillId, List<string> targetUnitId)
-        {
-            var skill = PlayerUnit.Unit.Skills.FirstOrDefault(s => s.Value.Id == skillId);
-
-            if(skill.Value.Id == skillId)
-            {
-                TurnCommand = new BattleTurnCommand(skill.Value.Id, targetUnitId);
-            }
         }
 
         public Skill GetSkill(int skillId)

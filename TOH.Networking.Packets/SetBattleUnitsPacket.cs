@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using TOH.Network.Abstractions;
 
 namespace TOH.Network.Packets
 {
-    public class SetMatchTeamPacket : Packet
+    public class SetBattleUnitsPacket : Packet
     {
         public string MatchId { get; set; }
 

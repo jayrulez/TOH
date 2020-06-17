@@ -11,7 +11,7 @@ Hierarchy:
     Parts:
         -   Entity:
                 Id: 95b443d9-4ae4-4a99-8e76-0ca60172e9bd
-                Name: BattleUI
+                Name: BattleInfoUI
                 Components:
                     31852b8559999174cfd56e7003e12643: !TransformComponent
                         Id: b7e5d4e2-4a4f-4cc0-890b-f69a9f586cbb
@@ -19,8 +19,10 @@ Hierarchy:
                         Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
                         Scale: {X: 1.0, Y: 1.0, Z: 1.0}
                         Children: {}
-                    e4937f7d23b7631559c6dda7eaac48b2: !UIComponent
-                        Id: 91ea8cc0-1bea-478b-83cb-9ec365db6f43
-                        Page: 46f75e84-3d66-4bfe-86e8-a2cf08433c59:UI/BattleUI
+                    18d94570bac3221b8f50d31917ec0fca: !UIComponent
+                        Id: cf4f5fb3-c89d-4c7d-8439-abaf534eecca
+                        Page: 46f75e84-3d66-4bfe-86e8-a2cf08433c59:UI/BattleInfoUI
                         Resolution: {X: 1280.0, Y: 720.0, Z: 1000.0}
                         Size: {X: 1.0, Y: 1.0, Z: 1.0}
+                    a2786c4fe52b5b17d4b2914577c69a4c: !TOH.BattleUIScript,TOH
+                        Id: 85a5ab95-9353-4f5b-b32a-5079dd06f1a6

@@ -8,20 +8,20 @@ using TOH.Network.Packets;
 
 namespace TOH.Server.Systems
 {
-    public class MatchLobbyService
+    public class PVPBattleLobbyService
     {
         private readonly ILogger _logger;
-        private readonly MatchService _matchService;
+        private readonly BattleSystem _matchService;
 
         public List<IConnection> Connections { get; private set; } = new List<IConnection>();
 
-        public MatchLobbyService(MatchService matchService, ILogger<MatchLobbyService> logger)
+        public PVPBattleLobbyService(BattleSystem matchService, ILogger<PVPBattleLobbyService> logger)
         {
             _matchService = matchService;
             _logger = logger;
         }
 
-        public Task FindMatch(IConnection connection)
+        public Task JoinLobbyQueue(IConnection connection)
         {
             if (!Connections.Any(c => c.Id.Equals(connection.Id)))
             {
@@ -31,11 +31,11 @@ namespace TOH.Server.Systems
             return Task.CompletedTask;
         }
 
-        private async Task CreateMatch(IConnection connection1, IConnection connection2)
+        private async Task CreateBattle(IConnection connection1, IConnection connection2)
         {
-            var match = await _matchService.CreateMatch(connection1, connection2);
+            var match = await _matchService.CreateBattle(connection1, connection2);
 
-            var matchInfoPacket = new MatchInfoPacket
+            var matchInfoPacket = new BattleInfoPacket
             {
                 MatchId = match.Id
             };
@@ -54,7 +54,7 @@ namespace TOH.Server.Systems
 
                 Connections.RemoveAll(c => players.Any(p => p.Id.Equals(c.Id)));
 
-                await CreateMatch(players[0], players[1]);
+                await CreateBattle(players[0], players[1]);
             }
         }
     }

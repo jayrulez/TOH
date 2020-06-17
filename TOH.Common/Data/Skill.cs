@@ -91,12 +91,12 @@ namespace TOH.Common.Data
 
     public class Skill
     {
-        public int Id { get; private set; }
-        public string Name { get; private set; }
-        public string Description { get; private set; }
-        public SkillTarget Target { get; private set; }
-        public int Cooldown { get; private set; }
-        public List<SkillAction> Actions { get; private set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public SkillTarget Target { get; set; }
+        public int Cooldown { get; set; }
+        public List<SkillAction> Actions { get; set; } = new List<SkillAction>();
 
         public static Skill Load(int id)
         {
@@ -106,6 +106,11 @@ namespace TOH.Common.Data
         public static Skill Create(SkillConfig skillConfig, List<SkillAction> skillActions)
         {
             return new Skill(skillConfig, skillActions);
+        }
+
+        public Skill()
+        {
+
         }
 
         private Skill(SkillConfig skillConfig, List<SkillAction> skillActions)

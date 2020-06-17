@@ -2,7 +2,8 @@
 using Stride.Engine.Events;
 using Stride.UI;
 using Stride.UI.Controls;
-using Stride.UI.Events;
+using System.Collections.Generic;
+using System.Linq;
 using TOH.Network.Packets;
 using TOH.Systems;
 
@@ -10,55 +11,84 @@ namespace TOH
 {
     public class BattleUIScript : SyncScript
     {
-        // Declared public member fields and properties will show in the game studio
-        private UIComponent BattleUI;
+        private UIComponent BattleInfoUI;
+        private TextBlock BattleInfoText;
 
-        private TextBlock PingRequestTextBlock;
-        private TextBlock PingResponseTextBlock;
+        private enum AssetLoadState
+        {
+            None,
+            Loading,
+            Loaded
+        }
 
-        private EventReceiver<PongPacket> PongPacketListener = new EventReceiver<PongPacket>(NetworkEvents.PongPacketEventKey);
+        private AssetLoadState LoadAssetState = AssetLoadState.None;
+
+        private EventReceiver<BattleTurnInfoPacket> BattleTurnInfoEventListener = new EventReceiver<BattleTurnInfoPacket>(NetworkEvents.BattleTurnInfoPacketPacketEventKey);
+        private EventReceiver<BattleUnitTurnPacket> BattleUnitTurnEventListener = new EventReceiver<BattleUnitTurnPacket>(NetworkEvents.BattleUnitTurnPacketPacketEventKey);
 
         public override void Start()
         {
-            // Initialization of the script.
-            BattleUI = Entity.Get<UIComponent>();
+            BattleInfoUI = Entity.Get<UIComponent>();
 
-            if (BattleUI != null)
+            if(BattleInfoUI != null)
             {
-                PingRequestTextBlock = BattleUI.Page.RootElement.FindVisualChildOfType<TextBlock>("PingRequest");
-                PingResponseTextBlock = BattleUI.Page.RootElement.FindVisualChildOfType<TextBlock>("PingResponse");
-
-                var game = (TOHGame)Game;
-
-                var netClient = game.GameManager.NetworkClient;
-
-                var loginButton = BattleUI.Page.RootElement.FindVisualChildOfType<Button>();
-
-                if (loginButton != null)
-                {
-                    loginButton.Click += async (object sender, RoutedEventArgs args) =>
-                    {
-                        var packet = new PingPacket { };
-
-                        Log.Debug($"Sending Pink Packet '{packet.PacketId}'.");
-
-                        PingRequestTextBlock.Text = $"{packet.PacketId}";
-
-                        await netClient.Connection.Send(packet);
-                        //GameEvents.ChangeStateEventKey.Broadcast(GameState.Home);
-                    };
-                }
+                BattleInfoText = BattleInfoUI.Page.RootElement.FindVisualChildOfType<TextBlock>();
             }
+        }
 
+        private void LoadBattleAssets()
+        {
+            LoadAssetState = AssetLoadState.Loading;
+
+            // load assets here
+
+            LoadAssetState = AssetLoadState.Loaded;
         }
 
         public override void Update()
         {
-            if (PongPacketListener.TryReceive(out PongPacket packet))
+            if (ClientPVPBattleManager.Instance.Battle.State == ClientPVPBattle.BattleState.None)
             {
-                PingResponseTextBlock.Text = $"Recevied Pong '{packet.PacketId}' from Ping '{packet.PingId}'.";
+                ClientPVPBattleManager.Instance.Battle.SetState(ClientPVPBattle.BattleState.LoadAssets);
             }
-            // Do stuff every new frame
+
+            if (ClientPVPBattleManager.Instance.Battle.State == ClientPVPBattle.BattleState.LoadAssets)
+            {
+                if (LoadAssetState == AssetLoadState.None)
+                    LoadBattleAssets();
+                if (LoadAssetState == AssetLoadState.Loading)
+                {
+                    // update UI with progress
+                }
+
+                if (LoadAssetState == AssetLoadState.Loaded)
+                {
+                    ClientPVPBattleManager.Instance.Battle.SetState(ClientPVPBattle.BattleState.Update);
+                }
+            }
+
+            if (ClientPVPBattleManager.Instance.Battle.State == ClientPVPBattle.BattleState.Update)
+            {
+                // update battle ui state here
+
+                if (BattleUnitTurnEventListener.TryReceive(out BattleUnitTurnPacket battleUnitTurnPacket))
+                {
+                    var unit = ClientPVPBattleManager.Instance.Battle.Units.FirstOrDefault(u => u.BattleUnit.PlayerUnit.Id == battleUnitTurnPacket.UnitId);
+
+                    if (BattleInfoText != null && unit != null) // TODO: Unit id on server is different from one on client. Fix that
+                    {
+                        BattleInfoText.Text = $"Unit '{unit.PlayerUnit.Unit.Name}' is taking a turn.";
+                    }
+                }
+
+                if (BattleTurnInfoEventListener.TryReceive(out BattleTurnInfoPacket battleTurnInfoPacket))
+                {
+                    if(BattleInfoText != null)
+                    {
+                        BattleInfoText.Text += $"' | {battleTurnInfoPacket.Unit.PlayerUnit.Unit.Name}' used '{battleTurnInfoPacket.SkillId}' on '{string.Join(", ", battleTurnInfoPacket.Targets.Select(t => t.PlayerUnit.Unit.Name).ToList())}'";
+                    }
+                }
+            }
         }
     }
 }

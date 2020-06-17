@@ -12,13 +12,13 @@ namespace TOH.Server
 {
     public class GameServer : AbstractTcpServer
     {
-        private readonly MatchLobbyService _matchLobbyService;
-        private readonly MatchService _matchService;
+        private readonly PVPBattleLobbyService _matchLobbyService;
+        private readonly BattleSystem _matchService;
 
         public GameServer(IHost host) : base(host)
         {
-            _matchLobbyService = host.Services.GetRequiredService<MatchLobbyService>();
-            _matchService = host.Services.GetRequiredService<MatchService>();
+            _matchLobbyService = host.Services.GetRequiredService<PVPBattleLobbyService>();
+            _matchService = host.Services.GetRequiredService<BattleSystem>();
             Logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger<GameServer>();
         }
 

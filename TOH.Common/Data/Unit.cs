@@ -48,13 +48,13 @@ namespace TOH.Common.Data
 
     public class Unit
     {
-        public int Id { get; private set; }
-        public UnitType Type { get; private set; }
-        public UnitGrade Grade { get; private set; }
-        public UnitElement Element { get; private set; }
-        public string Name { get; private set; }
-        private Dictionary<UnitStatType, int> Stats { get; set; }
-        public Dictionary<UnitSkillSlot, Skill> Skills { get; private set; }
+        public int Id { get; set; }
+        public UnitType Type { get; set; }
+        public UnitGrade Grade { get; set; }
+        public UnitElement Element { get; set; }
+        public string Name { get; set; }
+        private Dictionary<UnitStatType, int> Stats { get; set; } = new Dictionary<UnitStatType, int>();
+        public Dictionary<UnitSkillSlot, Skill> Skills { get; set; } = new Dictionary<UnitSkillSlot, Skill>();
 
         public static Unit Load(int id)
         {
@@ -64,6 +64,11 @@ namespace TOH.Common.Data
         public static Unit Create(UnitConfig unitConfig, Dictionary<UnitSkillSlot, Skill> skills)
         {
             return new Unit(unitConfig, skills);
+        }
+
+        public Unit()
+        {
+
         }
 
         private Unit(UnitConfig unitConfig, Dictionary<UnitSkillSlot, Skill> skills)

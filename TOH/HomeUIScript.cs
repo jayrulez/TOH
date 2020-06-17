@@ -23,8 +23,8 @@ namespace TOH
 
     public class HomeUIScript : SyncScript
     {
-        private EventReceiver<MatchInfoPacket> MatchInfoEventListener = new EventReceiver<MatchInfoPacket>(NetworkEvents.MatchInfoPacketEventKey);
-        private EventReceiver<MatchReadyPacket> MatchReadyEventListener = new EventReceiver<MatchReadyPacket>(NetworkEvents.MatchReadyPacketEventKey);
+        private EventReceiver<BattleInfoPacket> BattleInfoEventListener = new EventReceiver<BattleInfoPacket>(NetworkEvents.BattleInfoPacketEventKey);
+        private EventReceiver<BattleReadyPacket> BattleReadyEventListener = new EventReceiver<BattleReadyPacket>(NetworkEvents.BattleReadyPacketEventKey);
 
         private HomeState HomeState;
         private GameManagerSystem GameManager;
@@ -54,7 +54,7 @@ namespace TOH
                     {
                         if (HomeState == HomeState.None)
                         {
-                            GameManager.NetworkClient.Connection.Send(new FindMatchPacket());
+                            GameManager.NetworkClient.Connection.Send(new FindBattlePacket());
 
                             HomeState = HomeState.Matching;
 
@@ -80,7 +80,7 @@ namespace TOH
 
                 //TODO, listen for packet that shows opponents units and update UI
 
-                GameManager.NetworkClient.Connection.Send(new SetMatchTeamPacket()
+                GameManager.NetworkClient.Connection.Send(new SetBattleUnitsPacket()
                 {
                     MatchId = MatchInfo.MatchId,
                     Units = new System.Collections.Generic.List<int> { 1, 2, 3 }
@@ -91,17 +91,21 @@ namespace TOH
 
             if(HomeState == HomeState.MatchReadyWait)
             {
-                if (MatchReadyEventListener.TryReceive(out MatchReadyPacket matchReadyPacket))
+                if (BattleReadyEventListener.TryReceive(out BattleReadyPacket battleReadyPacket))
                 {
+                    var battle = new ClientPVPBattle(battleReadyPacket.BattleId, battleReadyPacket.Players);
+
+                    ClientPVPBattleManager.Instance.SetBattle(battle);
+                    
                     GameEvents.ChangeStateEventKey.Broadcast(GameState.Battle);
                 }
             }
 
-            if (MatchInfoEventListener.TryReceive(out MatchInfoPacket matchInfoPacket))
+            if (BattleInfoEventListener.TryReceive(out BattleInfoPacket battleInfoPacket))
             {
                 MatchInfo = new MatchInfo
                 {
-                    MatchId = matchInfoPacket.MatchId
+                    MatchId = battleInfoPacket.MatchId
                 };
 
                 HomeState = HomeState.SelectUnits;

@@ -49,7 +49,7 @@ namespace TOH.Network.Common
                 yield return packet;
             }
 
-            await Task.Yield();
+            //await Task.Yield();
         }
 
         public byte[] ToBytes<T>(T packet) where T : Packet
@@ -65,13 +65,20 @@ namespace TOH.Network.Common
 
         public T Unwrap<T>(Packet packet) where T : Packet
         {
-            var packetBytes = packet.GetData();
+            try
+            {
+                var packetBytes = packet.GetData();
 
-            var data = Encoding.UTF8.GetString(packetBytes).Trim('\0');
+                var data = Encoding.UTF8.GetString(packetBytes).Trim('\0');
 
-            var unwrappedPacket = JsonConvert.DeserializeObject(data) as JObject;
+                var unwrappedPacket = JsonConvert.DeserializeObject(data) as JObject;
 
-            return unwrappedPacket.ToObject<T>();
+                return unwrappedPacket.ToObject<T>();
+            }
+            catch(Exception ex)
+            {
+                return default(T);
+            }
         }
     }
 }

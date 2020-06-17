@@ -12,12 +12,17 @@ namespace TOH.Common.Data
 
     public class PlayerUnit
     {
-        public int Id { get; private set; }
-        public Unit Unit { get; private set; }
+        public int Id { get; set; }
+        public Unit Unit { get; set; }
 
-        public int Level { get; private set; }
+        public int Level { get; set; }
 
-        private Dictionary<UnitStatType, int> Stats = new Dictionary<UnitStatType, int>();
+        public Dictionary<UnitStatType, int> Stats { get; set; } = new Dictionary<UnitStatType, int>();
+
+        public PlayerUnit()
+        {
+
+        }
 
         public PlayerUnit(int id, int level, Unit unit)
         {

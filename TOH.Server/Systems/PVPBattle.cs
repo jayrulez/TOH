@@ -11,24 +11,82 @@ using TOH.Network.Packets;
 
 namespace TOH.Server.Systems
 {
-    public class Match
+    public class PVPBattle
     {
-        public class MatchPlayer
+        public class ServerBattleUnit : BattleUnit
+        {
+            public BattleUnit BattleUnit { get; private set; }
+            public BattleTurnCommand TurnCommand { get; set; } = null;
+            public int Turnbar { get; private set; }
+
+            public ServerBattleUnit(BattleUnit battleUnit) : base(battleUnit.PlayerUnit)
+            {
+                BattleUnit = battleUnit;
+            }
+
+            private void ResetTurnbar()
+            {
+                Turnbar = 0;
+            }
+
+            public void OnBattleStart()
+            {
+
+            }
+
+            public void OnTurnStart()
+            {
+
+            }
+
+            public void OnTurnEnd()
+            {
+                ResetTurnbar();
+                TurnCommand = null;
+            }
+
+            public void Kill()
+            {
+
+            }
+
+            public void UpdateTurn()
+            {
+
+            }
+
+            public void AdvanceTurnBar()
+            {
+                Turnbar += CurrentSpeed * 2;
+            }
+
+            public void SetTurnCommand(int skillId, List<int> targetUnitId)
+            {
+                var skill = PlayerUnit.Unit.Skills.FirstOrDefault(s => s.Value.Id == skillId);
+
+                if (skill.Value.Id == skillId)
+                {
+                    TurnCommand = new BattleTurnCommand(skill.Value.Id, targetUnitId);
+                }
+            }
+        }
+
+        public class ServerBattlePlayer
         {
             public IConnection Connection { get; private set; }
-            public List<BattleUnit> Units { get; set; } = new List<BattleUnit>();
+            public List<ServerBattleUnit> Units { get; set; } = new List<ServerBattleUnit>();
 
             public Stopwatch SelectUnitsTimer = new Stopwatch();
 
             public Stopwatch TurnTimer = new Stopwatch();
 
-            public MatchPlayer(IConnection connection)
+            public ServerBattlePlayer(IConnection connection)
             {
                 Connection = connection;
             }
         }
 
-        public enum MatchState
+        public enum BattleState
         {
             None,
             SelectUnits,
@@ -45,44 +103,44 @@ namespace TOH.Server.Systems
             TurnEnded,
         }
 
-        private const long SetUnitsTimeout = 1000 * 30; // seconds
+        private const long SetUnitsTimeout = 1000 * 5; // seconds
         private const long TurnTimeout = 1000 * 10; // seconds
 
-        public void SetTurnCommand(string unitId, int skillId, List<string> targetUnitId)
+        public void SetTurnCommand(int unitId, int skillId, List<int> targetUnitId)
         {
             var nextBattleUnit = GetCurrentBattleUnit();
 
-            if (nextBattleUnit.Id.Equals(unitId))
+            if (nextBattleUnit.PlayerUnit.Id == unitId)
             {
                 nextBattleUnit.SetTurnCommand(skillId, targetUnitId);
             }
         }
 
-        private const int MatchTeamSize = 3;
+        private const int BattleTeamSize = 3;
+        private int DummyPlayerId = 0;
 
         private readonly ILogger _logger;
 
         public string Id { get; private set; }
 
-        public MatchState State { get; private set; }
+        public BattleState State { get; private set; }
         public CombatState CurrentCombatState { get; private set; }
 
-        public List<MatchPlayer> Players { get; private set; } = new List<MatchPlayer>();
-        public List<BattleUnit> Units { get; private set; } = new List<BattleUnit>();
+        public List<ServerBattlePlayer> Players { get; private set; } = new List<ServerBattlePlayer>();
+        public List<ServerBattleUnit> Units { get; private set; } = new List<ServerBattleUnit>();
 
-        public Match(IConnection connection1, IConnection connection2, ILoggerFactory loggerFactory)
+        public PVPBattle(IConnection connection1, IConnection connection2, ILoggerFactory loggerFactory)
         {
-            _logger = loggerFactory.CreateLogger<Match>();
+            _logger = loggerFactory.CreateLogger<PVPBattle>();
             Id = Guid.NewGuid().ToString();
 
-            Players.Add(new MatchPlayer(connection1));
-            Players.Add(new MatchPlayer(connection2));
+            Players.Add(new ServerBattlePlayer(connection1));
+            Players.Add(new ServerBattlePlayer(connection2));
 
-            State = MatchState.None;
-            CurrentCombatState = CombatState.None;
+            State = BattleState.None;
         }
 
-        public void SetTeam(string connectionId, List<int> unitIds)
+        public void SetUnits(string connectionId, List<int> unitIds)
         {
             var player = Players.FirstOrDefault(p => p.Connection.Id.Equals(connectionId));
 
@@ -94,11 +152,12 @@ namespace TOH.Server.Systems
 
                     if (unit != null)
                     {
-                        var playerUnit = new PlayerUnit(1, 10, unit);
+                        var playerUnit = new PlayerUnit(++DummyPlayerId, 10, unit);
                         var battleUnit = new BattleUnit(playerUnit);
-                        player.Units.Add(battleUnit);
+                        var serverBattleUnit = new ServerBattleUnit(battleUnit);
+                        player.Units.Add(serverBattleUnit);
 
-                        Units.Add(battleUnit);
+                        Units.Add(serverBattleUnit);
                     }
                     else
                     {
@@ -118,27 +177,26 @@ namespace TOH.Server.Systems
             }
         }
 
-        private void SetTeamsState()
+        private void SelectUnitsState()
         {
-            if (Players.All(p => p.Units.Count == MatchTeamSize))
+            if (Players.All(p => p.Units.Count == BattleTeamSize))
             {
                 _logger.LogInformation($"All players have selected their units.");
 
-                State = MatchState.Ready;
+                State = BattleState.Ready;
             }
             else
             {
                 foreach (var player in Players)
                 {
-                    if (player.Units.Count < MatchTeamSize)
+                    if (player.Units.Count < BattleTeamSize)
                     {
                         if (player.SelectUnitsTimer.ElapsedMilliseconds >= SetUnitsTimeout)
                         {
                             _logger.LogInformation($"Set units timer for player '{player.Connection.Id}' has exceeded '{SetUnitsTimeout}' seconds.");
 
-                            //TODO: Auto-set team and go to MatchReadyState
-                            //
-                            SetTeam(player.Connection.Id, new List<int> { 4, 5, 6 });
+                            //TODO: Auto-set team and go to BattleReadyState
+                            SetUnits(player.Connection.Id, new List<int> { 4, 5, 6 });
                         }
                     }
                 }
@@ -147,7 +205,7 @@ namespace TOH.Server.Systems
 
         private void NoneState()
         {
-            State = MatchState.SelectUnits;
+            State = BattleState.SelectUnits;
 
             foreach (var player in Players)
             {
@@ -157,22 +215,40 @@ namespace TOH.Server.Systems
             _logger.LogInformation($"Waiting for players to select their units.");
         }
 
-        public void MatchReadyState()
+        public void BattleReadyState()
         {
-            Broadcast(new MatchReadyPacket { MatchId = Id });
-
-            State = MatchState.Combat;
-        }
-
-        private void PushMatchStatePacket()
-        {
-            Broadcast(new MatchStatePacket()
+            var battleReadyPacket = new BattleReadyPacket
             {
+                BattleId = Id,
+                Players = new List<BattlePlayer>()
+            };
 
-            });
+            foreach (var player in Players)
+            {
+                var battlePlayer = new BattlePlayer()
+                {
+                    Id = player.Connection.Id,// TODO: We will need the actual player id at some point instead of the connection id
+                    Units = player.Units.Select(u =>
+                    {
+                        return new BattleUnit(u.PlayerUnit);
+                    }).ToList()
+                };
+
+                battleReadyPacket.Players.Add(battlePlayer);
+            }
+
+            Broadcast(battleReadyPacket);
+
+            State = BattleState.Combat;
+            CurrentCombatState = CombatState.None;
         }
 
-        private void MatchCombatState()
+        private void PushTurnInfoPacket(BattleTurnInfoPacket packet)
+        {
+            Broadcast(packet);
+        }
+
+        private void BattleCombatState()
         {
             if (CurrentCombatState == CombatState.None)
             {
@@ -200,39 +276,39 @@ namespace TOH.Server.Systems
             }
         }
 
-        private List<BattleUnit> GetAllEnemies(BattleUnit nextBattleUnit)
+        private List<ServerBattleUnit> GetAllEnemies(ServerBattleUnit nextBattleUnit)
         {
-            var unitPlayer = Players.FirstOrDefault(p => p.Units.Any(u => u.Id.Equals(nextBattleUnit.Id)));
+            var unitPlayer = Players.FirstOrDefault(p => p.Units.Any(u => u.BattleUnit.PlayerUnit.Id == nextBattleUnit.PlayerUnit.Id));
 
-            var battleUnits = Units.Where(u => !unitPlayer.Units.Any(p => p.Id.Equals(u.Id))).ToList();
+            var battleUnits = Units.Where(u => !unitPlayer.Units.Any(p => p.BattleUnit.PlayerUnit.Id == u.BattleUnit.PlayerUnit.Id)).ToList();
 
             return battleUnits;
         }
 
-        private List<BattleUnit> GetAllAllies(BattleUnit nextBattleUnit)
+        private List<ServerBattleUnit> GetAllAllies(ServerBattleUnit nextBattleUnit)
         {
-            var unitPlayer = Players.FirstOrDefault(p => p.Units.Any(u => u.Id.Equals(nextBattleUnit.Id)));
+            var unitPlayer = Players.FirstOrDefault(p => p.Units.Any(u => u.PlayerUnit.Id == nextBattleUnit.PlayerUnit.Id));
 
-            var battleUnits = Units.Where(u => unitPlayer.Units.Any(p => p.Id.Equals(u.Id))).ToList();
+            var battleUnits = Units.Where(u => unitPlayer.Units.Any(p => p.PlayerUnit.Id == u.PlayerUnit.Id)).ToList();
 
             return battleUnits;
         }
 
-        private BattleUnit GetRandomEnemy(BattleUnit nextBattleUnit)
+        private ServerBattleUnit GetRandomEnemy(ServerBattleUnit nextBattleUnit)
         {
             var all = GetAllEnemies(nextBattleUnit);
 
             return all.FirstOrDefault();
         }
 
-        private BattleUnit GetRandomAlly(BattleUnit nextBattleUnit)
+        private ServerBattleUnit GetRandomAlly(ServerBattleUnit nextBattleUnit)
         {
             var all = GetAllAllies(nextBattleUnit);
 
             return all.FirstOrDefault();
         }
 
-        private void PerformTurnCommand(BattleUnit currentBattleUnit, Skill skill, List<BattleUnit> targets)
+        private void PerformTurnCommand(ServerBattleUnit currentBattleUnit, Skill skill, List<ServerBattleUnit> targets)
         {
             //TODO: execute skill logic here
 
@@ -240,17 +316,24 @@ namespace TOH.Server.Systems
 
             _logger.LogInformation($"Unit '{currentBattleUnit.PlayerUnit.Unit.Name}' performed skill '{skill.Name}' on targets '{string.Join(", ", targets.Select(t => t.PlayerUnit.Unit.Name).ToList())}'.");
 
+            PushTurnInfoPacket(new BattleTurnInfoPacket()
+            {
+                Unit = currentBattleUnit.BattleUnit,
+                SkillId = skill.Id,
+                Targets = targets.Select(t => t.BattleUnit).ToList()
+            });
+
             // Ends the turn after performing the turn command
             EndTurn();
         }
 
-        private List<BattleUnit> GetBattleUnits(List<string> targetUnitIds)
+        private List<ServerBattleUnit> GetBattleUnits(List<int> targetUnitIds)
         {
-            var battleUnits = new List<BattleUnit>();
+            var battleUnits = new List<ServerBattleUnit>();
 
             foreach (var battleUnit in Units)
             {
-                if (targetUnitIds.Contains(battleUnit.Id))
+                if (targetUnitIds.Contains(battleUnit.PlayerUnit.Id))
                 {
                     battleUnits.Add(battleUnit);
                 }
@@ -259,15 +342,23 @@ namespace TOH.Server.Systems
             return battleUnits;
         }
 
+        private void PushUnitTurnPacket(ServerBattleUnit unit)
+        {
+            Broadcast(new BattleUnitTurnPacket()
+            {
+                UnitId = unit.PlayerUnit.Id
+            });
+        }
+
         #region Battle logic
 
         private int MaxTurnbar { get { return GetCurrentBattleUnit().Turnbar; } }
 
         /// <summary>
-        /// Gets the BattleUnit that should take a turn based on the turnbars
+        /// Gets the ServerBattleUnit that should take a turn based on the turnbars
         /// </summary>
         /// <returns></returns>
-        private BattleUnit GetCurrentBattleUnit()
+        private ServerBattleUnit GetCurrentBattleUnit()
         {
             var unit = Units.Where(u => u.State != BattleUnitState.Dead).OrderByDescending(u => u.Turnbar).FirstOrDefault();
 
@@ -276,15 +367,10 @@ namespace TOH.Server.Systems
 
         private void StartTurn()
         {
-            // Update clients with match state
-            PushMatchStatePacket();
-
             var currentBattleUnit = GetCurrentBattleUnit();
 
-            var unitPlayer = Players.FirstOrDefault(p => p.Units.Any(u => u.Id.Equals(currentBattleUnit.Id)));
+            var unitPlayer = Players.FirstOrDefault(p => p.Units.Any(u => u.PlayerUnit.Id == currentBattleUnit.PlayerUnit.Id));
 
-            // resets the turn timer at the start of a turn
-            unitPlayer.TurnTimer.Restart();
 
             currentBattleUnit.OnTurnStart();
 
@@ -293,6 +379,11 @@ namespace TOH.Server.Systems
             // Go to the turn wait state to wait for a turn command
             CurrentCombatState = CombatState.TurnWait;
 
+            PushUnitTurnPacket(currentBattleUnit);
+
+            // resets the turn timer at the start of a turn
+            unitPlayer.TurnTimer.Restart();
+
             _logger.LogInformation($"Unit '{currentBattleUnit.PlayerUnit.Unit.Name}' is waiting on a TurnCommand.");
         }
 
@@ -300,14 +391,14 @@ namespace TOH.Server.Systems
         {
             var currentBattleUnit = GetCurrentBattleUnit();
 
-            var unitPlayer = Players.FirstOrDefault(p => p.Units.Any(u => u.Id.Equals(currentBattleUnit.Id)));
+            var unitPlayer = Players.FirstOrDefault(p => p.Units.Any(u => u.PlayerUnit.Id == currentBattleUnit.PlayerUnit.Id));
 
             if (unitPlayer.TurnTimer.ElapsedMilliseconds >= TurnTimeout)
             {
                 // auto-skill
                 var skill = currentBattleUnit.GetRandomSkill();
 
-                List<BattleUnit> targets = null;
+                List<ServerBattleUnit> targets = null;
 
                 // auto-targeting
                 switch (skill.Target)
@@ -319,10 +410,10 @@ namespace TOH.Server.Systems
                         targets = GetAllEnemies(currentBattleUnit);
                         break;
                     case SkillTarget.SingleAlly:
-                        targets = new List<BattleUnit> { GetRandomAlly(currentBattleUnit) };
+                        targets = new List<ServerBattleUnit> { GetRandomAlly(currentBattleUnit) };
                         break;
                     case SkillTarget.SingleEnemy:
-                        targets = new List<BattleUnit> { GetRandomEnemy(currentBattleUnit) };
+                        targets = new List<ServerBattleUnit> { GetRandomEnemy(currentBattleUnit) };
                         break;
                 }
 
@@ -357,8 +448,6 @@ namespace TOH.Server.Systems
 
             // Advance the turnbar of all units after a unit ends a turn
             AdvanceTurnbars();
-
-            PushMatchStatePacket();
         }
 
         private void AdvanceTurnbars()
@@ -375,20 +464,20 @@ namespace TOH.Server.Systems
         {
             switch (State)
             {
-                case MatchState.None:
+                case BattleState.None:
                     NoneState();
                     break;
 
-                case MatchState.SelectUnits:
-                    SetTeamsState();
+                case BattleState.SelectUnits:
+                    SelectUnitsState();
                     break;
 
-                case MatchState.Ready:
-                    MatchReadyState();
+                case BattleState.Ready:
+                    BattleReadyState();
                     break;
 
-                case MatchState.Combat:
-                    MatchCombatState();
+                case BattleState.Combat:
+                    BattleCombatState();
                     break;
             }
 

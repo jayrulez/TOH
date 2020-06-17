@@ -31,8 +31,10 @@ namespace TOH.Systems
     public class NetworkEvents
     {
         public static EventKey<PongPacket> PongPacketEventKey = new EventKey<PongPacket>();
-        public static EventKey<MatchInfoPacket> MatchInfoPacketEventKey = new EventKey<MatchInfoPacket>();
-        public static EventKey<MatchReadyPacket> MatchReadyPacketEventKey = new EventKey<MatchReadyPacket>();
+        public static EventKey<BattleInfoPacket> BattleInfoPacketEventKey = new EventKey<BattleInfoPacket>();
+        public static EventKey<BattleReadyPacket> BattleReadyPacketEventKey = new EventKey<BattleReadyPacket>();
+        public static EventKey<BattleTurnInfoPacket> BattleTurnInfoPacketPacketEventKey = new EventKey<BattleTurnInfoPacket>();
+        public static EventKey<BattleUnitTurnPacket> BattleUnitTurnPacketPacketEventKey = new EventKey<BattleUnitTurnPacket>();
     }
 
     public class GameManagerSystem : GameSystemBase
@@ -203,17 +205,29 @@ namespace TOH.Systems
 
                                 NetworkEvents.PongPacketEventKey.Broadcast(packet);
                             }
-                            else if(wrappedPacket.Type.Equals(typeof(MatchInfoPacket).FullName))
+                            else if(wrappedPacket.Type.Equals(typeof(BattleInfoPacket).FullName))
                             {
-                                var packet = NetworkClient.Connection.Unwrap<MatchInfoPacket>(wrappedPacket);
+                                var packet = NetworkClient.Connection.Unwrap<BattleInfoPacket>(wrappedPacket);
 
-                                NetworkEvents.MatchInfoPacketEventKey.Broadcast(packet);
+                                NetworkEvents.BattleInfoPacketEventKey.Broadcast(packet);
                             }
-                            else if (wrappedPacket.Type.Equals(typeof(MatchReadyPacket).FullName))
+                            else if (wrappedPacket.Type.Equals(typeof(BattleReadyPacket).FullName))
                             {
-                                var packet = NetworkClient.Connection.Unwrap<MatchReadyPacket>(wrappedPacket);
+                                var packet = NetworkClient.Connection.Unwrap<BattleReadyPacket>(wrappedPacket);
 
-                                NetworkEvents.MatchReadyPacketEventKey.Broadcast(packet);
+                                NetworkEvents.BattleReadyPacketEventKey.Broadcast(packet);
+                            }
+                            else if (wrappedPacket.Type.Equals(typeof(BattleTurnInfoPacket).FullName))
+                            {
+                                var packet = NetworkClient.Connection.Unwrap<BattleTurnInfoPacket>(wrappedPacket);
+
+                                NetworkEvents.BattleTurnInfoPacketPacketEventKey.Broadcast(packet);
+                            }
+                            else if (wrappedPacket.Type.Equals(typeof(BattleUnitTurnPacket).FullName))
+                            {
+                                var packet = NetworkClient.Connection.Unwrap<BattleUnitTurnPacket>(wrappedPacket);
+
+                                NetworkEvents.BattleUnitTurnPacketPacketEventKey.Broadcast(packet);
                             }
                             else
                             {

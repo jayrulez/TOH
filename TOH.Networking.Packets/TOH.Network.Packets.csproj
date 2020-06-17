@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TOH.Common\TOH.Common.csproj" />
     <ProjectReference Include="..\TOH.Networking\TOH.Network.csproj" />
   </ItemGroup>
 

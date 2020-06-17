@@ -54,13 +54,13 @@ namespace TOH.Server
             services.AddTransient<TimerService, TimerService>();
             services.AddTransient<IPacketConverter, JsonPacketConverter>();
             services.AddSingleton<ConnectionManager, ConnectionManager>();
-            services.AddSingleton<MatchLobbyService, MatchLobbyService>();
-            services.AddSingleton<MatchService, MatchService>();
+            services.AddSingleton<PVPBattleLobbyService, PVPBattleLobbyService>();
+            services.AddSingleton<BattleSystem, BattleSystem>();
 
             services.AddTransient<IPacketHandler<PingPacket>, PingPacketHandler>();
-            services.AddTransient<IPacketHandler<FindMatchPacket>, FindMatchPacketHandler>();
-            services.AddTransient<IPacketHandler<SetMatchTeamPacket>, SetMatchTeamPacketHandler>();
-            services.AddTransient<IPacketHandler<MatchTurnCommandPacket>, MatchTurnCommandPacketHandler>();
+            services.AddTransient<IPacketHandler<FindBattlePacket>, FindBattlePacketHandler>();
+            services.AddTransient<IPacketHandler<SetBattleUnitsPacket>, SetBattleUnitsPacketHandler>();
+            services.AddTransient<IPacketHandler<BattleTurnCommandPacket>, BattleTurnCommandPacketHandler>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

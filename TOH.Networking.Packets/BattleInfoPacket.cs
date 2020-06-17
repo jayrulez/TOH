@@ -2,7 +2,7 @@
 
 namespace TOH.Network.Packets
 {
-    public class MatchReadyPacket : Packet
+    public class BattleInfoPacket : Packet
     {
         public string MatchId { get; set; }
     }

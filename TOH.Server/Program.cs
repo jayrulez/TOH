@@ -18,9 +18,9 @@ namespace TOH.Server
             var server = new GameServer(host);
 
             server.AddPacketHandler<PingPacket, PingPacketHandler>();
-            server.AddPacketHandler<FindMatchPacket, FindMatchPacketHandler>();
-            server.AddPacketHandler<SetMatchTeamPacket, SetMatchTeamPacketHandler>();
-            server.AddPacketHandler<MatchTurnCommandPacket, MatchTurnCommandPacketHandler>();
+            server.AddPacketHandler<FindBattlePacket, FindBattlePacketHandler>();
+            server.AddPacketHandler<SetBattleUnitsPacket, SetBattleUnitsPacketHandler>();
+            server.AddPacketHandler<BattleTurnCommandPacket, BattleTurnCommandPacketHandler>();
 
             await server.StartAsync();
 
