@@ -24,7 +24,8 @@ namespace TOH.Server.Data
                 Id = source.Id,
                 PlayerId = source.PlayerId,
                 CreatedAt = source.CreatedAt,
-                ExpiresAt = source.ExpiresAt
+                ExpiresAt = source.ExpiresAt,
+                IsExpired = source.IsExpired
             };
 
             return destination;

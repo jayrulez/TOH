@@ -1,0 +1,39 @@
+!UIPageAsset
+Id: e51114ee-818f-4191-a66b-db940daef2b9
+SerializedVersion: {Stride: 2.1.0.1}
+Tags: []
+Design:
+    Resolution: {X: 1280.0, Y: 720.0, Z: 1000.0}
+Hierarchy:
+    RootParts:
+        - !Grid ref!! 276c2069-b2dd-4441-8301-de7c9aa6fba0
+    Parts:
+        -   UIElement: !Grid
+                Id: 276c2069-b2dd-4441-8301-de7c9aa6fba0
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                Margin: {}
+                Children:
+                    9051b7663f7d3302925650d07def0a27: !TextBlock ref!! 3a69f372-1e9e-4da5-b9a2-5f770d315277
+                RowDefinitions: {}
+                ColumnDefinitions: {}
+                LayerDefinitions: {}
+        -   UIElement: !TextBlock
+                Id: 3a69f372-1e9e-4da5-b9a2-5f770d315277
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                Width: 1280.0
+                Height: 45.0
+                HorizontalAlignment: Center
+                VerticalAlignment: Bottom
+                Margin: {}
+                MaximumWidth: 3.40282347E+38
+                MaximumHeight: 3.40282347E+38
+                MaximumDepth: 3.40282347E+38
+                Name: StartupStatus
+                Text: Startup Status
+                Font: c90f3988-0544-4cbe-993f-13af7d9c23c6:StrideDefaultFont
+                TextSize: 20.0
+                TextColor: {R: 240, G: 240, B: 240, A: 255}
+                TextAlignment: Center
+                WrapText: true

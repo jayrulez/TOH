@@ -37,23 +37,26 @@ namespace TOH.Server.Services
             return session != null && !session.IsExpired;
         }
 
-        public ServiceResponse<PlayerData> CreatePlayer(string username, CallContext context)
+        public ServiceResponse<PlayerData> CreatePlayer(IdentifierData<string> username, CallContext context)
         {
             var response = new ServiceResponse<PlayerData>();
 
             try
             {
-                var player = _playerManager.CreatePlayer(username);
+                var player = _playerManager.CreatePlayer(username.Identifier);
 
                 // Assign player 5 random units
                 // TODO: relocate and clean this up
                 var units = DataManager.Instance.Units.ToList();
 
-                for (int i = 0; i < 5; i++)
+                if(units.Count >= 5)
                 {
-                    var unit = _randomService.GetRandom(units);
+                    for (int i = 0; i < 5; i++)
+                    {
+                        var unit = _randomService.GetRandom(units);
 
-                    _playerManager.CreatePlayerUnit(player.Id, unit.UnitId, 1);
+                        _playerManager.CreatePlayerUnit(player.Id, unit.UnitId, 1);
+                    }
                 }
                 // END TODO
 
@@ -71,13 +74,13 @@ namespace TOH.Server.Services
             }
         }
 
-        public ServiceResponse<PlayerData> GetPlayerById(int id, CallContext context)
+        public ServiceResponse<PlayerData> GetPlayerById(IdentifierData<int> id, CallContext context)
         {
             var response = new ServiceResponse<PlayerData>();
 
             try
             {
-                var player = _playerManager.GetPlayerById(id);
+                var player = _playerManager.GetPlayerById(id.Identifier);
 
                 if (player == null)
                 {
@@ -94,13 +97,13 @@ namespace TOH.Server.Services
             }
         }
 
-        public ServiceResponse<PlayerData> GetPlayerByUsername(string username, CallContext context)
+        public ServiceResponse<PlayerData> GetPlayerByUsername(IdentifierData<string> username, CallContext context)
         {
             var response = new ServiceResponse<PlayerData>();
 
             try
             {
-                var player = _playerManager.GetPlayerByUsername(username);
+                var player = _playerManager.GetPlayerByUsername(username.Identifier);
 
                 if (player == null)
                 {
@@ -117,13 +120,13 @@ namespace TOH.Server.Services
             }
         }
 
-        public ServiceResponse<PlayerUnitData> GetPlayerUnitById(int id, CallContext context)
+        public ServiceResponse<PlayerUnitData> GetPlayerUnitById(IdentifierData<int> id, CallContext context)
         {
             var response = new ServiceResponse<PlayerUnitData>();
 
             try
             {
-                var playerUnit = _playerManager.GetPlayerUnitById(id);
+                var playerUnit = _playerManager.GetPlayerUnitById(id.Identifier);
 
                 if (playerUnit == null)
                 {
@@ -140,13 +143,13 @@ namespace TOH.Server.Services
             }
         }
 
-        public ServiceResponse<List<PlayerUnitData>> GetPlayerUnitsByPlayerId(int playerId, CallContext context)
+        public ServiceResponse<List<PlayerUnitData>> GetPlayerUnitsByPlayerId(IdentifierData<int> playerId, CallContext context)
         {
             var response = new ServiceResponse<List<PlayerUnitData>>();
 
             try
             {
-                var playerUnits = _playerManager.GetPlayerUnitsByPlayerId(playerId);
+                var playerUnits = _playerManager.GetPlayerUnitsByPlayerId(playerId.Identifier);
 
                 return response.Succeed(playerUnits.ToDataModel());
             }
@@ -158,13 +161,13 @@ namespace TOH.Server.Services
             }
         }
 
-        public ServiceResponse<PlayerSessionData> CreatePlayerSession(string username, CallContext context = default)
+        public ServiceResponse<PlayerSessionData> CreatePlayerSession(IdentifierData<string> username, CallContext context = default)
         {
             var response = new ServiceResponse<PlayerSessionData>();
 
             try
             {
-                var playerSession = _playerManager.CreatePlayerSession(username);
+                var playerSession = _playerManager.CreatePlayerSession(username.Identifier);
 
                 return response.Succeed(playerSession.ToDataModel());
             }
@@ -179,13 +182,13 @@ namespace TOH.Server.Services
                 return response.Fail(ServiceErrors.UnexpectedError);
             }
         }
-        public ServiceResponse<PlayerSessionData> GetPlayerSessionById(string id, CallContext context = default)
+        public ServiceResponse<PlayerSessionData> GetPlayerSessionById(IdentifierData<string> id, CallContext context = default)
         {
             var response = new ServiceResponse<PlayerSessionData>();
 
             try
             {
-                var playerSession = _playerManager.GetPlayerSessionById(id);
+                var playerSession = _playerManager.GetPlayerSessionById(id.Identifier);
 
                 if (playerSession == null)
                 {

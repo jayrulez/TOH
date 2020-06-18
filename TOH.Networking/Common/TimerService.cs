@@ -11,6 +11,8 @@ namespace TOH.Network.Common
 
         private readonly ILogger _logger;
 
+        public long TimerFrequency { get { return Stopwatch.Frequency; } }
+
         public TimerService(ILogger<TimerService> logger)
         {
             _logger = logger;

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -52,6 +53,14 @@ namespace TOH.Server.Systems
 
         public Task Tick()
         {
+            //var to = DateTime.Now.AddSeconds(10);
+            //var now = DateTime.Now;
+
+            //while(now < to)
+            //{
+            //    now = DateTime.Now;
+            //}
+
             Parallel.ForEach(Matches, match =>
             {
                 match.Value.Tick();

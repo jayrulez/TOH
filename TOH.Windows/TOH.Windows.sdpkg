@@ -15,6 +15,7 @@ ExplicitFolders: []
 Bundles: []
 TemplateFolders: []
 RootAssets:
+    - 0f57af43-8c41-4f3f-9b63-22d047269390:Scenes/StartupScene
     - 2f3a6a58-77eb-4276-9101-43af28851f90:Config/UnitLevel
     - 3adaf8f3-6856-4535-be72-82221b793236:Scenes/BattleScene
     - 6fe05ea4-40c0-472a-a475-a270a087844a:Config/Skills

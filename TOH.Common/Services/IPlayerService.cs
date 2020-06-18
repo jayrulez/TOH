@@ -49,17 +49,27 @@ namespace TOH.Common.Services
 
         [DataMember(Order = 4)]
         public DateTime ExpiresAt { get; set; }
+
+        [DataMember(Order = 5)]
+        public bool IsExpired { get; set; }
+    }
+
+    [DataContract]
+    public class IdentifierData<T>
+    {
+        [DataMember(Order = 1)]
+        public T Identifier { get; set; }
     }
 
     [ServiceContract]
     public interface IPlayerService
     {
-        ServiceResponse<PlayerData> CreatePlayer(string username, CallContext context = default);
-        ServiceResponse<PlayerData> GetPlayerById(int id, CallContext context = default);
-        ServiceResponse<PlayerData> GetPlayerByUsername(string username, CallContext context = default);
-        ServiceResponse<PlayerUnitData> GetPlayerUnitById(int id, CallContext context = default);
-        ServiceResponse<List<PlayerUnitData>> GetPlayerUnitsByPlayerId(int playerId, CallContext context = default);
-        ServiceResponse<PlayerSessionData> CreatePlayerSession(string username, CallContext context = default);
-        ServiceResponse<PlayerSessionData> GetPlayerSessionById(string id, CallContext context = default);
+        ServiceResponse<PlayerData> CreatePlayer(IdentifierData<string> username, CallContext context = default);
+        ServiceResponse<PlayerData> GetPlayerById(IdentifierData<int> id, CallContext context = default);
+        ServiceResponse<PlayerData> GetPlayerByUsername(IdentifierData<string> username, CallContext context = default);
+        ServiceResponse<PlayerUnitData> GetPlayerUnitById(IdentifierData<int> id, CallContext context = default);
+        ServiceResponse<List<PlayerUnitData>> GetPlayerUnitsByPlayerId(IdentifierData<int> playerId, CallContext context = default);
+        ServiceResponse<PlayerSessionData> CreatePlayerSession(IdentifierData<string> username, CallContext context = default);
+        ServiceResponse<PlayerSessionData> GetPlayerSessionById(IdentifierData<string> id, CallContext context = default);
     }
 }

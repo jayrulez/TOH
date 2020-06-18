@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using TOH.Common.Data;
@@ -26,7 +28,7 @@ namespace TOH.Server
         {
             Logger.LogInformation($"Loading data...");
             await DataManager.Instance.Initialize("Config");
-            while(DataManager.Instance.State != DataManagerState.Initialized)
+            while (DataManager.Instance.State != DataManagerState.Initialized)
             {
 
             }
@@ -37,8 +39,8 @@ namespace TOH.Server
 
         protected override async Task TickSystems()
         {
-            await _matchLobbyService.Tick();
             await _matchService.Tick();
+            await _matchLobbyService.Tick();
         }
 
 

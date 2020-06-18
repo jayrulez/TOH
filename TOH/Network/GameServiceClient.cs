@@ -1,4 +1,4 @@
-﻿using Grpc.Net.Client;
+﻿//using Grpc.Net.Client;
 using ProtoBuf.Grpc.Client;
 using System.Net.Http;
 using TOH.Common.Services;
@@ -16,7 +16,7 @@ namespace TOH.Network
     {
         public IPlayerService PlayerService { get; private set; }
 
-        private GrpcChannel _grpcChannel;
+        //private GrpcChannel _grpcChannel;
 
         public GameServiceClient(GameServiceClientOptions options)
         {
@@ -26,12 +26,14 @@ namespace TOH.Network
 
             GrpcClientFactory.AllowUnencryptedHttp2 = true;
 
+            /*
             _grpcChannel = GrpcChannel.ForAddress($"{options.Protocol}://{options.Host}:{options.Port}", new GrpcChannelOptions
             {
                 HttpClient = httpClient
             });
 
             PlayerService = _grpcChannel.CreateGrpcService<IPlayerService>();
+            */
         }
     }
 }

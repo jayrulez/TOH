@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TOH.Common.Data
@@ -54,6 +55,7 @@ namespace TOH.Common.Data
 
         public string ConfigDataPath { get; private set; } = "Assets/Config";
 
+        public bool Initialized { get { return State == DataManagerState.Initialized; } }
 
         public ServerConfig ServerConfig { get; private set; }
 
@@ -78,6 +80,8 @@ namespace TOH.Common.Data
             await LoadServerConfig();
             await LoadUnitsData();
             await LoadUnitLevelData();
+
+            Thread.Sleep(5000); // simulate long op
 
             State = DataManagerState.Initialized;
         }

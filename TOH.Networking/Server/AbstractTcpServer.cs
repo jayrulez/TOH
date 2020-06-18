@@ -15,6 +15,18 @@ using TOH.Network.Common;
 
 namespace TOH.Network.Server
 {
+    public static class DateTimeExtensions
+    {
+        public static long ToUnixTimestamp(this DateTime dateTime)
+        {
+            var epoch = new DateTime(1970, 1, 1);
+
+            var timeSpan = dateTime - epoch;
+
+            return (long)timeSpan.TotalSeconds;
+        }
+    }
+
     public abstract class AbstractTcpServer
     {
         protected readonly ServerOptions _configuration;
@@ -35,6 +47,9 @@ namespace TOH.Network.Server
         protected IServiceProvider _serviceProvider;
         private System.Timers.Timer _tickTimer;
         private const int TickInterval = 2000;// milliseconds
+
+        private long LastFrameTime = 0;
+        private long FrameStep = 1000000 / 30;
 
         private IHost _host;
 
@@ -222,11 +237,34 @@ namespace TOH.Network.Server
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             */
 
-            _tickSystemsTask = Task.Factory.StartNew(async () =>
+            _tickSystemsTask = Task.Factory.StartNew(() =>
             {
-                while (true)
+                while (!_tasksCancellationTokenSource.IsCancellationRequested)
                 {
-                    await TickSystems();
+                    if (FrameStep > 0)
+                    {
+                        var microSecondsPerTick = _timerService.TimerFrequency / 1000000;
+
+                        var currentTime = _timerService.GetTicks() / microSecondsPerTick;
+                        var nextFrameTime = LastFrameTime + FrameStep;
+
+                        while (nextFrameTime > currentTime)
+                        {
+                            // spin until next frame time
+                            while (nextFrameTime > currentTime)
+                            {
+                                currentTime = _timerService.GetTicks() / microSecondsPerTick;
+                            }
+                        }
+
+                        LastFrameTime = currentTime;
+                    }
+
+                    Logger.LogInformation($"Tick Start: {DateTime.Now}");
+
+                    TickSystems();
+
+                    Logger.LogInformation($"Tick End: {DateTime.Now}");
                 }
             }, _tasksCancellationToken);
 

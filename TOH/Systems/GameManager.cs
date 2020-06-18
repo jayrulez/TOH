@@ -3,7 +3,6 @@ using Stride.Engine;
 using Stride.Engine.Events;
 using Stride.Games;
 using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using TOH.Common.Data;
@@ -16,9 +15,7 @@ namespace TOH.Systems
     public enum GameState
     {
         None,
-        InitializeData,
-        ConnectToServer,
-        CheckSession,
+        Startup,
         Login,
         Home,
         Battle
@@ -47,8 +44,10 @@ namespace TOH.Systems
         public GameState NextGameState { get; private set; }
 
         private Task NetworkTask;
+        private bool NetworkTaskRunning = false;
 
         private CancellationToken NetworkTaskCancellationToken = new CancellationToken();
+        private CancellationTokenSource NetworkTaskCancellationTokenSource = new CancellationTokenSource();
 
         private Scene StateScene = null;
 
@@ -57,7 +56,7 @@ namespace TOH.Systems
         public GameManager(IServiceRegistry registry) : base(registry)
         {
             CurrentGameState = GameState.None;
-            NextGameState = GameState.InitializeData;
+            NextGameState = GameState.Startup;
         }
 
         public override void Initialize()
@@ -114,6 +113,9 @@ namespace TOH.Systems
 
             switch (state)
             {
+                case GameState.Startup:
+                    StateScene = game.Content.Load<Scene>("Scenes/StartupScene");
+                    break;
                 case GameState.Login:
                     StateScene = game.Content.Load<Scene>("Scenes/LoginScene");
                     break;
@@ -135,19 +137,28 @@ namespace TOH.Systems
         {
             base.Update(gameTime);
 
-            if (CurrentGameState == GameState.InitializeData)
-            {
-                InitializeData();
-            }
+            NetworkTaskRunning = NetworkTask != null && NetworkTask.Status == TaskStatus.Running;
 
-            if (CurrentGameState == GameState.ConnectToServer)
+            if(DataManager.Instance.Initialized)
             {
-                ConnectToServer();
-            }
+                if (ServiceClient == null)
+                {
+                    ServiceClient = new GameServiceClient(new GameServiceClientOptions
+                    {
+                        Protocol = DataManager.Instance.ServerConfig.ServiceProtocol,
+                        Host = DataManager.Instance.ServerConfig.ServiceHost,
+                        Port = DataManager.Instance.ServerConfig.ServicePort
+                    });
+                }
 
-            if(CurrentGameState == GameState.CheckSession)
-            {
-                CheckSession();
+                if (NetworkClient == null)
+                {
+                    NetworkClient = new GameTcpClient(new TcpClientOptions
+                    {
+                        Host = DataManager.Instance.ServerConfig.TcpServerHost,
+                        Port = DataManager.Instance.ServerConfig.TcpServerPort
+                    });
+                }
             }
 
             if (OnGameStateChangedEventListener.TryReceive(out GameState gameState))
@@ -161,124 +172,59 @@ namespace TOH.Systems
             }
         }
 
-        private void InitializeData()
+        public void StartNetworkTask()
         {
-            if (DataManager.Instance.State == DataManagerState.None)
+            if (!NetworkTaskRunning)
             {
-                Task.Run(async () =>
+                NetworkTask = Task.Factory.StartNew(async () =>
                 {
-                    try
+                    while (!NetworkClient.Connection.IsClosed)
                     {
-                        var dataPath = Path.Combine(PlatformFolders.ApplicationDataDirectory, "Config");
-                        await DataManager.Instance.Initialize(dataPath);
-                    }
-                    catch (Exception ex)
-                    {
-                        // TODO: Present this to player in a user friendly way
-                        Console.WriteLine(ex.Message);
-                    }
-                });
-            }
-            else if (DataManager.Instance.State == DataManagerState.Initialized)
-            {
-                GameEvents.ChangeStateEventKey.Broadcast(GameState.ConnectToServer);
-            }
-            else
-            {
-                //TODO: initializing, report progress
-            }
-        }
-
-        private void ConnectToServer()
-        {
-            if (ServiceClient == null)
-            {
-                ServiceClient = new GameServiceClient(new GameServiceClientOptions
-                {
-                    Protocol = DataManager.Instance.ServerConfig.ServiceProtocol,
-                    Host = DataManager.Instance.ServerConfig.ServiceHost,
-                    Port = DataManager.Instance.ServerConfig.ServicePort
-                });
-            }
-
-            if (NetworkClient == null)
-            {
-                NetworkClient = new GameTcpClient(new TcpClientOptions
-                {
-                    Host = DataManager.Instance.ServerConfig.TcpServerHost,
-                    Port = DataManager.Instance.ServerConfig.TcpServerPort
-                });
-            }
-
-            if (NetworkClient.State == TcpClientState.None)
-            {
-                try
-                {
-                    NetworkClient.Connect();
-
-                    NetworkTask = Task.Factory.StartNew(async () =>
-                    {
-                        while (!NetworkClient.Connection.IsClosed)
+                        await foreach (var wrappedPacket in NetworkClient.Connection.GetPackets())
                         {
-                            await foreach (var wrappedPacket in NetworkClient.Connection.GetPackets())
+                            if (wrappedPacket.Type.Equals(typeof(PongPacket).FullName))
                             {
-                                if (wrappedPacket.Type.Equals(typeof(PongPacket).FullName))
-                                {
-                                    var packet = NetworkClient.Connection.Unwrap<PongPacket>(wrappedPacket);
+                                var packet = NetworkClient.Connection.Unwrap<PongPacket>(wrappedPacket);
 
-                                    NetworkEvents.PongPacketEventKey.Broadcast(packet);
-                                }
-                                else if (wrappedPacket.Type.Equals(typeof(BattleInfoPacket).FullName))
-                                {
-                                    var packet = NetworkClient.Connection.Unwrap<BattleInfoPacket>(wrappedPacket);
+                                NetworkEvents.PongPacketEventKey.Broadcast(packet);
+                            }
+                            else if (wrappedPacket.Type.Equals(typeof(BattleInfoPacket).FullName))
+                            {
+                                var packet = NetworkClient.Connection.Unwrap<BattleInfoPacket>(wrappedPacket);
 
-                                    NetworkEvents.BattleInfoPacketEventKey.Broadcast(packet);
-                                }
-                                else if (wrappedPacket.Type.Equals(typeof(BattleReadyPacket).FullName))
-                                {
-                                    var packet = NetworkClient.Connection.Unwrap<BattleReadyPacket>(wrappedPacket);
+                                NetworkEvents.BattleInfoPacketEventKey.Broadcast(packet);
+                            }
+                            else if (wrappedPacket.Type.Equals(typeof(BattleReadyPacket).FullName))
+                            {
+                                var packet = NetworkClient.Connection.Unwrap<BattleReadyPacket>(wrappedPacket);
 
-                                    NetworkEvents.BattleReadyPacketEventKey.Broadcast(packet);
-                                }
-                                else if (wrappedPacket.Type.Equals(typeof(BattleTurnInfoPacket).FullName))
-                                {
-                                    var packet = NetworkClient.Connection.Unwrap<BattleTurnInfoPacket>(wrappedPacket);
+                                NetworkEvents.BattleReadyPacketEventKey.Broadcast(packet);
+                            }
+                            else if (wrappedPacket.Type.Equals(typeof(BattleTurnInfoPacket).FullName))
+                            {
+                                var packet = NetworkClient.Connection.Unwrap<BattleTurnInfoPacket>(wrappedPacket);
 
-                                    NetworkEvents.BattleTurnInfoPacketPacketEventKey.Broadcast(packet);
-                                }
-                                else if (wrappedPacket.Type.Equals(typeof(BattleUnitTurnPacket).FullName))
-                                {
-                                    var packet = NetworkClient.Connection.Unwrap<BattleUnitTurnPacket>(wrappedPacket);
+                                NetworkEvents.BattleTurnInfoPacketPacketEventKey.Broadcast(packet);
+                            }
+                            else if (wrappedPacket.Type.Equals(typeof(BattleUnitTurnPacket).FullName))
+                            {
+                                var packet = NetworkClient.Connection.Unwrap<BattleUnitTurnPacket>(wrappedPacket);
 
-                                    NetworkEvents.BattleUnitTurnPacketPacketEventKey.Broadcast(packet);
-                                }
-                                else
-                                {
+                                NetworkEvents.BattleUnitTurnPacketPacketEventKey.Broadcast(packet);
+                            }
+                            else
+                            {
 
-                                }
                             }
                         }
-                    }, NetworkTaskCancellationToken);
-                }
-                catch (Exception)
-                {
-                    // Network connection error
-                }
-            }
-
-            if (NetworkClient.State == TcpClientState.Connected)
-            {
-                GameEvents.ChangeStateEventKey.Broadcast(GameState.Login);
+                    }
+                }, NetworkTaskCancellationTokenSource.Token);
             }
         }
 
-        private void CheckSession()
+        public void StopNetworkTask()
         {
-            // read session file
-            // if file not exist then go to login
-            // if file exist, validate session with server
-            // if session invalid then go to login
-            // if session valid then load player data to local cache then go to home state
+            NetworkTaskCancellationTokenSource.Cancel();
         }
     }
 }

@@ -1,0 +1,28 @@
+!SceneAsset
+Id: 0f57af43-8c41-4f3f-9b63-22d047269390
+SerializedVersion: {Stride: 3.1.0.1}
+Tags: []
+ChildrenIds: []
+Parent: c1771411-c90f-430a-97d8-33a0405d4c70:Scenes/MainScene
+Offset: {X: 0.0, Y: 0.0, Z: 0.0}
+Hierarchy:
+    RootParts:
+        - ref!! 0f8ec3cf-43b0-41bc-af73-3ff2976ffd89
+    Parts:
+        -   Entity:
+                Id: 0f8ec3cf-43b0-41bc-af73-3ff2976ffd89
+                Name: StartupUI
+                Components:
+                    d9a46ac818512a21aab5d7ce9930d5f0: !TransformComponent
+                        Id: 553b8ce6-0171-4180-b280-05d61ed780b6
+                        Position: {X: 0.0, Y: 0.0, Z: 0.0}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children: {}
+                    3c7e9ac554187e9a9698740577ce9b81: !UIComponent
+                        Id: 6fa18734-7275-4393-800b-2a58bb48d2fd
+                        Page: e51114ee-818f-4191-a66b-db940daef2b9:UI/StartupUI
+                        Resolution: {X: 1280.0, Y: 720.0, Z: 1000.0}
+                        Size: {X: 1.0, Y: 1.0, Z: 1.0}
+                    1ee84f8deb809f4268353cfe570e8c83: !TOH.StartupManagerScript,TOH
+                        Id: d005eedd-cbe0-4b5d-ace8-1f29b691659e
