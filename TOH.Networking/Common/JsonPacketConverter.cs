@@ -49,7 +49,7 @@ namespace TOH.Network.Common
                 yield return packet;
             }
 
-            //await Task.Yield();
+            await Task.Yield();
         }
 
         public byte[] ToBytes<T>(T packet) where T : Packet

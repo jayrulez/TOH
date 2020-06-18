@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TOH.Network.Client
+﻿namespace TOH.Network.Client
 {
     public class TcpClientOptions
     {

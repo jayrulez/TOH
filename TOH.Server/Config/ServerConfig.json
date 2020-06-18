@@ -1,0 +1,7 @@
+{
+  "TcpServerHost": "localhost",
+  "TcpServerPort": 5000,
+  "ServiceProtocol": "https",
+  "ServiceHost": "localhost",
+  "ServicePort": 6501
+}

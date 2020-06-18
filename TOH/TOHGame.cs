@@ -4,11 +4,11 @@ namespace TOH
 {
     public class TOHGame : Stride.Engine.Game
     {
-        public GameManagerSystem GameManager { get; }
+        public GameManager GameManager { get; }
 
         public TOHGame() : base()
         {
-            GameManager = new GameManagerSystem(Services);
+            GameManager = new GameManager(Services);
             Services.AddService(GameManager);
         }
 

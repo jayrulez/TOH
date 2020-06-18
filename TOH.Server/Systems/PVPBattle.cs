@@ -148,7 +148,7 @@ namespace TOH.Server.Systems
             {
                 foreach (var unitId in unitIds)
                 {
-                    var unit = Unit.Load(unitId);
+                    var unit = DataManager.Instance.GetUnit(unitId);
 
                     if (unit != null)
                     {

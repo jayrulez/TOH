@@ -15,6 +15,7 @@ using TOH.Network.Packets;
 using TOH.Network.Server;
 using TOH.Server.Data;
 using TOH.Server.PacketHandlers;
+using TOH.Server.Services;
 using TOH.Server.Systems;
 
 namespace TOH.Server
@@ -51,6 +52,10 @@ namespace TOH.Server
                 .PersistKeysToDbContext<GameDbContext>()
                 .SetDefaultKeyLifetime(TimeSpan.FromDays(1825));
 
+            services.AddTransient<RandomService, RandomService>();
+            services.AddTransient<PlayerManager, PlayerManager>();
+            services.AddTransient<PlayerService, PlayerService>();
+
             services.AddTransient<TimerService, TimerService>();
             services.AddTransient<IPacketConverter, JsonPacketConverter>();
             services.AddSingleton<ConnectionManager, ConnectionManager>();
@@ -74,6 +79,8 @@ namespace TOH.Server
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapGrpcService<PlayerService>();
+
                 endpoints.MapGet("/", async context =>
                 {
                     await context.Response.WriteAsync("TOH.Server");

@@ -204,7 +204,7 @@ namespace TOH.Network.Server
 
             _timerService.Start(_tasksCancellationToken);
 
-            var ipAddress = IPAddress.Loopback;
+            var ipAddress = IPAddress.Parse(_configuration.IpAddress);
 
             _listener = new TcpListener(ipAddress, _configuration.Port);
 
@@ -221,8 +221,6 @@ namespace TOH.Network.Server
 
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             */
-
-            
 
             _tickSystemsTask = Task.Factory.StartNew(async () =>
             {

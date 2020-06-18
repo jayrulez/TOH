@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TOH.Server.Data
 {
-    class GameDbContext : DbContext, IDataProtectionKeyContext
+    public class GameDbContext : DbContext, IDataProtectionKeyContext
     {
         public GameDbContext(DbContextOptions<GameDbContext> options)
             : base(options)
@@ -12,6 +12,8 @@ namespace TOH.Server.Data
 
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
         public DbSet<Player> Players { get; set; }
+        public DbSet<PlayerUnit> PlayerUnits { get; set; }
+        public DbSet<PlayerSession> PlayerSessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -23,6 +25,18 @@ namespace TOH.Server.Data
             {
                 entity.HasKey(e => e.Id);
                 entity.HasAlternateKey(e => e.Username);
+            });
+
+            builder.Entity<PlayerUnit>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasOne(e => e.Player).WithMany(e => e.Units).HasForeignKey(e => e.PlayerId); ;
+            });
+
+            builder.Entity<PlayerSession>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasOne(e => e.Player).WithMany().HasForeignKey(e => e.PlayerId); ;
             });
         }
     }

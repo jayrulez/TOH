@@ -48,53 +48,28 @@ namespace TOH.Common.Data
 
     public class Unit
     {
-        public int Id { get; set; }
+        public int UnitId { get; set; }
         public UnitType Type { get; set; }
         public UnitGrade Grade { get; set; }
         public UnitElement Element { get; set; }
         public string Name { get; set; }
-        private Dictionary<UnitStatType, int> Stats { get; set; } = new Dictionary<UnitStatType, int>();
+        public Dictionary<UnitStatType, int> Stats { get; set; } = new Dictionary<UnitStatType, int>();
         public Dictionary<UnitSkillSlot, Skill> Skills { get; set; } = new Dictionary<UnitSkillSlot, Skill>();
-
-        public static Unit Load(int id)
-        {
-            return Instance.Units.FirstOrDefault(u => u.Id == id);
-        }
-
-        public static Unit Create(UnitConfig unitConfig, Dictionary<UnitSkillSlot, Skill> skills)
-        {
-            return new Unit(unitConfig, skills);
-        }
 
         public Unit()
         {
-
-        }
-
-        private Unit(UnitConfig unitConfig, Dictionary<UnitSkillSlot, Skill> skills)
-        {
-            Id = unitConfig.Id;
-            Type = unitConfig.Type;
-            Grade = unitConfig.Grade;
-            Element = unitConfig.Element;
-            Name = unitConfig.Name;
-
-            Stats = unitConfig.Stats;
             foreach (var stat in Enum.GetValues(typeof(UnitStatType)).Cast<UnitStatType>())
             {
-                if (!Stats.ContainsKey(stat))
-                    Stats.Add(stat, 0);
+                Stats.Add(stat, 0);
             }
 
-            Skills = skills;
             foreach (var skillSlot in Enum.GetValues(typeof(UnitSkillSlot)).Cast<UnitSkillSlot>())
             {
-                if (!Skills.ContainsKey(skillSlot))
-                    Skills.Add(skillSlot, null);
+                Skills.Add(skillSlot, null);
             }
         }
 
-        public int GetStatValue(int level, UnitStatType statType)
+        public int GetBaseStatValue(int level, UnitStatType statType)
         {
             var statValue = Stats[statType];
 

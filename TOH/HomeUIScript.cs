@@ -27,7 +27,7 @@ namespace TOH
         private EventReceiver<BattleReadyPacket> BattleReadyEventListener = new EventReceiver<BattleReadyPacket>(NetworkEvents.BattleReadyPacketEventKey);
 
         private HomeState HomeState;
-        private GameManagerSystem GameManager;
+        private GameManager GameManager;
         private Button MatchButton;
         private MatchInfo MatchInfo;
 

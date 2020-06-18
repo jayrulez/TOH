@@ -9,6 +9,36 @@ using System.Threading.Tasks;
 
 namespace TOH.Common.Data
 {
+    public class ServerConfig
+    {
+        public string TcpServerHost { get; set; }
+        public int TcpServerPort { get; set; }
+
+        public string ServiceProtocol { get; set; }
+        public string ServiceHost { get; set; }
+        public int ServicePort { get; set; }
+    }
+
+    public class UnitConfig
+    {
+        public int Id { get; set; }
+        public UnitType Type { get; set; }
+        public UnitGrade Grade { get; set; }
+        public UnitElement Element { get; set; }
+        public string Name { get; set; }
+        public Dictionary<UnitStatType, int> Stats { get; set; }
+        public Dictionary<UnitSkillSlot, int> Skills { get; set; }
+    }
+
+    public class SkillConfig
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public SkillTarget Target { get; set; }
+        public int Cooldown { get; set; }
+        public List<object> Actions { get; set; }
+    }
     public enum DataManagerState
     {
         None,
@@ -18,40 +48,14 @@ namespace TOH.Common.Data
 
     public sealed class DataManager
     {
-        public class UnitConfig
-        {
-            public int Id { get; set; }
-            public UnitType Type { get; set; }
-            public UnitGrade Grade { get; set; }
-            public UnitElement Element { get; set; }
-            public string Name { get; set; }
-            public Dictionary<UnitStatType, int> Stats { get; set; }
-            public Dictionary<UnitSkillSlot, int> Skills { get; set; }
-        }
-
-        public class SkillConfig
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public string Description { get; set; }
-            public SkillTarget Target { get; set; }
-            public int Cooldown { get; set; }
-            public List<object> Actions { get; set; }
-        }
-
         private static readonly Lazy<DataManager> lazy = new Lazy<DataManager>(() => new DataManager(), true);
 
         public static DataManager Instance { get { return lazy.Value; } }
 
         public string ConfigDataPath { get; private set; } = "Assets/Config";
 
-        public class TcpServerConfig
-        {
-            public string Host { get; set; }
-            public int Port { get; set; }
-        }
 
-        public TcpServerConfig ServerConfig { get; private set; }
+        public ServerConfig ServerConfig { get; private set; }
 
         public ReadOnlyCollection<Skill> Skills { get; private set; } = new ReadOnlyCollection<Skill>(new List<Skill>());
         public ReadOnlyCollection<Unit> Units { get; private set; } = new ReadOnlyCollection<Unit>(new List<Unit>());
@@ -88,7 +92,7 @@ namespace TOH.Common.Data
 
         private Task LoadServerConfig()
         {
-            ServerConfig = LoadConfigConfig<TcpServerConfig>("TcpServerConfig.json");
+            ServerConfig = LoadConfigConfig<ServerConfig>("ServerConfig.json");
 
             return Task.CompletedTask;
         }
@@ -130,7 +134,7 @@ namespace TOH.Common.Data
                                 break;
 
                             case SkillActionType.Leader:
-                                var leaderSkillAction = skillActionObject.ToObject <LeaderSkillAction>();
+                                var leaderSkillAction = skillActionObject.ToObject<LeaderSkillAction>();
                                 if (leaderSkillAction != null)
                                 {
                                     skillActions.Add(leaderSkillAction);
@@ -173,7 +177,16 @@ namespace TOH.Common.Data
                     }
                 }
 
-                var unit = Unit.Create(unitConfig, unitSkills);
+                var unit = new Unit
+                {
+                    UnitId = unitConfig.Id,
+                    Type = unitConfig.Type,
+                    Grade = unitConfig.Grade,
+                    Element = unitConfig.Element,
+                    Name = unitConfig.Name,
+                    Stats = unitConfig.Stats,
+                    Skills = unitSkills
+                };
 
                 units.Add(unit);
             }
@@ -188,6 +201,11 @@ namespace TOH.Common.Data
             LevelConfig = LoadConfigConfig<Dictionary<int, Dictionary<UnitStatType, double>>>("UnitLevel.json");
 
             return Task.CompletedTask;
+        }
+
+        public Unit GetUnit(int id)
+        {
+            return Units.FirstOrDefault(u => u.UnitId == id);
         }
     }
 }
