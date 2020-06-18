@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!--<PackageReference Include="Grpc.Net.Client" Version="2.28.0" />-->
+    <PackageReference Include="LiteDB" Version="5.0.8" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.1" />
     <PackageReference Include="Stride.Engine" Version="4.0.0.1-beta03-1036" />
     <PackageReference Include="Stride.Video" Version="4.0.0.1-beta03-1036" />

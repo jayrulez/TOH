@@ -4,6 +4,7 @@ using Stride.UI;
 using Stride.UI.Controls;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using TOH.Common.Data;
 using TOH.Network.Client;
@@ -58,18 +59,15 @@ namespace TOH
             {
                 State = StartupState.InitializeData;
             }
-
-            if (State == StartupState.InitializeData)
+            else if (State == StartupState.InitializeData)
             {
                 InitializeData();
             }
-
-            if (State == StartupState.ConnectToServer)
+            else if (State == StartupState.ConnectToServer)
             {
                 ConnectToServer();
             }
-
-            if (State == StartupState.CheckSession)
+            else if (State == StartupState.CheckSession)
             {
                 CheckSession();
             }
@@ -86,6 +84,8 @@ namespace TOH
                         var dataPath = Path.Combine(PlatformFolders.ApplicationDataDirectory, "Config");
 
                         await DataManager.Instance.Initialize(dataPath);
+
+                        Thread.Sleep(5000); // simulate long op
                     }
                     catch (Exception ex)
                     {
@@ -113,8 +113,6 @@ namespace TOH
                 {
                     try
                     {
-                        GameManager.NetworkClient.Connect();
-
                         GameManager.StartNetworkTask();
                     }
                     catch (Exception)
@@ -122,12 +120,15 @@ namespace TOH
                         StartupStatusText.Text = "An error occured while connecting to the network.";
                     }
                 }
-
-                if (GameManager.NetworkClient.State == TcpClientState.Connected)
+                else if (GameManager.NetworkClient.State == TcpClientState.Connected)
                 {
                     SessionState = CheckSessionState.None;
 
                     State = StartupState.CheckSession;
+                }
+                else
+                {
+                    StartupStatusText.Text = "Connecting to server.";
                 }
             }
         }
@@ -138,7 +139,7 @@ namespace TOH
             {
                 SessionState = CheckSessionState.Checking;
 
-                var sessionId = CacheManager.Instance.Get<string>("player_session_id");
+                var sessionId = GameDatabase.Instance.GetSessionId();
 
                 if (string.IsNullOrEmpty(sessionId))
                 {

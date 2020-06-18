@@ -13,6 +13,8 @@ namespace TOH
 
         public override void Start()
         {
+            var game = (TOHGame)Game;
+
             // Initialization of the script.
             LoginUI = Entity.Get<UIComponent>();
 
@@ -24,6 +26,7 @@ namespace TOH
                 {
                     loginButton.Click += (object sender, RoutedEventArgs args) =>
                     {
+                        //game.GameManager.StopNetworkTask();
                         GameEvents.ChangeStateEventKey.Broadcast(GameState.Home);
                     };
                 }

@@ -81,8 +81,6 @@ namespace TOH.Common.Data
             await LoadUnitsData();
             await LoadUnitLevelData();
 
-            Thread.Sleep(5000); // simulate long op
-
             State = DataManagerState.Initialized;
         }
 

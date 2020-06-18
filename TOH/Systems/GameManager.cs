@@ -46,7 +46,6 @@ namespace TOH.Systems
         private Task NetworkTask;
         private bool NetworkTaskRunning = false;
 
-        private CancellationToken NetworkTaskCancellationToken = new CancellationToken();
         private CancellationTokenSource NetworkTaskCancellationTokenSource = new CancellationTokenSource();
 
         private Scene StateScene = null;
@@ -137,9 +136,7 @@ namespace TOH.Systems
         {
             base.Update(gameTime);
 
-            NetworkTaskRunning = NetworkTask != null && NetworkTask.Status == TaskStatus.Running;
-
-            if(DataManager.Instance.Initialized)
+            if (DataManager.Instance.Initialized)
             {
                 if (ServiceClient == null)
                 {
@@ -176,10 +173,18 @@ namespace TOH.Systems
         {
             if (!NetworkTaskRunning)
             {
+                NetworkClient.Connect();
+                NetworkTaskRunning = true;
+
                 NetworkTask = Task.Factory.StartNew(async () =>
                 {
                     while (!NetworkClient.Connection.IsClosed)
                     {
+                        if (NetworkTaskRunning == false)
+                        {
+                            break;
+                        }
+
                         await foreach (var wrappedPacket in NetworkClient.Connection.GetPackets())
                         {
                             if (wrappedPacket.Type.Equals(typeof(PongPacket).FullName))
@@ -224,6 +229,7 @@ namespace TOH.Systems
 
         public void StopNetworkTask()
         {
+            NetworkTaskRunning = false;
             NetworkTaskCancellationTokenSource.Cancel();
         }
     }
