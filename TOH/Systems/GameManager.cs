@@ -33,6 +33,8 @@ namespace TOH.Systems
 
         #region PVPBattle
         public static EventKey<BattleInfoPacket> BattleInfoPacketEventKey = new EventKey<BattleInfoPacket>();
+        public static EventKey<BattleCountdownPacket> BattleCountdownPacketEventKey = new EventKey<BattleCountdownPacket>();
+        public static EventKey<BattleUnitSelectionReadyPacket> BattleUnitSelectionReadyPacketEventKey = new EventKey<BattleUnitSelectionReadyPacket>();
         public static EventKey<BattleReadyPacket> BattleReadyPacketEventKey = new EventKey<BattleReadyPacket>();
         public static EventKey<BattleTurnInfoPacket> BattleTurnInfoPacketEventKey = new EventKey<BattleTurnInfoPacket>();
         public static EventKey<BattleUnitTurnPacket> BattleUnitTurnPacketEventKey = new EventKey<BattleUnitTurnPacket>();
@@ -207,6 +209,14 @@ namespace TOH.Systems
                             else if (NetworkClient.Connection.TryUnwrap<BattleInfoPacket>(wrappedPacket, out var battleInfoPacket))
                             {
                                 NetworkEvents.BattleInfoPacketEventKey.Broadcast(battleInfoPacket);
+                            }
+                            else if (NetworkClient.Connection.TryUnwrap<BattleCountdownPacket>(wrappedPacket, out var battleCountdownPacket))
+                            {
+                                NetworkEvents.BattleCountdownPacketEventKey.Broadcast(battleCountdownPacket);
+                            }
+                            else if (NetworkClient.Connection.TryUnwrap<BattleUnitSelectionReadyPacket>(wrappedPacket, out var battleUnitSelectionReadyPacket))
+                            {
+                                NetworkEvents.BattleUnitSelectionReadyPacketEventKey.Broadcast(battleUnitSelectionReadyPacket);
                             }
                             else if (NetworkClient.Connection.TryUnwrap<BattleReadyPacket>(wrappedPacket, out var battleReadyPacket))
                             {

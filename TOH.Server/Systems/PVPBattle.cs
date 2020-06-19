@@ -90,7 +90,7 @@ namespace TOH.Server.Systems
 
         public enum BattleState
         {
-            None,
+            Countdown,
             SelectUnits,
             Ready,
             Combat,
@@ -107,6 +107,10 @@ namespace TOH.Server.Systems
 
         private const long SetUnitsTimeout = 1000 * 5; // seconds
         private const long TurnTimeout = 1000 * 10; // seconds
+
+        private const long CountdownStateTimeout = 1000 * 30; // seconds
+
+        public Stopwatch CountdownStateTimer = new Stopwatch();
 
         public void SetTurnCommand(int unitId, int skillId, List<int> targetUnitId)
         {
@@ -139,7 +143,7 @@ namespace TOH.Server.Systems
             Players.Add(new ServerBattlePlayer(session1));
             Players.Add(new ServerBattlePlayer(session2));
 
-            State = BattleState.None;
+            State = BattleState.Countdown;
         }
 
         public void SetUnits(string sessionId, List<int> unitIds)
@@ -205,14 +209,43 @@ namespace TOH.Server.Systems
             }
         }
 
-        private void NoneState()
+        private void CountdownState()
         {
+            if (!CountdownStateTimer.IsRunning)
+            {
+                CountdownStateTimer.Start();
+
+                return;
+            }
+
+            if (CountdownStateTimer.ElapsedMilliseconds < CountdownStateTimeout)
+            {
+                var countdownPacket = new BattleCountdownPacket
+                {
+                    Count = (int)(CountdownStateTimeout - CountdownStateTimer.ElapsedMilliseconds) / 1000
+                };
+
+                Broadcast(countdownPacket);
+
+                //_logger.LogInformation($"Countdown: {countdownPacket.Count}");
+
+                return;
+            }
+            else
+            {
+                CountdownStateTimer.Stop();
+            }
+
             State = BattleState.SelectUnits;
+
+            Broadcast(new BattleUnitSelectionReadyPacket()); // inform the client that unit selection state is ready
 
             foreach (var player in Players)
             {
                 player.SelectUnitsTimer.Start();
             }
+
+
 
             _logger.LogInformation($"Waiting for players to select their units.");
         }
@@ -466,8 +499,8 @@ namespace TOH.Server.Systems
         {
             switch (State)
             {
-                case BattleState.None:
-                    NoneState();
+                case BattleState.Countdown:
+                    CountdownState();
                     break;
 
                 case BattleState.SelectUnits:

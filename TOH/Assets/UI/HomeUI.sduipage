@@ -18,6 +18,7 @@ Hierarchy:
                 MaximumDepth: 3.40282347E+38
                 Children:
                     1a493cf5e6e727ce61e876322fcc4a59: !Button ref!! d4f61382-52ac-4e62-b71c-561c167fb650
+                    a0a42e22b3eb336b85ad1dcefeb6b6ce: !TextBlock ref!! e3164e74-fc97-4432-8e5a-42d0aced5603
                 RowDefinitions: {}
                 ColumnDefinitions: {}
                 LayerDefinitions: {}
@@ -55,3 +56,21 @@ Hierarchy:
                     CurrentFrame: 1
                 MouseOverImage: !SpriteFromSheet
                     Sheet: 1be3340c-b797-4557-bff7-d9be92dfdb42:StrideUIDesigns
+        -   UIElement: !TextBlock
+                Id: e3164e74-fc97-4432-8e5a-42d0aced5603
+                DependencyProperties: {}
+                BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                Visibility: Hidden
+                Width: 1280.0
+                Height: 64.0
+                Margin: {Top: 340.0, Bottom: 316.0}
+                MaximumWidth: 3.40282347E+38
+                MaximumHeight: 3.40282347E+38
+                MaximumDepth: 3.40282347E+38
+                Name: Countdown
+                Text: Battle will start in 0
+                Font: c90f3988-0544-4cbe-993f-13af7d9c23c6:StrideDefaultFont
+                TextSize: 40.0
+                TextColor: {R: 240, G: 240, B: 240, A: 255}
+                TextAlignment: Center
+                WrapText: true
