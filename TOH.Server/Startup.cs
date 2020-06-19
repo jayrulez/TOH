@@ -89,6 +89,10 @@ namespace TOH.Server
                     await context.Response.WriteAsync("TOH.Server");
                 });
             });
+
+            var dbInitializer = new DBInitializer(app);
+
+            dbInitializer.Run();
         }
     }
 }

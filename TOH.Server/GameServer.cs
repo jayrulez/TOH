@@ -50,7 +50,7 @@ namespace TOH.Server
 
         protected async override Task OnPacketReceived(IConnection connection, Packet packet)
         {
-            if (typeof(JoinSessionPacket).Equals(packet.Type))
+            if (_packetConverter.CanUnwrap<JoinSessionPacket>(packet))
             {
                 await _sessionService.JoinSession(connection, _packetConverter.Unwrap<JoinSessionPacket>(packet));
             }

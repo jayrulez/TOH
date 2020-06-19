@@ -61,13 +61,16 @@ namespace TOH.Server.Systems
                 }
             });
 
-            if (Sessions.Count > 0)
+            if (Sessions.Count > 1)
             {
                 var matches = Sessions.Take(2).ToList();
 
-                Sessions.RemoveAll(session => matches.Any(m => m.SessionId.Equals(session.SessionId)));
+                if(matches.Count == 2)
+                {
+                    Sessions.RemoveAll(session => matches.Any(m => m.SessionId.Equals(session.SessionId)));
 
-                await CreateBattle(matches[0], matches[1]);
+                    await CreateBattle(matches[0], matches[1]);
+                }
             }
         }
     }
