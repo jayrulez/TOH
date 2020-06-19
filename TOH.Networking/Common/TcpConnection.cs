@@ -104,5 +104,15 @@ namespace TOH.Network.Common
         {
             return _packetConverter.Unwrap<T>(packet);
         }
+
+        public bool CanUnwrap<T>(Packet packet) where T : Packet
+        {
+            return _packetConverter.CanUnwrap<T>(packet);
+        }
+
+        public bool TryUnwrap<T>(Packet packet, out T unwrappedPacket) where T : Packet
+        {
+            return _packetConverter.TryUnwrap(packet, out unwrappedPacket);
+        }
     }
 }

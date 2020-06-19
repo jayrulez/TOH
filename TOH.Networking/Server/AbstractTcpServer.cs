@@ -260,11 +260,11 @@ namespace TOH.Network.Server
                         LastFrameTime = currentTime;
                     }
 
-                    Logger.LogInformation($"Tick Start: {DateTime.Now}");
+                    //Logger.LogInformation($"Tick Start: {DateTime.Now}");
 
                     TickSystems();
 
-                    Logger.LogInformation($"Tick End: {DateTime.Now}");
+                    //Logger.LogInformation($"Tick End: {DateTime.Now}");
                 }
             }, _tasksCancellationToken);
 

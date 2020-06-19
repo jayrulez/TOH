@@ -17,8 +17,10 @@ TemplateFolders: []
 RootAssets:
     - 0f57af43-8c41-4f3f-9b63-22d047269390:Scenes/StartupScene
     - 2f3a6a58-77eb-4276-9101-43af28851f90:Config/UnitLevel
+    - 3a679721-5fd7-4612-80a5-c49f0a358258:Scenes/PickSessionScene
     - 3adaf8f3-6856-4535-be72-82221b793236:Scenes/BattleScene
     - 6fe05ea4-40c0-472a-a475-a270a087844a:Config/Skills
     - 7cb99cc5-071a-4f38-920a-1a27305a42b3:Scenes/LoginScene
+    - d866dee0-1685-416b-b25e-e2773a26e2ac:UI/PickSessionUI
     - ebb25339-5223-4baf-8ffb-f681b37bb409:Scenes/HomeScene
     - fbc3fdc9-ccc4-48da-9b77-3efd793f93b8:Config/Units

@@ -11,6 +11,8 @@ namespace TOH.Network.Abstractions
         IAsyncEnumerable<Packet> GetPackets();
 
         T Unwrap<T>(Packet packet) where T : Packet;
+        bool CanUnwrap<T>(Packet packet) where T : Packet;
+        bool TryUnwrap<T>(Packet packet, out T unwrappedPacket) where T : Packet;
 
         void Close();
     }

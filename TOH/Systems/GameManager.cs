@@ -15,6 +15,7 @@ namespace TOH.Systems
     public enum GameState
     {
         None,
+        PickSession,// Temporary, remove when we have signup+login
         Startup,
         Login,
         Home,
@@ -64,7 +65,7 @@ namespace TOH.Systems
         public GameManager(IServiceRegistry registry) : base(registry)
         {
             CurrentGameState = GameState.None;
-            NextGameState = GameState.Startup;
+            NextGameState = GameState.PickSession;
         }
 
         public override void Initialize()
@@ -121,6 +122,9 @@ namespace TOH.Systems
 
             switch (state)
             {
+                case GameState.PickSession:
+                    StateScene = game.Content.Load<Scene>("Scenes/PickSessionScene");
+                    break;
                 case GameState.Startup:
                     StateScene = game.Content.Load<Scene>("Scenes/StartupScene");
                     break;
@@ -196,53 +200,37 @@ namespace TOH.Systems
 
                         await foreach (var wrappedPacket in NetworkClient.Connection.GetPackets())
                         {
-                            if (wrappedPacket.Type.Equals(typeof(PongPacket).FullName))
+                            if (NetworkClient.Connection.TryUnwrap<PongPacket>(wrappedPacket, out var pongPacket))
                             {
-                                var packet = NetworkClient.Connection.Unwrap<PongPacket>(wrappedPacket);
-
-                                NetworkEvents.PongPacketEventKey.Broadcast(packet);
+                                NetworkEvents.PongPacketEventKey.Broadcast(pongPacket);
                             }
-                            else if (wrappedPacket.Type.Equals(typeof(BattleInfoPacket).FullName))
+                            else if (NetworkClient.Connection.TryUnwrap<BattleInfoPacket>(wrappedPacket, out var battleInfoPacket))
                             {
-                                var packet = NetworkClient.Connection.Unwrap<BattleInfoPacket>(wrappedPacket);
-
-                                NetworkEvents.BattleInfoPacketEventKey.Broadcast(packet);
+                                NetworkEvents.BattleInfoPacketEventKey.Broadcast(battleInfoPacket);
                             }
-                            else if (wrappedPacket.Type.Equals(typeof(BattleReadyPacket).FullName))
+                            else if (NetworkClient.Connection.TryUnwrap<BattleReadyPacket>(wrappedPacket, out var battleReadyPacket))
                             {
-                                var packet = NetworkClient.Connection.Unwrap<BattleReadyPacket>(wrappedPacket);
-
-                                NetworkEvents.BattleReadyPacketEventKey.Broadcast(packet);
+                                NetworkEvents.BattleReadyPacketEventKey.Broadcast(battleReadyPacket);
                             }
-                            else if (wrappedPacket.Type.Equals(typeof(BattleTurnInfoPacket).FullName))
+                            else if (NetworkClient.Connection.TryUnwrap<BattleTurnInfoPacket>(wrappedPacket, out var battleTurnInfoPacket))
                             {
-                                var packet = NetworkClient.Connection.Unwrap<BattleTurnInfoPacket>(wrappedPacket);
-
-                                NetworkEvents.BattleTurnInfoPacketEventKey.Broadcast(packet);
+                                NetworkEvents.BattleTurnInfoPacketEventKey.Broadcast(battleTurnInfoPacket);
                             }
-                            else if (wrappedPacket.Type.Equals(typeof(BattleUnitTurnPacket).FullName))
+                            else if (NetworkClient.Connection.TryUnwrap<BattleUnitTurnPacket>(wrappedPacket, out var battleUnitTurnPacket))
                             {
-                                var packet = NetworkClient.Connection.Unwrap<BattleUnitTurnPacket>(wrappedPacket);
-
-                                NetworkEvents.BattleUnitTurnPacketEventKey.Broadcast(packet);
+                                NetworkEvents.BattleUnitTurnPacketEventKey.Broadcast(battleUnitTurnPacket);
                             }
-                            else if (wrappedPacket.Type.Equals(typeof(JoinSessionFailedPacket).FullName))
+                            else if (NetworkClient.Connection.TryUnwrap<JoinSessionFailedPacket>(wrappedPacket, out var joinSessionFailedPacket))
                             {
-                                var packet = NetworkClient.Connection.Unwrap<JoinSessionFailedPacket>(wrappedPacket);
-
-                                NetworkEvents.JoinSessionFailedPacketEventKey.Broadcast(packet);
+                                NetworkEvents.JoinSessionFailedPacketEventKey.Broadcast(joinSessionFailedPacket);
                             }
-                            else if (wrappedPacket.Type.Equals(typeof(JoinSessionSuccessPacket).FullName))
+                            else if (NetworkClient.Connection.TryUnwrap<JoinSessionSuccessPacket>(wrappedPacket, out var joinSessionSuccessPacket))
                             {
-                                var packet = NetworkClient.Connection.Unwrap<JoinSessionSuccessPacket>(wrappedPacket);
-
-                                NetworkEvents.JoinSessionSuccessPacketEventKey.Broadcast(packet);
+                                NetworkEvents.JoinSessionSuccessPacketEventKey.Broadcast(joinSessionSuccessPacket);
                             }
-                            else if (wrappedPacket.Type.Equals(typeof(SessionDisconnectedPacket).FullName))
+                            else if (NetworkClient.Connection.TryUnwrap<SessionDisconnectedPacket>(wrappedPacket, out var sessionDisconnectedPacket))
                             {
-                                var packet = NetworkClient.Connection.Unwrap<SessionDisconnectedPacket>(wrappedPacket);
-
-                                NetworkEvents.SessionDisconnectedPacketEventKey.Broadcast(packet);
+                                NetworkEvents.SessionDisconnectedPacketEventKey.Broadcast(sessionDisconnectedPacket);
                             }
                             else
                             {

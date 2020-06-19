@@ -16,9 +16,9 @@ namespace TOH
         MatchReadyWait
     }
 
-    public class MatchInfo
+    public class BattleInfo
     {
-        public string MatchId { get; set; }
+        public string BattleId { get; set; }
     }
 
     public class HomeUIScript : SyncScript
@@ -29,7 +29,7 @@ namespace TOH
         private HomeState HomeState;
         private GameManager GameManager;
         private Button MatchButton;
-        private MatchInfo MatchInfo;
+        private BattleInfo MatchInfo;
 
         // Declared public member fields and properties will show in the game studio
         private UIComponent HomeUI;
@@ -82,7 +82,7 @@ namespace TOH
 
                 GameManager.NetworkClient.Connection.Send(new SetBattleUnitsPacket()
                 {
-                    BattleId = MatchInfo.MatchId,
+                    BattleId = MatchInfo.BattleId,
                     Units = new System.Collections.Generic.List<int> { 1, 2, 3 }
                 });
 
@@ -103,9 +103,9 @@ namespace TOH
 
             if (BattleInfoEventListener.TryReceive(out BattleInfoPacket battleInfoPacket))
             {
-                MatchInfo = new MatchInfo
+                MatchInfo = new BattleInfo
                 {
-                    MatchId = battleInfoPacket.BattleId
+                    BattleId = battleInfoPacket.BattleId
                 };
 
                 HomeState = HomeState.SelectUnits;

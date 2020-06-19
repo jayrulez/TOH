@@ -30,7 +30,7 @@ namespace TOH
         {
             BattleInfoUI = Entity.Get<UIComponent>();
 
-            if(BattleInfoUI != null)
+            if (BattleInfoUI != null)
             {
                 BattleInfoText = BattleInfoUI.Page.RootElement.FindVisualChildOfType<TextBlock>();
             }
@@ -80,10 +80,9 @@ namespace TOH
                         BattleInfoText.Text = $"Unit '{unit.PlayerUnit.Unit.Name}' is taking a turn.";
                     }
                 }
-
-                if (BattleTurnInfoEventListener.TryReceive(out BattleTurnInfoPacket battleTurnInfoPacket))
+                else if (BattleTurnInfoEventListener.TryReceive(out BattleTurnInfoPacket battleTurnInfoPacket))
                 {
-                    if(BattleInfoText != null)
+                    if (BattleInfoText != null)
                     {
                         BattleInfoText.Text += $"' | {battleTurnInfoPacket.Unit.PlayerUnit.Unit.Name}' used '{battleTurnInfoPacket.SkillId}' on '{string.Join(", ", battleTurnInfoPacket.Targets.Select(t => t.PlayerUnit.Unit.Name).ToList())}'";
                     }

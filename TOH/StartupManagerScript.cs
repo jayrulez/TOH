@@ -145,7 +145,8 @@ namespace TOH
             {
                 SessionState = CheckSessionState.Checking;
 
-                var sessionId = GameDatabase.Instance.GetSessionId();
+                //var sessionId = GameDatabase.Instance.GetSessionId();
+                var sessionId = StaticConfig.SessionId;
 
                 if (string.IsNullOrEmpty(sessionId))
                 {
@@ -167,6 +168,9 @@ namespace TOH
                         {
                             Token = sessionId
                         });
+
+
+                        StartupStatusText.Text = "Joining session.";
 
                         SessionState = CheckSessionState.Joining;
                     }

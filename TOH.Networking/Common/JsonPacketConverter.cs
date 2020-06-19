@@ -29,6 +29,11 @@ namespace TOH.Network.Common
             }
         }
 
+        public bool CanUnwrap<T>(Packet packet) where T : Packet
+        {
+            return packet.Type.Equals(typeof(T).FullName);
+        }
+
         public async IAsyncEnumerable<T> StreamFromBytes<T>(byte[] streamBytes) where T : Packet
         {
             var packets = new List<Packet>();
@@ -75,9 +80,24 @@ namespace TOH.Network.Common
 
                 return unwrappedPacket.ToObject<T>();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return default(T);
+            }
+        }
+
+        public bool TryUnwrap<T>(Packet packet, out T unwrappedPacket) where T : Packet
+        {
+            if (CanUnwrap<T>(packet))
+            {
+                unwrappedPacket = Unwrap<T>(packet);
+
+                return true;
+            }
+            else
+            {
+                unwrappedPacket = default;
+                return false;
             }
         }
     }
