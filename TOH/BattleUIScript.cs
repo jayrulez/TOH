@@ -23,8 +23,8 @@ namespace TOH
 
         private AssetLoadState LoadAssetState = AssetLoadState.None;
 
-        private EventReceiver<BattleTurnInfoPacket> BattleTurnInfoEventListener = new EventReceiver<BattleTurnInfoPacket>(NetworkEvents.BattleTurnInfoPacketPacketEventKey);
-        private EventReceiver<BattleUnitTurnPacket> BattleUnitTurnEventListener = new EventReceiver<BattleUnitTurnPacket>(NetworkEvents.BattleUnitTurnPacketPacketEventKey);
+        private EventReceiver<BattleTurnInfoPacket> BattleTurnInfoEventListener = new EventReceiver<BattleTurnInfoPacket>(NetworkEvents.BattleTurnInfoPacketEventKey);
+        private EventReceiver<BattleUnitTurnPacket> BattleUnitTurnEventListener = new EventReceiver<BattleUnitTurnPacket>(NetworkEvents.BattleUnitTurnPacketEventKey);
 
         public override void Start()
         {

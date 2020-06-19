@@ -29,10 +29,19 @@ namespace TOH.Systems
     public class NetworkEvents
     {
         public static EventKey<PongPacket> PongPacketEventKey = new EventKey<PongPacket>();
+
+        #region PVPBattle
         public static EventKey<BattleInfoPacket> BattleInfoPacketEventKey = new EventKey<BattleInfoPacket>();
         public static EventKey<BattleReadyPacket> BattleReadyPacketEventKey = new EventKey<BattleReadyPacket>();
-        public static EventKey<BattleTurnInfoPacket> BattleTurnInfoPacketPacketEventKey = new EventKey<BattleTurnInfoPacket>();
-        public static EventKey<BattleUnitTurnPacket> BattleUnitTurnPacketPacketEventKey = new EventKey<BattleUnitTurnPacket>();
+        public static EventKey<BattleTurnInfoPacket> BattleTurnInfoPacketEventKey = new EventKey<BattleTurnInfoPacket>();
+        public static EventKey<BattleUnitTurnPacket> BattleUnitTurnPacketEventKey = new EventKey<BattleUnitTurnPacket>();
+        #endregion
+
+        #region Session
+        public static EventKey<JoinSessionFailedPacket> JoinSessionFailedPacketEventKey = new EventKey<JoinSessionFailedPacket>();
+        public static EventKey<JoinSessionSuccessPacket> JoinSessionSuccessPacketEventKey = new EventKey<JoinSessionSuccessPacket>();
+        public static EventKey<SessionDisconnectedPacket> SessionDisconnectedPacketEventKey = new EventKey<SessionDisconnectedPacket>();
+        #endregion
     }
 
     public class GameManager : GameSystemBase
@@ -209,13 +218,31 @@ namespace TOH.Systems
                             {
                                 var packet = NetworkClient.Connection.Unwrap<BattleTurnInfoPacket>(wrappedPacket);
 
-                                NetworkEvents.BattleTurnInfoPacketPacketEventKey.Broadcast(packet);
+                                NetworkEvents.BattleTurnInfoPacketEventKey.Broadcast(packet);
                             }
                             else if (wrappedPacket.Type.Equals(typeof(BattleUnitTurnPacket).FullName))
                             {
                                 var packet = NetworkClient.Connection.Unwrap<BattleUnitTurnPacket>(wrappedPacket);
 
-                                NetworkEvents.BattleUnitTurnPacketPacketEventKey.Broadcast(packet);
+                                NetworkEvents.BattleUnitTurnPacketEventKey.Broadcast(packet);
+                            }
+                            else if (wrappedPacket.Type.Equals(typeof(JoinSessionFailedPacket).FullName))
+                            {
+                                var packet = NetworkClient.Connection.Unwrap<JoinSessionFailedPacket>(wrappedPacket);
+
+                                NetworkEvents.JoinSessionFailedPacketEventKey.Broadcast(packet);
+                            }
+                            else if (wrappedPacket.Type.Equals(typeof(JoinSessionSuccessPacket).FullName))
+                            {
+                                var packet = NetworkClient.Connection.Unwrap<JoinSessionSuccessPacket>(wrappedPacket);
+
+                                NetworkEvents.JoinSessionSuccessPacketEventKey.Broadcast(packet);
+                            }
+                            else if (wrappedPacket.Type.Equals(typeof(SessionDisconnectedPacket).FullName))
+                            {
+                                var packet = NetworkClient.Connection.Unwrap<SessionDisconnectedPacket>(wrappedPacket);
+
+                                NetworkEvents.SessionDisconnectedPacketEventKey.Broadcast(packet);
                             }
                             else
                             {

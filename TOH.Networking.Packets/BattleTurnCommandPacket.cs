@@ -5,7 +5,7 @@ namespace TOH.Network.Packets
 {
     public class BattleTurnCommandPacket : Packet
     {
-        public string MatchId { get; set; }
+        public string BattleId { get; set; }
         public int UnitId { get; set; }
         public int SkillId { get; set; }
         public List<int> TargetUnitId { get; set; }

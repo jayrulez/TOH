@@ -1,5 +1,6 @@
 ﻿using Stride.Core;
 using Stride.Engine;
+using Stride.Engine.Events;
 using Stride.UI;
 using Stride.UI.Controls;
 using System;
@@ -8,14 +9,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using TOH.Common.Data;
 using TOH.Network.Client;
+using TOH.Network.Packets;
 using TOH.Systems;
 
 namespace TOH
 {
     public class StartupManagerScript : SyncScript
     {
-        // Declared public member fields and properties will show in the game studio
-
         public enum StartupState
         {
             None,
@@ -29,7 +29,9 @@ namespace TOH
             None,
             Checking,
             CheckFailed,
-            CheckSucceeded
+            Joining,
+            JoinFailed,
+            JoinSucceeded
         }
 
         private StartupState State = StartupState.None;
@@ -38,6 +40,10 @@ namespace TOH
         private TextBlock StartupStatusText;
 
         private GameManager GameManager;
+
+
+        private EventReceiver<JoinSessionSuccessPacket> JoinSessionSuccessEventListener = new EventReceiver<JoinSessionSuccessPacket>(NetworkEvents.JoinSessionSuccessPacketEventKey);
+        private EventReceiver<JoinSessionFailedPacket> JoinSessionFailedEventListener = new EventReceiver<JoinSessionFailedPacket>(NetworkEvents.JoinSessionFailedPacketEventKey);
 
         public override void Start()
         {
@@ -85,7 +91,7 @@ namespace TOH
 
                         await DataManager.Instance.Initialize(dataPath);
 
-                        Thread.Sleep(5000); // simulate long op
+                        Thread.Sleep(5000); // simulate long data load
                     }
                     catch (Exception ex)
                     {
@@ -149,19 +155,21 @@ namespace TOH
                 {
                     /*
                     var response = ServiceClient.PlayerService.GetPlayerSessionById(new IdentifierData<string> { Identifier = sessionId });
+                    */
 
-                    if (!response.IsSuccessful || response.Data.IsExpired)
+                    if (false/*!response.IsSuccessful || response.Data.IsExpired*/)
                     {
-                        SessionState = SessionState.CheckFailed;
+                        SessionState = CheckSessionState.CheckFailed;
                     }
                     else
                     {
-                        SessionState = SessionState.CheckSucceeded;
+                        GameManager.NetworkClient.Connection.Send(new JoinSessionPacket
+                        {
+                            Token = sessionId
+                        });
+
+                        SessionState = CheckSessionState.Joining;
                     }
-                    */
-
-
-                    SessionState = CheckSessionState.CheckFailed;// remove this when using service
                 }
             }
             else if (SessionState == CheckSessionState.Checking)
@@ -172,9 +180,39 @@ namespace TOH
             {
                 GameEvents.ChangeStateEventKey.Broadcast(GameState.Login);
             }
-            else if (SessionState == CheckSessionState.CheckSucceeded)
+            else if (SessionState == CheckSessionState.Joining)
+            {
+                if (JoinSessionFailedEventListener.TryReceive(out JoinSessionFailedPacket joinSessionFailedPacket))
+                {
+                    SessionState = CheckSessionState.JoinFailed;
+
+                    if (joinSessionFailedPacket.Code == JoinSessionFailCode.InvalidSession)
+                    {
+                        GameDatabase.Instance.RemoveSession();
+
+                        // Kick back to startup
+                        GameEvents.ChangeStateEventKey.Broadcast(GameState.Startup);
+                    }
+                    else
+                    {
+                        StartupStatusText.Text = "Failed to join session on server.";
+
+                        //TODO: Setup retry UI
+                    }
+                }
+
+                if (JoinSessionSuccessEventListener.TryReceive(out JoinSessionSuccessPacket joinSessionSuccessPacket))
+                {
+                    SessionState = CheckSessionState.JoinSucceeded;
+                }
+            }
+            else if (SessionState == CheckSessionState.JoinSucceeded)
             {
                 GameEvents.ChangeStateEventKey.Broadcast(GameState.Home);
+            }
+            else if (SessionState == CheckSessionState.JoinFailed)
+            {
+                //
             }
         }
     }

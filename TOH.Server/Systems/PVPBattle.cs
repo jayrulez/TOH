@@ -8,6 +8,7 @@ using TOH.Common.BattleSystem;
 using TOH.Common.Data;
 using TOH.Network.Abstractions;
 using TOH.Network.Packets;
+using TOH.Server.Services;
 
 namespace TOH.Server.Systems
 {
@@ -73,16 +74,17 @@ namespace TOH.Server.Systems
 
         public class ServerBattlePlayer
         {
-            public IConnection Connection { get; private set; }
+            public ActiveSession Session { get; set; }
             public List<ServerBattleUnit> Units { get; set; } = new List<ServerBattleUnit>();
 
             public Stopwatch SelectUnitsTimer = new Stopwatch();
 
             public Stopwatch TurnTimer = new Stopwatch();
 
-            public ServerBattlePlayer(IConnection connection)
+
+            public ServerBattlePlayer(ActiveSession session)
             {
-                Connection = connection;
+                Session = session;
             }
         }
 
@@ -129,20 +131,20 @@ namespace TOH.Server.Systems
         public List<ServerBattlePlayer> Players { get; private set; } = new List<ServerBattlePlayer>();
         public List<ServerBattleUnit> Units { get; private set; } = new List<ServerBattleUnit>();
 
-        public PVPBattle(IConnection connection1, IConnection connection2, ILoggerFactory loggerFactory)
+        public PVPBattle(ActiveSession session1, ActiveSession session2, ILogger logger)
         {
-            _logger = loggerFactory.CreateLogger<PVPBattle>();
+            _logger = logger;
             Id = Guid.NewGuid().ToString();
 
-            Players.Add(new ServerBattlePlayer(connection1));
-            Players.Add(new ServerBattlePlayer(connection2));
+            Players.Add(new ServerBattlePlayer(session1));
+            Players.Add(new ServerBattlePlayer(session2));
 
             State = BattleState.None;
         }
 
-        public void SetUnits(string connectionId, List<int> unitIds)
+        public void SetUnits(string sessionId, List<int> unitIds)
         {
-            var player = Players.FirstOrDefault(p => p.Connection.Id.Equals(connectionId));
+            var player = Players.FirstOrDefault(p => p.Session.SessionId.Equals(sessionId));
 
             if (player != null)
             {
@@ -165,7 +167,7 @@ namespace TOH.Server.Systems
                     }
                 }
 
-                _logger.LogInformation($"Player '{player.Connection.Id}' team set. ");
+                _logger.LogInformation($"Player '{player.Session.PlayerId}' team set. ");
             }
         }
 
@@ -173,7 +175,7 @@ namespace TOH.Server.Systems
         {
             foreach (var player in Players)
             {
-                player.Connection.Send(packet);
+                player.Session.Connection.Send(packet);
             }
         }
 
@@ -193,10 +195,10 @@ namespace TOH.Server.Systems
                     {
                         if (player.SelectUnitsTimer.ElapsedMilliseconds >= SetUnitsTimeout)
                         {
-                            _logger.LogInformation($"Set units timer for player '{player.Connection.Id}' has exceeded '{SetUnitsTimeout}' seconds.");
+                            _logger.LogInformation($"Set units timer for player '{player.Session.PlayerId}' has exceeded '{SetUnitsTimeout}' seconds.");
 
                             //TODO: Auto-set team and go to BattleReadyState
-                            SetUnits(player.Connection.Id, new List<int> { 4, 5, 6 });
+                            SetUnits(player.Session.Connection.Id, new List<int> { 4, 5, 6 });
                         }
                     }
                 }
@@ -227,7 +229,7 @@ namespace TOH.Server.Systems
             {
                 var battlePlayer = new BattlePlayer()
                 {
-                    Id = player.Connection.Id,// TODO: We will need the actual player id at some point instead of the connection id
+                    Id = player.Session.PlayerId,
                     Units = player.Units.Select(u =>
                     {
                         return new BattleUnit(u.PlayerUnit);

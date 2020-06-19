@@ -82,7 +82,7 @@ namespace TOH
 
                 GameManager.NetworkClient.Connection.Send(new SetBattleUnitsPacket()
                 {
-                    MatchId = MatchInfo.MatchId,
+                    BattleId = MatchInfo.MatchId,
                     Units = new System.Collections.Generic.List<int> { 1, 2, 3 }
                 });
 
@@ -105,7 +105,7 @@ namespace TOH
             {
                 MatchInfo = new MatchInfo
                 {
-                    MatchId = battleInfoPacket.MatchId
+                    MatchId = battleInfoPacket.BattleId
                 };
 
                 HomeState = HomeState.SelectUnits;

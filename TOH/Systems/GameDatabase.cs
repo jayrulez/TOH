@@ -1,9 +1,6 @@
 ﻿using LiteDB;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using TOH.Common.Services;
 
 namespace TOH.Systems
 {
@@ -28,6 +25,12 @@ namespace TOH.Systems
             Initialize();
         }
 
+        private void Initialize()
+        {
+            Sessions = _db.GetCollection<Session>();
+            Sessions.EnsureIndex(c => c.SessionId);
+        }
+
         public void SetSessionId(string sessionId)
         {
             Sessions.DeleteAll();
@@ -50,22 +53,9 @@ namespace TOH.Systems
             return session.First().SessionId;
         }
 
-        private void Initialize()
+        public void RemoveSession()
         {
-            Sessions = _db.GetCollection<Session>();
-            Sessions.EnsureIndex(c => c.SessionId);
-        }
-
-        public T Get<T>(string key) where T : IConvertible
-        {
-            return default;
-        }
-
-        public void Set<T>(string key, T value)
-        {
-            var stringValue = Convert.ToString(value);
-
-
+            Sessions.DeleteAll();
         }
     }
 }

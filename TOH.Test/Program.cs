@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TOH.Test
 {
 
     public class Test
     {
+        public int Id { get; set; }
         public List<string> List { get; set; } = new List<string>();
 
         public Test()
@@ -22,6 +25,10 @@ namespace TOH.Test
         static void Main(string[] args)
         {
             var test = new Test() { List = new List<string>() { "1", "2" } };
+
+            var x = new ConcurrentDictionary<int, Test>();
+
+            var y = x.FirstOrDefault(t => t.Value.Id == 1);
 
 
             Console.WriteLine("Hello World!");

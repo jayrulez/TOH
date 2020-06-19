@@ -15,7 +15,7 @@ namespace TOH
 
     public class ClientBattlePlayer
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public List<ClientBattleUnit> Units { get; set; }
     }
 

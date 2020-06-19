@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using TOH.Common.Data;
 using TOH.Network.Abstractions;
+using TOH.Network.Packets;
 using TOH.Network.Server;
+using TOH.Server.Services;
 using TOH.Server.Systems;
 
 namespace TOH.Server
@@ -15,12 +15,15 @@ namespace TOH.Server
     public class GameServer : AbstractTcpServer
     {
         private readonly PVPBattleLobbyService _matchLobbyService;
-        private readonly BattleSystem _matchService;
+        private readonly PVPBattleSystemService _matchService;
+        private readonly SessionService _sessionService;
 
         public GameServer(IHost host) : base(host)
         {
             _matchLobbyService = host.Services.GetRequiredService<PVPBattleLobbyService>();
-            _matchService = host.Services.GetRequiredService<BattleSystem>();
+            _matchService = host.Services.GetRequiredService<PVPBattleSystemService>();
+            _sessionService = host.Services.GetRequiredService<SessionService>();
+
             Logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger<GameServer>();
         }
 
@@ -28,10 +31,12 @@ namespace TOH.Server
         {
             Logger.LogInformation($"Loading data...");
             await DataManager.Instance.Initialize("Config");
+
             while (DataManager.Instance.State != DataManagerState.Initialized)
             {
 
             }
+
             Logger.LogInformation($"Loaded data successfully.");
 
             await base.StartAsync(cancellationToken);
@@ -43,51 +48,22 @@ namespace TOH.Server
             await _matchLobbyService.Tick();
         }
 
-
-        public bool StartSession(IConnection connection, string packetKey, byte[] packetBuffer)
+        protected async override Task OnPacketReceived(IConnection connection, Packet packet)
         {
-            return false;
-        }
-
-        /*
-        public async override Task OnConnected(IConnection connection, CancellationToken cancellationToken)
-        {
-            var packet = await connection.GetPacket();
-
-            var authenticationPackets = new List<string>()
+            if (typeof(JoinSessionPacket).Equals(packet.Type))
             {
-                typeof(LoginRequestPacket).Name,
-                typeof(ReconnectRequestPacket).Name
-            };
-
-            if (authenticationPackets.Contains(packet.Packet.PacketType))
-            {
-                if (StartSession(connection, packet.Packet.PacketType, packet.PacketBytes))
-                {
-                    await base.OnConnected(connection, cancellationToken);
-                }
-                else
-                {
-                    await connection.Send(new ErrorResponsePacket
-                    {
-                        ErrorCode = (int)ErrorCode.AuthenticationFailed,
-                        ErrorDescription = $"Authentication failed."
-                    });
-
-                    connection.Close();
-                }
+                await _sessionService.JoinSession(connection, _packetConverter.Unwrap<JoinSessionPacket>(packet));
             }
             else
             {
-                await connection.Send(new ErrorResponsePacket
-                {
-                    ErrorCode = (int)ErrorCode.LoginRequired,
-                    ErrorDescription = $"Unexpected packet type received. Please establish a session with the server."
-                });
-
-                connection.Close();
+                await base.OnPacketReceived(connection, packet);
             }
         }
-        */
+
+        protected async override Task OnDisconnected(IConnection connection)
+        {
+            await _sessionService.TryDisconnect(connection);
+            await base.OnDisconnected(connection);
+        }
     }
 }

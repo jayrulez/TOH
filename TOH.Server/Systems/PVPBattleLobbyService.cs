@@ -1,61 +1,73 @@
 ﻿using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TOH.Network.Abstractions;
 using TOH.Network.Packets;
+using TOH.Server.Services;
 
 namespace TOH.Server.Systems
 {
     public class PVPBattleLobbyService
     {
         private readonly ILogger _logger;
-        private readonly BattleSystem _matchService;
+        private readonly PVPBattleSystemService _battleSystemService;
+        private readonly SessionService _sessionService;
 
-        public List<IConnection> Connections { get; private set; } = new List<IConnection>();
+        public List<ActiveSession> Sessions { get; private set; } = new List<ActiveSession>();
 
-        public PVPBattleLobbyService(BattleSystem matchService, ILogger<PVPBattleLobbyService> logger)
+        public PVPBattleLobbyService(PVPBattleSystemService battleSystemService, SessionService sessionService, ILogger<PVPBattleLobbyService> logger)
         {
-            _matchService = matchService;
+            _battleSystemService = battleSystemService;
+            _sessionService = sessionService;
             _logger = logger;
         }
 
-        public Task JoinLobbyQueue(IConnection connection)
+        public Task JoinQueue(ActiveSession session)
         {
-            if (!Connections.Any(c => c.Id.Equals(connection.Id)))
+            if (!Sessions.Any(c => c.SessionId.Equals(session.SessionId)))
             {
-                Connections.Add(connection);
+                Sessions.Add(session);
             }
 
             return Task.CompletedTask;
         }
 
-        private async Task CreateBattle(IConnection connection1, IConnection connection2)
+        private async Task CreateBattle(ActiveSession session1, ActiveSession session2)
         {
-            var match = await _matchService.CreateBattle(connection1, connection2);
+            var battle = await _battleSystemService.CreateBattle(session1, session2);
 
             var matchInfoPacket = new BattleInfoPacket
             {
-                MatchId = match.Id
+                BattleId = battle.Id
             };
 
-            await connection1.Send(matchInfoPacket);
-            await connection2.Send(matchInfoPacket);
+            await session1.Connection.Send(matchInfoPacket);
+            await session2.Connection.Send(matchInfoPacket);
 
-            _logger.LogInformation($"Match created: {match.Id} with clients '{connection1.Id}' and '{connection2.Id}'.");
+            _logger.LogInformation($"Battle created: {battle.Id} with players '{session1.PlayerId}' and '{session2.PlayerId}'.");
         }
 
         public async Task Tick()
         {
-            if (Connections.Count > 1)
+            // Remove dead sessions from lobby
+            Sessions.ForEach(async session =>
             {
-                var players = Connections.Take(2).ToList();
+                var activeSession = await _sessionService.GetActiveSession(session.Connection);
 
-                Connections.RemoveAll(c => players.Any(p => p.Id.Equals(c.Id)));
+                if (activeSession == null)
+                {
+                    Sessions.Remove(session);
+                }
+            });
 
-                await CreateBattle(players[0], players[1]);
+            if (Sessions.Count > 0)
+            {
+                var matches = Sessions.Take(2).ToList();
+
+                Sessions.RemoveAll(session => matches.Any(m => m.SessionId.Equals(session.SessionId)));
+
+                await CreateBattle(matches[0], matches[1]);
             }
         }
     }

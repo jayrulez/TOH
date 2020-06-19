@@ -52,15 +52,18 @@ namespace TOH.Server
                 .PersistKeysToDbContext<GameDbContext>()
                 .SetDefaultKeyLifetime(TimeSpan.FromDays(1825));
 
-            services.AddTransient<RandomService, RandomService>();
+
+            services.AddSingleton<ConnectionManager, ConnectionManager>();
+            services.AddSingleton<PVPBattleLobbyService, PVPBattleLobbyService>();
+            services.AddSingleton<PVPBattleSystemService, PVPBattleSystemService>();
+            services.AddSingleton<RandomService, RandomService>();
+            services.AddSingleton<SessionService, SessionService>();
+
             services.AddTransient<PlayerManager, PlayerManager>();
             services.AddTransient<PlayerService, PlayerService>();
 
             services.AddTransient<TimerService, TimerService>();
             services.AddTransient<IPacketConverter, JsonPacketConverter>();
-            services.AddSingleton<ConnectionManager, ConnectionManager>();
-            services.AddSingleton<PVPBattleLobbyService, PVPBattleLobbyService>();
-            services.AddSingleton<BattleSystem, BattleSystem>();
 
             services.AddTransient<IPacketHandler<PingPacket>, PingPacketHandler>();
             services.AddTransient<IPacketHandler<FindBattlePacket>, FindBattlePacketHandler>();

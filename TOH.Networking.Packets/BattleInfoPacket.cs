@@ -4,6 +4,6 @@ namespace TOH.Network.Packets
 {
     public class BattleInfoPacket : Packet
     {
-        public string MatchId { get; set; }
+        public string BattleId { get; set; }
     }
 }

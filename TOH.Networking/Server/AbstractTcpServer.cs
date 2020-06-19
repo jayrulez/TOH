@@ -32,7 +32,7 @@ namespace TOH.Network.Server
         protected readonly ServerOptions _configuration;
         protected readonly TimerService _timerService;
         protected readonly ConnectionManager _connectionManager;
-        protected readonly IPacketConverter _packetSerializer;
+        protected readonly IPacketConverter _packetConverter;
 
         protected readonly CancellationTokenSource _tasksCancellationTokenSource;
         protected readonly CancellationToken _tasksCancellationToken;
@@ -68,7 +68,7 @@ namespace TOH.Network.Server
 
             _connectionManager = _serviceProvider.GetRequiredService<ConnectionManager>();
 
-            _packetSerializer = _serviceProvider.GetRequiredService<IPacketConverter>();
+            _packetConverter = _serviceProvider.GetRequiredService<IPacketConverter>();
 
             Logger = _serviceProvider.GetRequiredService<ILogger<AbstractTcpServer>>();
 
@@ -100,7 +100,7 @@ namespace TOH.Network.Server
             return Task.CompletedTask;
         }
 
-        public virtual Task OnDisconnected(IConnection connection)
+        protected virtual Task OnDisconnected(IConnection connection)
         {
             _connectionManager.RemoveConnection(connection);
 
@@ -161,7 +161,7 @@ namespace TOH.Network.Server
 
                 if (socket != null)
                 {
-                    var connection = new TcpConnection(socket, _packetSerializer);
+                    var connection = new TcpConnection(socket, _packetConverter);
 
                     var handlerTask = Task.Factory.StartNew(() => HandleConnection(connection, cancellationToken), cancellationToken);
 
@@ -194,7 +194,7 @@ namespace TOH.Network.Server
             await OnDisconnected(connection);
         }
 
-        protected async Task OnPacketReceived(IConnection connection, Packet packet)
+        protected virtual async Task OnPacketReceived(IConnection connection, Packet packet)
         {
             if (string.IsNullOrEmpty(packet.Type))
             {

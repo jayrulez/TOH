@@ -8,8 +8,8 @@ namespace TOH.Server.PacketHandlers
 {
     public class BattleTurnCommandPacketHandler : PacketHandler<BattleTurnCommandPacket>
     {
-        private readonly BattleSystem _matchService;
-        public BattleTurnCommandPacketHandler(BattleSystem matchService, IPacketConverter packetConverter) : base(packetConverter)
+        private readonly PVPBattleSystemService _matchService;
+        public BattleTurnCommandPacketHandler(PVPBattleSystemService matchService, IPacketConverter packetConverter) : base(packetConverter)
         {
             _matchService = matchService;
         }
