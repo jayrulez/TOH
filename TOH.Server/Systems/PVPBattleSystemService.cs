@@ -60,9 +60,22 @@ namespace TOH.Server.Systems
             //    now = DateTime.Now;
             //}
 
-            Parallel.ForEach(Battles, match =>
+            Parallel.ForEach(Battles, battle =>
             {
-                match.Value.Tick();
+                //TODO: Ensure match players have valid sessions, end battle if not
+                //foreach(var serverBattlePlayer in battle.Value.Players)
+                //{
+
+                //}
+
+                if (battle.Value.State == PVPBattle.BattleState.Ended)
+                {
+                    Battles.Remove(battle.Key, out var _);
+                }
+                else
+                {
+                    battle.Value.Tick();
+                }
             });
 
             return Task.CompletedTask;
