@@ -108,7 +108,7 @@ namespace TOH.Server.Systems
         private const long SetUnitsTimeout = 1000 * 5; // seconds
         private const long TurnTimeout = 1000 * 10; // seconds
 
-        private const long CountdownStateTimeout = 1000 * 30; // seconds
+        private const long CountdownStateTimeout = 1000 * 10; // seconds
 
         public Stopwatch CountdownStateTimer = new Stopwatch();
 
@@ -202,7 +202,7 @@ namespace TOH.Server.Systems
                             _logger.LogInformation($"Set units timer for player '{player.Session.PlayerId}' has exceeded '{SetUnitsTimeout}' seconds.");
 
                             //TODO: Auto-set team and go to BattleReadyState
-                            SetUnits(player.Session.Connection.Id, new List<int> { 4, 5, 6 });
+                            SetUnits(player.Session.SessionId, new List<int> { 4, 5, 6 });
                         }
                     }
                 }
@@ -238,14 +238,13 @@ namespace TOH.Server.Systems
 
             State = BattleState.SelectUnits;
 
-            Broadcast(new BattleUnitSelectionReadyPacket()); // inform the client that unit selection state is ready
+            // inform the client that unit selection state is ready
+            Broadcast(new BattleUnitSelectionReadyPacket()); 
 
             foreach (var player in Players)
             {
                 player.SelectUnitsTimer.Start();
             }
-
-
 
             _logger.LogInformation($"Waiting for players to select their units.");
         }

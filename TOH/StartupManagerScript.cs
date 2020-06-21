@@ -8,6 +8,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using TOH.Common.Data;
+using TOH.Common.Services;
 using TOH.Network.Client;
 using TOH.Network.Packets;
 using TOH.Systems;
@@ -154,11 +155,9 @@ namespace TOH
                 }
                 else
                 {
-                    /*
-                    var response = ServiceClient.PlayerService.GetPlayerSessionById(new IdentifierData<string> { Identifier = sessionId });
-                    */
+                    var response = GameManager.ServiceClient.PlayerService.GetPlayerSessionById(new IdentifierData<string> { Identifier = sessionId });
 
-                    if (false/*!response.IsSuccessful || response.Data.IsExpired*/)
+                    if (!response.IsSuccessful || response.Data.IsExpired)
                     {
                         SessionState = CheckSessionState.CheckFailed;
                     }

@@ -40,7 +40,7 @@ namespace TOH.Server
             {
                 options.UseLazyLoadingProxies();
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly(migrationsAssembly));
-            });
+            }, ServiceLifetime.Singleton);
 
             services.AddCodeFirstGrpc(config =>
             {
@@ -53,11 +53,12 @@ namespace TOH.Server
                 .SetDefaultKeyLifetime(TimeSpan.FromDays(1825));
 
 
+            services.AddSingleton<RandomService, RandomService>();
             services.AddSingleton<ConnectionManager, ConnectionManager>();
+            services.AddSingleton<SessionService, SessionService>();
+
             services.AddSingleton<PVPBattleLobbyService, PVPBattleLobbyService>();
             services.AddSingleton<PVPBattleSystemService, PVPBattleSystemService>();
-            services.AddSingleton<RandomService, RandomService>();
-            services.AddSingleton<SessionService, SessionService>();
 
             services.AddTransient<PlayerManager, PlayerManager>();
             services.AddTransient<PlayerService, PlayerService>();

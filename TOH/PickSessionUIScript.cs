@@ -40,7 +40,7 @@ namespace TOH
                         if (EvonButton != null)
                             EvonButton.IsEnabled = false;
 
-                        SessionSelected("ee468ce4-d579-448b-b9ec-eccc6067fcf3");
+                        SessionSelected("efbc3c1a-90f8-4896-9f69-d6ae3dc5b6db");
                     };
                 }
 
@@ -56,7 +56,7 @@ namespace TOH
                         if (RobertButton != null)
                             RobertButton.IsEnabled = false;
 
-                        SessionSelected("46a88c34-62af-45d6-b764-315a9c501679");
+                        SessionSelected("e2b10a43-726b-41fe-95e5-909dca5bf154");
                     };
                 }
 

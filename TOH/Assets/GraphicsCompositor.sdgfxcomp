@@ -120,12 +120,14 @@ SharedRenderers:
         Id: f3ab15d8-1bca-4c8e-aecc-7ff9aeccd877
         Clear:
             Id: 4bc4b2ca-027e-4e4a-94cb-2912709bef5f
-            Color: {R: 0.40491876, G: 0.411895424, B: 0.43775, A: 1.0}
+            Color: {R: 0.40491876, G: 0.41189542, B: 0.43775, A: 1.0}
         LightProbes: true
         OpaqueRenderStage: ref!! d5051995-6735-4c51-a7bf-1ce9ca4443b9
         TransparentRenderStage: ref!! 812fcf4b-c84a-4765-8a4e-e20192ca1107
         ShadowMapRenderStages:
             fc4d1e0de5c2b0bbc27bcf96e9a848fd: ref!! b45e228e-e46e-4c72-ba1f-5fa1414918ad
+            87ff1d9cdd52418daf76385176a0e316: ref!! e861df42-55fc-4715-8b9e-1f9304e780b2
+            5e059d4cc2db4ee8a1f28a40f4ac3ae8: ref!! b59b23d0-221b-430e-baeb-9395a7f4c906
         GBufferRenderStage: ref!! 19f984ef-3714-4875-9bb1-e1a69f32b4ed
         PostEffects: !PostProcessingEffects ref!! 4eb9a29e-3182-40ac-ab02-9d8cd1ce9933
         LightShafts: null
@@ -140,12 +142,14 @@ SharedRenderers:
         Id: 515e4e31-b380-4120-b0b5-bac5fc675133
         Clear:
             Id: 66a42307-1985-4316-871a-768449238c11
-            Color: {R: 0.40491876, G: 0.411895424, B: 0.43775, A: 1.0}
+            Color: {R: 0.40491876, G: 0.41189542, B: 0.43775, A: 1.0}
         LightProbes: true
         OpaqueRenderStage: ref!! d5051995-6735-4c51-a7bf-1ce9ca4443b9
         TransparentRenderStage: ref!! 812fcf4b-c84a-4765-8a4e-e20192ca1107
         ShadowMapRenderStages:
             2323a99a8a983e182f318e55604659b0: ref!! b45e228e-e46e-4c72-ba1f-5fa1414918ad
+            61b557b74893400898c007d5ece5e87f: ref!! e861df42-55fc-4715-8b9e-1f9304e780b2
+            5c382f66ee524c498d26d9aaf19fc9c3: ref!! b59b23d0-221b-430e-baeb-9395a7f4c906
         GBufferRenderStage: ref!! 19f984ef-3714-4875-9bb1-e1a69f32b4ed
         PostEffects: null
         LightShafts: null
