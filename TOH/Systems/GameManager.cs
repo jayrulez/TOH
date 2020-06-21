@@ -15,7 +15,6 @@ namespace TOH.Systems
     public enum GameState
     {
         None,
-        PickSession,// Temporary, remove when we have signup+login
         Startup,
         Login,
         Home,
@@ -67,7 +66,7 @@ namespace TOH.Systems
         public GameManager(IServiceRegistry registry) : base(registry)
         {
             CurrentGameState = GameState.None;
-            NextGameState = GameState.PickSession;
+            NextGameState = GameState.Startup;
         }
 
         public override void Initialize()
@@ -124,9 +123,6 @@ namespace TOH.Systems
 
             switch (state)
             {
-                case GameState.PickSession:
-                    StateScene = game.Content.Load<Scene>("Scenes/PickSessionScene");
-                    break;
                 case GameState.Startup:
                     StateScene = game.Content.Load<Scene>("Scenes/StartupScene");
                     break;

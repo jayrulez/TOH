@@ -24,7 +24,7 @@ namespace TOH.Server.Services
 
         private bool IsAuthorized(CallContext context)
         {
-            if(context.RequestHeaders == null)
+            if (context.RequestHeaders == null)
                 return false;
 
             var token = context.RequestHeaders.GetString("token");
@@ -49,7 +49,7 @@ namespace TOH.Server.Services
                 // TODO: relocate and clean this up
                 var units = DataManager.Instance.Units.ToList();
 
-                if(units.Count >= 5)
+                if (units.Count >= 5)
                 {
                     for (int i = 0; i < 5; i++)
                     {
@@ -196,6 +196,36 @@ namespace TOH.Server.Services
                 }
 
                 return response.Succeed(playerSession.ToDataModel());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+
+                return response.Fail(ServiceErrors.UnexpectedError);
+            }
+        }
+
+        public ServiceResponse<PlayerSessionData> Login(IdentifierData<string> username, CallContext context = default)
+        {
+            var response = new ServiceResponse<PlayerSessionData>();
+
+            try
+            {
+                var getPlayer = GetPlayerByUsername(username, context);
+
+                if (!getPlayer.IsSuccessful)
+                {
+                    var createPlayer = CreatePlayer(username, context);
+
+                    if (!createPlayer.IsSuccessful)
+                    {
+                        return response.Fail(createPlayer.Error);
+                    }
+
+                    return CreatePlayerSession(new IdentifierData<string> { Identifier = createPlayer.Data.Username });
+                }
+
+                return CreatePlayerSession(new IdentifierData<string> { Identifier = getPlayer.Data.Username });
             }
             catch (Exception ex)
             {

@@ -2,6 +2,7 @@
 using Stride.UI;
 using Stride.UI.Controls;
 using Stride.UI.Events;
+using System.Threading.Tasks;
 using TOH.Systems;
 
 namespace TOH
@@ -10,32 +11,102 @@ namespace TOH
     {
         // Declared public member fields and properties will show in the game studio
         private UIComponent LoginUI;
+        private EditText UsernameInput;
+        private Button LoginButton;
+        private TextBlock LoginStatusText;
+
+        private enum LoginState
+        {
+            None,
+            Processing,
+            Successful,
+            Failed
+        }
+
+        private LoginState PlayerLoginState = LoginState.None;
+        private GameManager GameManager;
 
         public override void Start()
         {
+
             var game = (TOHGame)Game;
+
+            GameManager = game.GameManager;
+
 
             // Initialization of the script.
             LoginUI = Entity.Get<UIComponent>();
 
             if (LoginUI != null)
             {
-                var loginButton = LoginUI.Page.RootElement.FindVisualChildOfType<Button>();
+                UsernameInput = LoginUI.Page.RootElement.FindVisualChildOfType<EditText>();
+                LoginButton = LoginUI.Page.RootElement.FindVisualChildOfType<Button>();
 
-                if (loginButton != null)
+                LoginStatusText = LoginUI.Page.RootElement.FindVisualChildOfType<TextBlock>("LoginStatusText");
+                LoginStatusText.Visibility = Visibility.Collapsed;
+
+                if (LoginButton != null)
                 {
-                    loginButton.Click += (object sender, RoutedEventArgs args) =>
+                    LoginButton.Click += (object sender, RoutedEventArgs args) =>
                     {
-                        //game.GameManager.StopNetworkTask();
-                        GameEvents.ChangeStateEventKey.Broadcast(GameState.Home);
+                        DoLogin();
                     };
                 }
             }
         }
 
+        private void DoLogin()
+        {
+            if (!string.IsNullOrEmpty(UsernameInput?.Text))
+            {
+                LoginButton.IsEnabled = false;
+
+                PlayerLoginState = LoginState.Processing;
+
+                Task.Factory.StartNew(() =>
+                {
+                    var loginResponse = GameManager.ServiceClient.PlayerService.Login(new Common.Services.IdentifierData<string> { Identifier = UsernameInput.Text.Trim() });
+
+                    if (loginResponse.IsSuccessful)
+                    {
+                        GameDatabase.Instance.SetSessionId(loginResponse.Data.Id);
+                        PlayerLoginState = LoginState.Successful;
+                    }
+                    else
+                    {
+                        PlayerLoginState = LoginState.Failed;
+                    }
+                }).ContinueWith((Task task) =>
+                {
+                    LoginButton.IsEnabled = true;
+                });
+            }
+        }
+
         public override void Update()
         {
-            // Do stuff every new frame
+            if (PlayerLoginState == LoginState.None)
+            {
+
+            }
+            else if (PlayerLoginState == LoginState.Processing)
+            {
+                LoginStatusText.Visibility = Visibility.Visible;
+                LoginStatusText.Text = "Processing login.";
+            }
+            else if (PlayerLoginState == LoginState.Successful)
+            {
+                LoginStatusText.Visibility = Visibility.Visible;
+                LoginStatusText.Text = "Login Successful";
+                PlayerLoginState = LoginState.None;
+                GameEvents.ChangeStateEventKey.Broadcast(GameState.Startup);
+            }
+            else if (PlayerLoginState == LoginState.Failed)
+            {
+
+                LoginStatusText.Visibility = Visibility.Visible;
+                LoginStatusText.Text = "Login failed.";
+            }
         }
     }
 }

@@ -39,6 +39,8 @@ namespace TOH.Systems
             {
                 SessionId = sessionId
             });
+
+            _db.Checkpoint();
         }
 
         public string GetSessionId()

@@ -91,8 +91,6 @@ namespace TOH
                         var dataPath = Path.Combine(PlatformFolders.ApplicationDataDirectory, "Config");
 
                         await DataManager.Instance.Initialize(dataPath);
-
-                        Thread.Sleep(5000); // simulate long data load
                     }
                     catch (Exception ex)
                     {
@@ -146,8 +144,8 @@ namespace TOH
             {
                 SessionState = CheckSessionState.Checking;
 
-                //var sessionId = GameDatabase.Instance.GetSessionId();
-                var sessionId = StaticConfig.SessionId;
+                var sessionId = GameDatabase.Instance.GetSessionId();
+                //var sessionId = StaticConfig.SessionId;
 
                 if (string.IsNullOrEmpty(sessionId))
                 {

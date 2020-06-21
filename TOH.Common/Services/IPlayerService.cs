@@ -71,5 +71,6 @@ namespace TOH.Common.Services
         ServiceResponse<List<PlayerUnitData>> GetPlayerUnitsByPlayerId(IdentifierData<int> playerId, CallContext context = default);
         ServiceResponse<PlayerSessionData> CreatePlayerSession(IdentifierData<string> username, CallContext context = default);
         ServiceResponse<PlayerSessionData> GetPlayerSessionById(IdentifierData<string> id, CallContext context = default);
+        ServiceResponse<PlayerSessionData> Login(IdentifierData<string> username, CallContext context = default);
     }
 }
