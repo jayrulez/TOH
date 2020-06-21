@@ -134,14 +134,6 @@ namespace TOH.Common.Data
                                     skillActions.Add(healSkillAction);
                                 }
                                 break;
-
-                            case SkillActionType.Leader:
-                                var leaderSkillAction = skillActionObject.ToObject<LeaderSkillAction>();
-                                if (leaderSkillAction != null)
-                                {
-                                    skillActions.Add(leaderSkillAction);
-                                }
-                                break;
                         }
                     }
                 }

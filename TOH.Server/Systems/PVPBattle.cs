@@ -239,7 +239,7 @@ namespace TOH.Server.Systems
             State = BattleState.SelectUnits;
 
             // inform the client that unit selection state is ready
-            Broadcast(new BattleUnitSelectionReadyPacket()); 
+            Broadcast(new BattleUnitSelectionReadyPacket());
 
             foreach (var player in Players)
             {
@@ -342,11 +342,85 @@ namespace TOH.Server.Systems
             return all.FirstOrDefault();
         }
 
+        private void PerformHealSkillAction(ServerBattleUnit currentBattleUnit, HealSkillAction skillAction, ref List<ServerBattleUnit> targets)
+        {
+
+        }
+
+        private void PerformDamageSkillAction(ServerBattleUnit currentBattleUnit, DamageSkillAction skillAction, ref List<ServerBattleUnit> targets)
+        {
+            foreach (var target in targets)
+            {
+                if (target.BattleUnit.State == BattleUnitState.Alive)
+                {
+                    var attack = currentBattleUnit.CurrentAttack;
+                    var multiplier = (float)skillAction.DamageAmount / 100.0f;
+                    var damage = attack * multiplier;
+                    damage -= target.CurrentDefense / 2;
+
+                    target.TakeDamage((int)damage);
+                }
+            }
+        }
+
+        private void PerformSkillAction(ServerBattleUnit currentBattleUnit, SkillAction skillAction, ref List<ServerBattleUnit> targets)
+        {
+            var actionTargets = new List<ServerBattleUnit>();
+
+            switch (skillAction.Target)
+            {
+                case SkillActionTarget.Caster:
+                    actionTargets = new List<ServerBattleUnit>() { currentBattleUnit };
+                    break;
+                case SkillActionTarget.AllEnemies:
+                    actionTargets = GetAllEnemies(currentBattleUnit);
+                    break;
+                case SkillActionTarget.AllAllies:
+                    actionTargets = GetAllAllies(currentBattleUnit);
+                    break;
+                case SkillActionTarget.RandomEnemy:
+                    actionTargets = new List<ServerBattleUnit>() { GetRandomEnemy(currentBattleUnit) };
+                    break;
+                case SkillActionTarget.RandomAlly:
+                    actionTargets = new List<ServerBattleUnit>() { GetRandomAlly(currentBattleUnit) };
+                    break;
+                case SkillActionTarget.SkillTarget:
+                default:
+                    actionTargets = targets;
+                    break;
+            }
+
+            switch (skillAction.Type)
+            {
+                case SkillActionType.Damage:
+                    var damageSkillAction = skillAction as DamageSkillAction;
+                    if (damageSkillAction != null)
+                    {
+                        PerformDamageSkillAction(currentBattleUnit, damageSkillAction, ref actionTargets);
+                    }
+                    break;
+                case SkillActionType.Heal:
+                    var healSkillAction = skillAction as HealSkillAction;
+                    if (healSkillAction != null)
+                    {
+                        PerformHealSkillAction(currentBattleUnit, healSkillAction, ref actionTargets);
+                    }
+                    break;
+            }
+        }
+
         private void PerformTurnCommand(ServerBattleUnit currentBattleUnit, Skill skill, List<ServerBattleUnit> targets)
         {
             //TODO: execute skill logic here
+            foreach (var action in skill.Actions)
+            {
+                if (targets.Any(t => t.BattleUnit.State == BattleUnitState.Alive))
+                    PerformSkillAction(currentBattleUnit, action, ref targets);
+            }
+
 
             //TODO: Push packet so client can update UI
+
 
             _logger.LogInformation($"Unit '{currentBattleUnit.PlayerUnit.Unit.Name}' performed skill '{skill.Name}' on targets '{string.Join(", ", targets.Select(t => t.PlayerUnit.Unit.Name).ToList())}'.");
 

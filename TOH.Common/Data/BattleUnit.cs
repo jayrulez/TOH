@@ -94,7 +94,10 @@ namespace TOH.Common.BattleSystem
         public BattleUnitState State { get; set; }
         public StatModifier StatModifier { get; set; }
 
+        public int CurrentHP => GetStatValue(UnitStatType.HP);
         public int CurrentSpeed => GetStatValue(UnitStatType.Speed);
+        public int CurrentAttack => GetStatValue(UnitStatType.Attack);
+        public int CurrentDefense => GetStatValue(UnitStatType.Defense);
 
         public Dictionary<UnitStatType, int> Stats { get; set; } = new Dictionary<UnitStatType, int>();
 
@@ -119,14 +122,16 @@ namespace TOH.Common.BattleSystem
         {
             var statValue = Stats[statType];
 
+            var modificationValue = 0;
+
             var modifications = StatModifier.GetModifications(statType);
 
             foreach (var modification in modifications)
             {
-                statValue += modification.Value;
+                modificationValue += modification.Value;
             }
 
-            return statValue;
+            return statValue + modificationValue;
         }
 
         public Skill GetRandomSkill()
@@ -137,6 +142,46 @@ namespace TOH.Common.BattleSystem
         public Skill GetSkill(int skillId)
         {
             return PlayerUnit.GetSkill(skillId);
+        }
+
+        private void ReduceStat(UnitStatType statType, int amount)
+        {
+            var reduction = amount;
+            var statModifications = StatModifier.GetModifications(statType);
+
+            foreach (var statModification in statModifications)
+            {
+                if (statModification.Value > reduction)
+                {
+                    statModification.Value -= reduction;
+                    reduction = 0;
+                }
+                else
+                {
+                    reduction -= statModification.Value;
+                    StatModifier.RemoveModification(statType, statModification.Key);
+                }
+            }
+
+            if (reduction > 0)
+            {
+                Stats[statType] -= reduction;
+                if (Stats[statType] < 0)
+                {
+                    Stats[statType] = 0;
+                }
+            }
+        }
+
+        public void TakeDamage(int damage)
+        {
+            ReduceStat(UnitStatType.HP, damage);
+            var hp = GetStatValue(UnitStatType.HP);
+
+            if(hp <= 0)
+            {
+                State = BattleUnitState.Dead;
+            }
         }
     }
 }

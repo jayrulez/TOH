@@ -77,18 +77,6 @@ namespace TOH.Common.Data
         public SkillActionScaleType ScaleType { get; set; }
     }
 
-    public class LeaderSkillAction : SkillAction
-    {
-        public LeaderSkillAction()
-        {
-            Type = SkillActionType.Leader;
-        }
-
-        public LeaderSkillArea Area { get; set; }
-        public UnitStatType StatType { get; set; }
-        public int StatIncreaseAmount { get; set; }
-    }
-
     public class Skill
     {
         public int Id { get; set; }
