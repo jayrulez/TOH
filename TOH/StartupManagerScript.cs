@@ -82,7 +82,7 @@ namespace TOH
 
         private void InitializeData()
         {
-            if (DataManager.Instance.State == DataManagerState.None)
+            if (ConfigManager.Instance.State == ConfigManagerState.None)
             {
                 Task.Run(async () =>
                 {
@@ -90,7 +90,7 @@ namespace TOH
                     {
                         var dataPath = Path.Combine(PlatformFolders.ApplicationDataDirectory, "Config");
 
-                        await DataManager.Instance.Initialize(dataPath);
+                        await ConfigManager.Instance.Initialize(dataPath);
                     }
                     catch (Exception ex)
                     {
@@ -100,7 +100,7 @@ namespace TOH
                     }
                 });
             }
-            else if (DataManager.Instance.State == DataManagerState.Initialized)
+            else if (ConfigManager.Instance.State == ConfigManagerState.Initialized)
             {
                 State = StartupState.ConnectToServer;
             }
@@ -144,16 +144,16 @@ namespace TOH
             {
                 SessionState = CheckSessionState.Checking;
 
-                var sessionId = GameDatabase.Instance.GetSessionId();
+                var session = GameDatabase.Instance.GetSession();
                 //var sessionId = StaticConfig.SessionId;
 
-                if (string.IsNullOrEmpty(sessionId))
+                if (session == null)
                 {
                     SessionState = CheckSessionState.CheckFailed;
                 }
                 else
                 {
-                    var response = GameManager.ServiceClient.PlayerService.GetPlayerSessionById(new IdentifierData<string> { Identifier = sessionId });
+                    var response = GameManager.ServiceClient.PlayerService.GetPlayerSessionById(new IdentifierData<string> { Identifier = session.SessionId });
 
                     if (!response.IsSuccessful || response.Data.IsExpired)
                     {
@@ -163,7 +163,7 @@ namespace TOH
                     {
                         GameManager.NetworkClient.Connection.Send(new JoinSessionPacket
                         {
-                            Token = sessionId
+                            Token = session.SessionId
                         });
 
 

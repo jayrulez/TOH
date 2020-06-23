@@ -5,9 +5,9 @@ using TOH.Common.Data;
 
 namespace TOH
 {
-    public class ClientBattleUnit : BattleUnit
+    public class ClientBattleUnit : BattleUnitModel
     {
-        public ClientBattleUnit(PlayerUnit playerUnit) : base(playerUnit)
+        public ClientBattleUnit(PlayerUnitModel playerUnit) : base(playerUnit)
         {
         }
     }
@@ -33,7 +33,7 @@ namespace TOH
         public List<ClientBattlePlayer> Players { get; private set; }
         public List<ClientBattleUnit> Units { get; private set; }
 
-        public ClientPVPBattle(string battleId, List<BattlePlayer> players)
+        public ClientPVPBattle(string battleId, List<BattlePlayerModel> players)
         {
             BattleId = battleId;
             Players = new List<ClientBattlePlayer>();

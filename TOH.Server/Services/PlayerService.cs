@@ -47,7 +47,7 @@ namespace TOH.Server.Services
 
                 // Assign player 5 random units
                 // TODO: relocate and clean this up
-                var units = DataManager.Instance.Units.ToList();
+                var units = ConfigManager.Instance.Units.ToList();
 
                 if (units.Count >= 5)
                 {

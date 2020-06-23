@@ -13,15 +13,15 @@ namespace TOH.Common.BattleSystem
         End
     }
 
-    public class Battle
+    public class BattleModel
     {
         public string Id { get; private set; }
         public BattleState State { get; private set; }
-        public List<BattlePlayer> Players { get; private set; }
+        public List<BattlePlayerModel> Players { get; private set; }
 
         private DateTime StartTime;
 
-        public Battle()
+        public BattleModel()
         {
             Id = Guid.NewGuid().ToString();
             State = BattleState.Start;

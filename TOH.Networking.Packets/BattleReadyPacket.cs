@@ -9,6 +9,6 @@ namespace TOH.Network.Packets
     {
         public string BattleId { get; set; }
 
-        public List<BattlePlayer> Players { get; set; }
+        public List<BattlePlayerModel> Players { get; set; }
     }
 }

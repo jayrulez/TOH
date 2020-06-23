@@ -94,8 +94,14 @@ namespace TOH.Server.Systems
 
                     var matchInfoPacket = new BattleInfoPacket
                     {
-                        BattleId = battle.Id
+                        BattleId = battle.Id,
+                        Players = new List<PlayerModel>()
                     };
+
+                    foreach(var player in battle.Players)
+                    {
+                        matchInfoPacket.Players.Add(player.Player);
+                    }
 
                     await session1.Connection.Send(matchInfoPacket);
                     await session2.Connection.Send(matchInfoPacket);

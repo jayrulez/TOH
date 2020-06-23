@@ -40,34 +40,34 @@ namespace TOH.Common.Data
         public int Cooldown { get; set; }
         public List<object> Actions { get; set; }
     }
-    public enum DataManagerState
+    public enum ConfigManagerState
     {
         None,
         Initializing,
         Initialized
     }
 
-    public sealed class DataManager
+    public sealed class ConfigManager
     {
-        private static readonly Lazy<DataManager> lazy = new Lazy<DataManager>(() => new DataManager(), true);
+        private static readonly Lazy<ConfigManager> lazy = new Lazy<ConfigManager>(() => new ConfigManager(), true);
 
-        public static DataManager Instance { get { return lazy.Value; } }
+        public static ConfigManager Instance { get { return lazy.Value; } }
 
         public string ConfigDataPath { get; private set; } = "Assets/Config";
 
-        public bool Initialized { get { return State == DataManagerState.Initialized; } }
+        public bool Initialized { get { return State == ConfigManagerState.Initialized; } }
 
         public ServerConfig ServerConfig { get; private set; }
 
-        public ReadOnlyCollection<Skill> Skills { get; private set; } = new ReadOnlyCollection<Skill>(new List<Skill>());
-        public ReadOnlyCollection<Unit> Units { get; private set; } = new ReadOnlyCollection<Unit>(new List<Unit>());
+        public ReadOnlyCollection<SkillModel> Skills { get; private set; } = new ReadOnlyCollection<SkillModel>(new List<SkillModel>());
+        public ReadOnlyCollection<UnitModel> Units { get; private set; } = new ReadOnlyCollection<UnitModel>(new List<UnitModel>());
         public Dictionary<int, Dictionary<UnitStatType, double>> LevelConfig { get; private set; } = new Dictionary<int, Dictionary<UnitStatType, double>>();
 
-        public DataManagerState State { get; private set; }
+        public ConfigManagerState State { get; private set; }
 
-        private DataManager()
+        private ConfigManager()
         {
-            State = DataManagerState.None;
+            State = ConfigManagerState.None;
         }
 
         public async Task Initialize(string datatPath = null)
@@ -75,13 +75,13 @@ namespace TOH.Common.Data
             if (!string.IsNullOrEmpty(datatPath))
                 ConfigDataPath = datatPath;
 
-            State = DataManagerState.Initializing;
+            State = ConfigManagerState.Initializing;
 
             await LoadServerConfig();
             await LoadUnitsData();
             await LoadUnitLevelData();
 
-            State = DataManagerState.Initialized;
+            State = ConfigManagerState.Initialized;
         }
 
         private static T LoadConfigConfig<T>(string filename)
@@ -101,7 +101,7 @@ namespace TOH.Common.Data
 
         private Task LoadSkillsData()
         {
-            var skills = new List<Skill>();
+            var skills = new List<SkillModel>();
 
             var skillConfigs = LoadConfigConfig<List<SkillConfig>>("Skills.json");
 
@@ -138,12 +138,12 @@ namespace TOH.Common.Data
                     }
                 }
 
-                var skill = Skill.Create(skillConfig, skillActions);
+                var skill = SkillModel.Create(skillConfig, skillActions);
 
                 skills.Add(skill);
             }
 
-            Skills = new ReadOnlyCollection<Skill>(skills);
+            Skills = new ReadOnlyCollection<SkillModel>(skills);
 
             return Task.CompletedTask;
         }
@@ -153,13 +153,13 @@ namespace TOH.Common.Data
             // Units config depend on skill data so ensure it is loaded
             LoadSkillsData();
 
-            var units = new List<Unit>();
+            var units = new List<UnitModel>();
 
             var unitConfigs = LoadConfigConfig<List<UnitConfig>>("Units.json");
 
             foreach (var unitConfig in unitConfigs)
             {
-                var unitSkills = new Dictionary<UnitSkillSlot, Skill>();
+                var unitSkills = new Dictionary<UnitSkillSlot, SkillModel>();
 
                 foreach (var skillData in unitConfig.Skills)
                 {
@@ -171,7 +171,7 @@ namespace TOH.Common.Data
                     }
                 }
 
-                var unit = new Unit
+                var unit = new UnitModel
                 {
                     UnitId = unitConfig.Id,
                     Type = unitConfig.Type,
@@ -185,7 +185,7 @@ namespace TOH.Common.Data
                 units.Add(unit);
             }
 
-            Units = new ReadOnlyCollection<Unit>(units);
+            Units = new ReadOnlyCollection<UnitModel>(units);
 
             return Task.CompletedTask;
         }
@@ -197,7 +197,7 @@ namespace TOH.Common.Data
             return Task.CompletedTask;
         }
 
-        public Unit GetUnit(int id)
+        public UnitModel GetUnit(int id)
         {
             return Units.FirstOrDefault(u => u.UnitId == id);
         }

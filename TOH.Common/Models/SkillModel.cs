@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using static TOH.Common.Data.DataManager;
+using static TOH.Common.Data.ConfigManager;
 
 namespace TOH.Common.Data
 {
@@ -77,7 +77,7 @@ namespace TOH.Common.Data
         public SkillActionScaleType ScaleType { get; set; }
     }
 
-    public class Skill
+    public class SkillModel
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -86,22 +86,22 @@ namespace TOH.Common.Data
         public int Cooldown { get; set; }
         public List<SkillAction> Actions { get; set; } = new List<SkillAction>();
 
-        public static Skill Load(int id)
+        public static SkillModel Load(int id)
         {
             return Instance.Skills.FirstOrDefault(s => s.Id == id);
         }
 
-        public static Skill Create(SkillConfig skillConfig, List<SkillAction> skillActions)
+        public static SkillModel Create(SkillConfig skillConfig, List<SkillAction> skillActions)
         {
-            return new Skill(skillConfig, skillActions);
+            return new SkillModel(skillConfig, skillActions);
         }
 
-        public Skill()
+        public SkillModel()
         {
 
         }
 
-        private Skill(SkillConfig skillConfig, List<SkillAction> skillActions)
+        private SkillModel(SkillConfig skillConfig, List<SkillAction> skillActions)
         {
             Id = skillConfig.Id;
             Name = skillConfig.Name;

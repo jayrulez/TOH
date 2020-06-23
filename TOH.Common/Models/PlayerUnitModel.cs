@@ -4,21 +4,21 @@ using System.Linq;
 
 namespace TOH.Common.Data
 {
-    public class PlayerUnit
+    public class PlayerUnitModel
     {
         public int Id { get; set; }
-        public Unit Unit { get; set; }
+        public UnitModel Unit { get; set; }
 
         public int Level { get; set; }
 
         public Dictionary<UnitStatType, int> Stats { get; set; } = new Dictionary<UnitStatType, int>();
 
-        public PlayerUnit()
+        public PlayerUnitModel()
         {
 
         }
 
-        public PlayerUnit(int id, int level, Unit unit)
+        public PlayerUnitModel(int id, int level, UnitModel unit)
         {
             Id = id;
             Unit = unit;
@@ -35,7 +35,7 @@ namespace TOH.Common.Data
             return Stats[statType];
         }
 
-        public Skill GetRandomSkill()
+        public SkillModel GetRandomSkill()
         {
             var skillsCount = Unit.Skills.Count();
 
@@ -46,7 +46,7 @@ namespace TOH.Common.Data
             return skills.FirstOrDefault();
         }
 
-        public Skill GetSkill(int skillId)
+        public SkillModel GetSkill(int skillId)
         {
             return Unit.Skills.Values.ToList().FirstOrDefault(s => s.Id == skillId);
         }

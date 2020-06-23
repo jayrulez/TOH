@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TOH.Common.Data;
 using TOH.Common.Services;
 
 namespace TOH.Server.Data
@@ -27,6 +28,22 @@ namespace TOH.Server.Data
                 Username = source.Username,
                 Level = source.Level
             };
+
+            return destination;
+        }
+
+        public static PlayerModel ToModel(this Player source)
+        {
+            var destination = new PlayerModel
+            {
+                Id = source.Id,
+                Units = new List<PlayerUnitModel>()
+            };
+
+            foreach(var playerUnit in source.Units)
+            {
+                destination.Units.Add(playerUnit.ToModel());
+            }
 
             return destination;
         }

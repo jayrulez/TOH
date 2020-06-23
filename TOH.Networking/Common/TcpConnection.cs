@@ -47,10 +47,10 @@ namespace TOH.Network.Common
 
             var packetSizeBytes = BitConverter.GetBytes(packetSize);
 
-            if (packetBytes.Length > BufferSize)
-            {
-                throw new Exception($"Serialized packet is larger than buffer size of '{BufferSize}' bytes.");
-            }
+            //if (packetBytes.Length > BufferSize)
+            //{
+            //    throw new Exception($"Serialized packet is larger than buffer size of '{BufferSize}' bytes.");
+            //}
 
             var packetBuffer = new byte[packetSize + packetLengthSize];
 
@@ -68,33 +68,43 @@ namespace TOH.Network.Common
         {
             //while (_stream.DataAvailable)
             //{
-                byte[] streamBuffer = new byte[BufferSize];
 
-                var packetSizeBytes = new byte[sizeof(int)];
+            var packetSizeBytes = new byte[sizeof(int)];
 
-                var sizeBytesRead = await _stream.ReadAsync(packetSizeBytes, 0, sizeof(int));
+            var sizeBytesRead = await _stream.ReadAsync(packetSizeBytes, 0, sizeof(int));
 
-                if (sizeBytesRead == sizeof(int))
+            if (sizeBytesRead == sizeof(int))
+            {
+                var packetSize = BitConverter.ToInt32(packetSizeBytes, 0);
+
+                //if (packetSize > BufferSize)
+                //{
+                //    throw new Exception($"Packet size is larger than buffer size.");
+                //}
+
+                //byte[] streamBuffer = new byte[BufferSize];
+                byte[] streamBuffer = new byte[packetSize];
+
+                var streamSize = await _stream.ReadAsync(streamBuffer, 0, packetSize);
+
+                if (streamSize > 0)
                 {
-                    var packetSize = BitConverter.ToInt32(packetSizeBytes, 0);
+                    //Array.Resize(ref streamBuffer, streamSize);
 
-                    if (packetSize > BufferSize)
+                    await foreach (var packet in _packetConverter.StreamFromBytes<Packet>(streamBuffer))
                     {
-                        throw new Exception($"Packet size is larger than buffer size.");
-                    }
-
-                    var streamSize = await _stream.ReadAsync(streamBuffer, 0, packetSize);
-
-                    if (streamSize > 0)
-                    {
-                        Array.Resize(ref streamBuffer, streamSize);
-
-                        await foreach (var packet in _packetConverter.StreamFromBytes<Packet>(streamBuffer))
-                        {
-                            yield return packet;
-                        }
+                        yield return packet;
                     }
                 }
+            }
+            else
+            {
+
+            }
+
+            if (sizeBytesRead == sizeof(int))
+            {
+            }
             //}
 
             //await Task.Yield();

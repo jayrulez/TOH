@@ -69,7 +69,12 @@ namespace TOH
 
                     if (loginResponse.IsSuccessful)
                     {
-                        GameDatabase.Instance.SetSessionId(loginResponse.Data.Id);
+                        GameDatabase.Instance.SetSession(new GameDatabase.Session
+                        {
+                            SessionId = loginResponse.Data.Id,
+                            PlayerId = loginResponse.Data.PlayerId
+                        });
+
                         PlayerLoginState = LoginState.Successful;
                     }
                     else

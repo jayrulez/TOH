@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using static TOH.Common.Data.DataManager;
+using static TOH.Common.Data.ConfigManager;
 
 namespace TOH.Common.Data
 {
@@ -46,7 +46,7 @@ namespace TOH.Common.Data
         Leader
     }
 
-    public class Unit
+    public class UnitModel
     {
         public int UnitId { get; set; }
         public UnitType Type { get; set; }
@@ -54,9 +54,9 @@ namespace TOH.Common.Data
         public UnitElement Element { get; set; }
         public string Name { get; set; }
         public Dictionary<UnitStatType, int> Stats { get; set; } = new Dictionary<UnitStatType, int>();
-        public Dictionary<UnitSkillSlot, Skill> Skills { get; set; } = new Dictionary<UnitSkillSlot, Skill>();
+        public Dictionary<UnitSkillSlot, SkillModel> Skills { get; set; } = new Dictionary<UnitSkillSlot, SkillModel>();
 
-        public Unit()
+        public UnitModel()
         {
             foreach (var stat in Enum.GetValues(typeof(UnitStatType)).Cast<UnitStatType>())
             {

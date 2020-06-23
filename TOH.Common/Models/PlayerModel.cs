@@ -2,9 +2,9 @@
 
 namespace TOH.Common.Data
 {
-    public class Player
+    public class PlayerModel
     {
         public int Id { get; set; }
-        public List<PlayerUnit> Units { get; set; }
+        public List<PlayerUnitModel> Units { get; set; }
     }
 }

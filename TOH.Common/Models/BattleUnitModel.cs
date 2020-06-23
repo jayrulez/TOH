@@ -88,9 +88,9 @@ namespace TOH.Common.Data
         }
     }
 
-    public class BattleUnit
+    public class BattleUnitModel
     {
-        public PlayerUnit PlayerUnit { get; set; }
+        public PlayerUnitModel PlayerUnit { get; set; }
         public BattleUnitState State { get; set; }
         public StatModifier StatModifier { get; set; }
 
@@ -98,15 +98,16 @@ namespace TOH.Common.Data
         public int CurrentSpeed => GetStatValue(UnitStatType.Speed);
         public int CurrentAttack => GetStatValue(UnitStatType.Attack);
         public int CurrentDefense => GetStatValue(UnitStatType.Defense);
+        public int Turnbar { get; protected set; }
 
         public Dictionary<UnitStatType, int> Stats { get; set; } = new Dictionary<UnitStatType, int>();
 
-        public BattleUnit()
+        public BattleUnitModel()
         {
 
         }
 
-        public BattleUnit(PlayerUnit playerUnit)
+        public BattleUnitModel(PlayerUnitModel playerUnit)
         {
             PlayerUnit = playerUnit;
             State = BattleUnitState.Alive;
@@ -134,17 +135,17 @@ namespace TOH.Common.Data
             return statValue + modificationValue;
         }
 
-        public Skill GetRandomSkill()
+        public SkillModel GetRandomSkill()
         {
             return PlayerUnit.GetRandomSkill();
         }
 
-        public Skill GetSkill(int skillId)
+        public SkillModel GetSkill(int skillId)
         {
             return PlayerUnit.GetSkill(skillId);
         }
 
-        private void ReduceStat(UnitStatType statType, int amount)
+        private void DecreaseStat(UnitStatType statType, int amount)
         {
             var reduction = amount;
             var statModifications = StatModifier.GetModifications(statType);
@@ -175,13 +176,25 @@ namespace TOH.Common.Data
 
         public void TakeDamage(int damage)
         {
-            ReduceStat(UnitStatType.HP, damage);
+            DecreaseStat(UnitStatType.HP, damage);
             var hp = GetStatValue(UnitStatType.HP);
 
             if(hp <= 0)
             {
+                Kill();
                 State = BattleUnitState.Dead;
             }
+        }
+
+        protected void Kill()
+        {
+            StatModifier.ClearModifications();
+            Stats[UnitStatType.HP] = 0;
+        }
+
+        protected virtual void ResetTurnbar()
+        {
+            Turnbar = 0;
         }
     }
 }

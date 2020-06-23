@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TOH.Common.Data;
 using TOH.Common.Services;
 
 namespace TOH.Server.Data
@@ -36,6 +37,14 @@ namespace TOH.Server.Data
             {
                 destination.Add(item.ToDataModel());
             }
+
+            return destination;
+        }
+
+
+        public static PlayerUnitModel ToModel(this PlayerUnit source)
+        {
+            var destination = new PlayerUnitModel(source.Id, source.Level, ConfigManager.Instance.GetUnit(source.UnitId));
 
             return destination;
         }

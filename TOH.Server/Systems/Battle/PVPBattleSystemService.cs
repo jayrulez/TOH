@@ -4,8 +4,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TOH.Network.Packets;
+using TOH.Server.Data;
 using TOH.Server.Services;
-using static TOH.Server.Systems.PVPBattle;
+using TOH.Server.Systems.Battle;
 
 namespace TOH.Server.Systems
 {
@@ -26,10 +27,16 @@ namespace TOH.Server.Systems
 
         public Task<PVPBattle> CreateBattle(Session session1, Session session2)
         {
+            var serviceProvider = _serviceScopeFactory.CreateScope().ServiceProvider;
+            var playerManager = serviceProvider.GetRequiredService<PlayerManager>();
+
             var battlePlayers = new List<ServerBattlePlayer>();
 
-            battlePlayers.Add(new ServerBattlePlayer(session1));
-            battlePlayers.Add(new ServerBattlePlayer(session2));
+            var player1 = playerManager.GetPlayerById(session1.PlayerId);
+            var player2 = playerManager.GetPlayerById(session2.PlayerId);
+
+            battlePlayers.Add(new ServerBattlePlayer(session1, player1.ToModel()));
+            battlePlayers.Add(new ServerBattlePlayer(session2, player2.ToModel()));
 
             var battle = new PVPBattle(_serviceScopeFactory, battlePlayers);
 

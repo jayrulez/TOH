@@ -30,9 +30,9 @@ namespace TOH.Server
         public async override Task StartAsync(CancellationToken cancellationToken = default)
         {
             Logger.LogInformation($"Loading data...");
-            await DataManager.Instance.Initialize("Config");
+            await ConfigManager.Instance.Initialize("Config");
 
-            while (DataManager.Instance.State != DataManagerState.Initialized)
+            while (ConfigManager.Instance.State != ConfigManagerState.Initialized)
             {
 
             }

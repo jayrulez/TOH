@@ -6,9 +6,10 @@ namespace TOH.Systems
 {
     public sealed class GameDatabase
     {
-        private class Session
+        public class Session
         {
             public string SessionId { get; set; }
+            public int PlayerId { get; set; }
         }
 
         private static readonly Lazy<GameDatabase> lazy = new Lazy<GameDatabase>(() => new GameDatabase(), true);
@@ -31,28 +32,25 @@ namespace TOH.Systems
             Sessions.EnsureIndex(c => c.SessionId);
         }
 
-        public void SetSessionId(string sessionId)
+        public void SetSession(Session session)
         {
             Sessions.DeleteAll();
 
-            Sessions.Insert(new Session
-            {
-                SessionId = sessionId
-            });
+            Sessions.Insert(session);
 
             _db.Checkpoint();
         }
 
-        public string GetSessionId()
+        public Session GetSession()
         {
             var session = Sessions.FindAll().ToList();
 
             if (session.Count == 0)
             {
-                return string.Empty;
+                return null;
             }
 
-            return session.First().SessionId;
+            return session.First();
         }
 
         public void RemoveSession()

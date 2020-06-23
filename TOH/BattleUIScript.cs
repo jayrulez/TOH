@@ -74,16 +74,28 @@ namespace TOH
                 {
                     var unit = ClientPVPBattleManager.Instance.Battle.Units.FirstOrDefault(u => u.PlayerUnit.Id == battleUnitTurnPacket.UnitId);
 
-                    if (BattleInfoText != null && unit != null) // TODO: Unit id on server is different from one on client. Fix that
+                    var session = GameDatabase.Instance.GetSession();
+
+                    var myUnits = ClientPVPBattleManager.Instance.Battle.Players.FirstOrDefault(p => p.Id == session.PlayerId)?.Units;
+
+                    var currentUnit = myUnits.FirstOrDefault(u => u.PlayerUnit.Id == unit.PlayerUnit.Id);
+
+                    if(currentUnit != null)
                     {
-                        BattleInfoText.Text = $"Unit '{unit.PlayerUnit.Unit.Name}' is taking a turn.";
+                        // This is my unit
+                        BattleInfoText.Text += $"My Unit '{unit.PlayerUnit.Unit.Name}' is taking a turn.\n";
+                    }
+                    else
+                    {
+                        // This is the opponent's unit.
+                        BattleInfoText.Text += $"Opponent's Unit '{unit.PlayerUnit.Unit.Name}' is taking a turn.\n";
                     }
                 }
                 else if (BattleTurnInfoEventListener.TryReceive(out BattleTurnInfoPacket battleTurnInfoPacket))
                 {
                     if (BattleInfoText != null)
                     {
-                        BattleInfoText.Text += $"' | {battleTurnInfoPacket.Unit.PlayerUnit.Unit.Name}' used '{battleTurnInfoPacket.SkillId}' on '{string.Join(", ", battleTurnInfoPacket.Targets.Select(t => t.PlayerUnit.Unit.Name).ToList())}'";
+                        BattleInfoText.Text += $"'{battleTurnInfoPacket.Unit.PlayerUnit.Unit.Name}' used '{battleTurnInfoPacket.SkillId}' on '{string.Join(", ", battleTurnInfoPacket.Targets.Select(t => t.PlayerUnit.Unit.Name).ToList())}'\n";
                     }
                 }
             }

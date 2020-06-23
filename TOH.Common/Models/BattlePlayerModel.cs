@@ -2,10 +2,10 @@
 
 namespace TOH.Common.Data
 {
-    public class BattlePlayer
+    public class BattlePlayerModel
     {
         public int Id { get; set; }
 
-        public List<BattleUnit> Units { get; set; }
+        public List<BattleUnitModel> Units { get; set; }
     }
 }

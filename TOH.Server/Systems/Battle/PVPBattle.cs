@@ -8,83 +8,12 @@ using System.Threading.Tasks;
 using TOH.Common.Data;
 using TOH.Network.Abstractions;
 using TOH.Network.Packets;
-using TOH.Server.Services;
+using TOH.Server.Systems.Battle;
 
 namespace TOH.Server.Systems
 {
     public class PVPBattle
     {
-        public class ServerBattleUnit : BattleUnit
-        {
-            public BattleTurnCommand TurnCommand { get; set; } = null;
-            public int Turnbar { get; private set; }
-
-            public ServerBattleUnit(PlayerUnit playerUnit) : base(playerUnit)
-            {
-            }
-
-            private void ResetTurnbar()
-            {
-                Turnbar = 0;
-            }
-
-            public void OnBattleStart()
-            {
-
-            }
-
-            public void OnTurnStart()
-            {
-
-            }
-
-            public void OnTurnEnd()
-            {
-                ResetTurnbar();
-                TurnCommand = null;
-            }
-
-            public void Kill()
-            {
-
-            }
-
-            public void UpdateTurn()
-            {
-
-            }
-
-            public void AdvanceTurnBar()
-            {
-                Turnbar += CurrentSpeed * 2;
-            }
-
-            public void SetTurnCommand(int skillId, List<int> targetUnitId)
-            {
-                var skill = PlayerUnit.Unit.Skills.FirstOrDefault(s => s.Value.Id == skillId);
-
-                if (skill.Value.Id == skillId)
-                {
-                    TurnCommand = new BattleTurnCommand(skill.Value.Id, targetUnitId);
-                }
-            }
-        }
-
-        public class ServerBattlePlayer
-        {
-            public Session Session { get; set; }
-            public List<ServerBattleUnit> Units { get; set; } = new List<ServerBattleUnit>();
-
-            public Stopwatch SelectUnitsTimer = new Stopwatch();
-
-            public Stopwatch TurnTimer = new Stopwatch();
-
-            public ServerBattlePlayer(Session session)
-            {
-                Session = session;
-            }
-        }
-
         public enum PVPBattleState
         {
             Countdown,
@@ -102,6 +31,10 @@ namespace TOH.Server.Systems
             TurnEnded,
         }
 
+        private int DummyPlayerId = 0;
+
+        private const int BattleTeamSize = 3;
+
         private const long SetUnitsTimeout = 1000 * 5; // seconds
         private const long TurnTimeout = 1000 * 10; // seconds
 
@@ -109,8 +42,6 @@ namespace TOH.Server.Systems
 
         public Stopwatch CountdownStateTimer = new Stopwatch();
 
-        private const int BattleTeamSize = 3;
-        private int DummyPlayerId = 0;
 
         private readonly ILogger _logger;
 
@@ -137,13 +68,11 @@ namespace TOH.Server.Systems
             State = PVPBattleState.Countdown;
         }
 
-        public void SetTurnCommand(int unitId, int skillId, List<int> targetUnitId)
+        private void Broadcast<T>(T packet) where T : Packet
         {
-            var nextBattleUnit = GetCurrentBattleUnit();
-
-            if (nextBattleUnit.PlayerUnit.Id == unitId)
+            foreach (var player in Players)
             {
-                nextBattleUnit.SetTurnCommand(skillId, targetUnitId);
+                player.Session.Connection.Send(packet);
             }
         }
 
@@ -155,13 +84,11 @@ namespace TOH.Server.Systems
             {
                 foreach (var unitId in unitIds)
                 {
-                    var unit = DataManager.Instance.GetUnit(unitId);
+                    var unit = player.Player.Units.FirstOrDefault(u => u.Id == unitId);
 
                     if (unit != null)
                     {
-                        var playerUnit = new PlayerUnit(++DummyPlayerId, 10, unit);
-
-                        var serverBattleUnit = new ServerBattleUnit(playerUnit);
+                        var serverBattleUnit = new ServerBattleUnit(unit);
                         player.Units.Add(serverBattleUnit);
 
                         Units.Add(serverBattleUnit);
@@ -176,14 +103,29 @@ namespace TOH.Server.Systems
             }
         }
 
-        private void Broadcast<T>(T packet) where T : Packet
+        public void SetTurnCommand(int unitId, int skillId, List<int> targetUnitId)
         {
-            foreach (var player in Players)
+            var nextBattleUnit = GetCurrentBattleUnit();
+
+            if (nextBattleUnit.PlayerUnit.Id == unitId)
             {
-                player.Session.Connection.Send(packet);
+                nextBattleUnit.SetTurnCommand(skillId, targetUnitId);
             }
         }
 
+        private void PushTurnInfoPacket(BattleTurnInfoPacket packet)
+        {
+            Broadcast(packet);
+        }
+        private void PushUnitTurnPacket(ServerBattleUnit unit)
+        {
+            Broadcast(new BattleUnitTurnPacket()
+            {
+                UnitId = unit.PlayerUnit.Id
+            });
+        }
+
+        #region Battle States
         private void SelectUnitsState()
         {
             if (Players.All(p => p.Units.Count == BattleTeamSize))
@@ -203,7 +145,15 @@ namespace TOH.Server.Systems
                             _logger.LogInformation($"Set units timer for player '{player.Session.PlayerId}' has exceeded '{SetUnitsTimeout}' seconds.");
 
                             //TODO: Auto-set team and go to BattleReadyState
-                            SetUnits(player.Session.SessionId, new List<int> { 4, 5, 6 });
+
+                            var unitIds = player.Player.Units.Select(u => u.Id).Take(BattleTeamSize).ToList();
+
+                            if(unitIds.Count < BattleTeamSize)
+                            {
+                                // TODO: cannot continue battle because player has less then required number of units
+                            }
+
+                            SetUnits(player.Session.SessionId, unitIds);
                         }
                     }
                 }
@@ -255,17 +205,17 @@ namespace TOH.Server.Systems
             var battleReadyPacket = new BattleReadyPacket
             {
                 BattleId = Id,
-                Players = new List<BattlePlayer>()
+                Players = new List<BattlePlayerModel>()
             };
 
             foreach (var player in Players)
             {
-                var battlePlayer = new BattlePlayer()
+                var battlePlayer = new BattlePlayerModel()
                 {
                     Id = player.Session.PlayerId,
                     Units = player.Units.Select(u =>
                     {
-                        return new BattleUnit(u.PlayerUnit);
+                        return new BattleUnitModel(u.PlayerUnit);
                     }).ToList()
                 };
 
@@ -276,11 +226,6 @@ namespace TOH.Server.Systems
 
             State = PVPBattleState.Combat;
             CurrentCombatState = PVPCombatState.None;
-        }
-
-        private void PushTurnInfoPacket(BattleTurnInfoPacket packet)
-        {
-            Broadcast(packet);
         }
 
         private void BattleCombatState()
@@ -311,155 +256,8 @@ namespace TOH.Server.Systems
             }
         }
 
-        private List<ServerBattleUnit> GetAllEnemies(ServerBattleUnit nextBattleUnit)
-        {
-            var unitPlayer = Players.FirstOrDefault(p => p.Units.Any(u => u.PlayerUnit.Id == nextBattleUnit.PlayerUnit.Id));
+        #endregion
 
-            var battleUnits = Units.Where(u => !unitPlayer.Units.Any(p => p.PlayerUnit.Id == u.PlayerUnit.Id)).ToList();
-
-            return battleUnits;
-        }
-
-        private List<ServerBattleUnit> GetAllAllies(ServerBattleUnit nextBattleUnit)
-        {
-            var unitPlayer = Players.FirstOrDefault(p => p.Units.Any(u => u.PlayerUnit.Id == nextBattleUnit.PlayerUnit.Id));
-
-            var battleUnits = Units.Where(u => unitPlayer.Units.Any(p => p.PlayerUnit.Id == u.PlayerUnit.Id)).ToList();
-
-            return battleUnits;
-        }
-
-        private ServerBattleUnit GetRandomEnemy(ServerBattleUnit nextBattleUnit)
-        {
-            var all = GetAllEnemies(nextBattleUnit);
-
-            return all.FirstOrDefault();
-        }
-
-        private ServerBattleUnit GetRandomAlly(ServerBattleUnit nextBattleUnit)
-        {
-            var all = GetAllAllies(nextBattleUnit);
-
-            return all.FirstOrDefault();
-        }
-
-        private void PerformHealSkillAction(ServerBattleUnit currentBattleUnit, HealSkillAction skillAction, ref List<ServerBattleUnit> targets)
-        {
-
-        }
-
-        private void PerformDamageSkillAction(ServerBattleUnit currentBattleUnit, DamageSkillAction skillAction, ref List<ServerBattleUnit> targets)
-        {
-            foreach (var target in targets)
-            {
-                if (target.State == BattleUnitState.Alive)
-                {
-                    var attack = currentBattleUnit.CurrentAttack;
-                    var multiplier = (float)skillAction.DamageAmount / 100.0f;
-                    var damage = attack * multiplier;
-                    damage -= target.CurrentDefense / 2;
-
-                    target.TakeDamage((int)damage);
-                }
-            }
-        }
-
-        private void PerformSkillAction(ServerBattleUnit currentBattleUnit, SkillAction skillAction, ref List<ServerBattleUnit> targets)
-        {
-            var actionTargets = new List<ServerBattleUnit>();
-
-            switch (skillAction.Target)
-            {
-                case SkillActionTarget.Caster:
-                    actionTargets = new List<ServerBattleUnit>() { currentBattleUnit };
-                    break;
-                case SkillActionTarget.AllEnemies:
-                    actionTargets = GetAllEnemies(currentBattleUnit);
-                    break;
-                case SkillActionTarget.AllAllies:
-                    actionTargets = GetAllAllies(currentBattleUnit);
-                    break;
-                case SkillActionTarget.RandomEnemy:
-                    actionTargets = new List<ServerBattleUnit>() { GetRandomEnemy(currentBattleUnit) };
-                    break;
-                case SkillActionTarget.RandomAlly:
-                    actionTargets = new List<ServerBattleUnit>() { GetRandomAlly(currentBattleUnit) };
-                    break;
-                case SkillActionTarget.SkillTarget:
-                default:
-                    actionTargets = targets;
-                    break;
-            }
-
-            switch (skillAction.Type)
-            {
-                case SkillActionType.Damage:
-                    var damageSkillAction = skillAction as DamageSkillAction;
-                    if (damageSkillAction != null)
-                    {
-                        PerformDamageSkillAction(currentBattleUnit, damageSkillAction, ref actionTargets);
-                    }
-                    break;
-                case SkillActionType.Heal:
-                    var healSkillAction = skillAction as HealSkillAction;
-                    if (healSkillAction != null)
-                    {
-                        PerformHealSkillAction(currentBattleUnit, healSkillAction, ref actionTargets);
-                    }
-                    break;
-            }
-        }
-
-        private void PerformTurnCommand(ServerBattleUnit currentBattleUnit, Skill skill, List<ServerBattleUnit> targets)
-        {
-            //TODO: execute skill logic here
-            foreach (var action in skill.Actions)
-            {
-                if (targets.Any(t => t.State == BattleUnitState.Alive))
-                    PerformSkillAction(currentBattleUnit, action, ref targets);
-            }
-
-
-            //TODO: Push packet so client can update UI
-
-
-            _logger.LogInformation($"Unit '{currentBattleUnit.PlayerUnit.Unit.Name}' performed skill '{skill.Name}' on targets '{string.Join(", ", targets.Select(t => t.PlayerUnit.Unit.Name).ToList())}'.");
-
-            var battleTurnInfoPacket = new BattleTurnInfoPacket()
-            {
-                Unit = currentBattleUnit,
-                SkillId = skill.Id,
-                Targets = targets.Select(t => (BattleUnit)t).ToList()
-            };
-
-            PushTurnInfoPacket(battleTurnInfoPacket);
-
-            // Ends the turn after performing the turn command
-            EndTurn();
-        }
-
-        private List<ServerBattleUnit> GetBattleUnits(List<int> targetUnitIds)
-        {
-            var battleUnits = new List<ServerBattleUnit>();
-
-            foreach (var battleUnit in Units)
-            {
-                if (targetUnitIds.Contains(battleUnit.PlayerUnit.Id))
-                {
-                    battleUnits.Add(battleUnit);
-                }
-            }
-
-            return battleUnits;
-        }
-
-        private void PushUnitTurnPacket(ServerBattleUnit unit)
-        {
-            Broadcast(new BattleUnitTurnPacket()
-            {
-                UnitId = unit.PlayerUnit.Id
-            });
-        }
 
         #region Battle logic
 
@@ -567,6 +365,149 @@ namespace TOH.Server.Systems
             {
                 battleUnit.AdvanceTurnBar();
             }
+        }
+
+
+        private List<ServerBattleUnit> GetAllEnemies(ServerBattleUnit nextBattleUnit)
+        {
+            var unitPlayer = Players.FirstOrDefault(p => p.Units.Any(u => u.PlayerUnit.Id == nextBattleUnit.PlayerUnit.Id));
+
+            var battleUnits = Units.Where(u => !unitPlayer.Units.Any(p => p.PlayerUnit.Id == u.PlayerUnit.Id)).ToList();
+
+            return battleUnits;
+        }
+
+        private List<ServerBattleUnit> GetAllAllies(ServerBattleUnit nextBattleUnit)
+        {
+            var unitPlayer = Players.FirstOrDefault(p => p.Units.Any(u => u.PlayerUnit.Id == nextBattleUnit.PlayerUnit.Id));
+
+            var battleUnits = Units.Where(u => unitPlayer.Units.Any(p => p.PlayerUnit.Id == u.PlayerUnit.Id)).ToList();
+
+            return battleUnits;
+        }
+
+        private ServerBattleUnit GetRandomEnemy(ServerBattleUnit nextBattleUnit)
+        {
+            var all = GetAllEnemies(nextBattleUnit);
+
+            return all.FirstOrDefault();
+        }
+
+        private ServerBattleUnit GetRandomAlly(ServerBattleUnit nextBattleUnit)
+        {
+            var all = GetAllAllies(nextBattleUnit);
+
+            return all.FirstOrDefault();
+        }
+
+        private void PerformHealSkillAction(ServerBattleUnit currentBattleUnit, HealSkillAction skillAction, ref List<ServerBattleUnit> targets)
+        {
+
+        }
+
+        private void PerformDamageSkillAction(ServerBattleUnit currentBattleUnit, DamageSkillAction skillAction, ref List<ServerBattleUnit> targets)
+        {
+            foreach (var target in targets)
+            {
+                if (target.State == BattleUnitState.Alive)
+                {
+                    var attack = currentBattleUnit.CurrentAttack;
+                    var multiplier = (float)skillAction.DamageAmount / 100.0f;
+                    var damage = attack * multiplier;
+                    damage -= target.CurrentDefense / 2;
+
+                    target.TakeDamage((int)damage);
+                }
+            }
+        }
+
+        private void PerformSkillAction(ServerBattleUnit currentBattleUnit, SkillAction skillAction, ref List<ServerBattleUnit> targets)
+        {
+            var actionTargets = new List<ServerBattleUnit>();
+
+            switch (skillAction.Target)
+            {
+                case SkillActionTarget.Caster:
+                    actionTargets = new List<ServerBattleUnit>() { currentBattleUnit };
+                    break;
+                case SkillActionTarget.AllEnemies:
+                    actionTargets = GetAllEnemies(currentBattleUnit);
+                    break;
+                case SkillActionTarget.AllAllies:
+                    actionTargets = GetAllAllies(currentBattleUnit);
+                    break;
+                case SkillActionTarget.RandomEnemy:
+                    actionTargets = new List<ServerBattleUnit>() { GetRandomEnemy(currentBattleUnit) };
+                    break;
+                case SkillActionTarget.RandomAlly:
+                    actionTargets = new List<ServerBattleUnit>() { GetRandomAlly(currentBattleUnit) };
+                    break;
+                case SkillActionTarget.SkillTarget:
+                default:
+                    actionTargets = targets;
+                    break;
+            }
+
+            switch (skillAction.Type)
+            {
+                case SkillActionType.Damage:
+                    var damageSkillAction = skillAction as DamageSkillAction;
+                    if (damageSkillAction != null)
+                    {
+                        PerformDamageSkillAction(currentBattleUnit, damageSkillAction, ref actionTargets);
+                    }
+                    break;
+                case SkillActionType.Heal:
+                    var healSkillAction = skillAction as HealSkillAction;
+                    if (healSkillAction != null)
+                    {
+                        PerformHealSkillAction(currentBattleUnit, healSkillAction, ref actionTargets);
+                    }
+                    break;
+            }
+        }
+
+        private void PerformTurnCommand(ServerBattleUnit currentBattleUnit, SkillModel skill, List<ServerBattleUnit> targets)
+        {
+            //TODO: execute skill logic here
+            foreach (var action in skill.Actions)
+            {
+                if (targets.Any(t => t.State == BattleUnitState.Alive))
+                    PerformSkillAction(currentBattleUnit, action, ref targets);
+            }
+
+
+            //TODO: Push packet so client can update UI
+
+
+            _logger.LogInformation($"Unit '{currentBattleUnit.PlayerUnit.Unit.Name}' performed skill '{skill.Name}' on targets '{string.Join(", ", targets.Select(t => t.PlayerUnit.Unit.Name).ToList())}'.");
+
+            var battleTurnInfoPacket = new BattleTurnInfoPacket()
+            {
+                Unit = currentBattleUnit,
+                SkillId = skill.Id,
+                Targets = targets.Select(t => (BattleUnitModel)t).ToList()
+            };
+
+            PushTurnInfoPacket(battleTurnInfoPacket);
+
+            // Ends the turn after performing the turn command
+            EndTurn();
+        }
+
+        private List<ServerBattleUnit> GetBattleUnits(List<int> targetUnitIds)
+        {
+            var battleUnits = new List<ServerBattleUnit>();
+
+            foreach (var battleUnit in Units)
+            {
+                if (targetUnitIds.Contains(battleUnit.PlayerUnit.Id))
+                {
+                    battleUnits.Add(battleUnit);
+                }
+            }
+
+            return battleUnits;
         }
 
         #endregion

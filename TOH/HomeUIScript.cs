@@ -3,6 +3,9 @@ using Stride.Engine.Events;
 using Stride.UI;
 using Stride.UI.Controls;
 using Stride.UI.Events;
+using System.Collections.Generic;
+using System.Linq;
+using TOH.Common.Data;
 using TOH.Network.Packets;
 using TOH.Systems;
 
@@ -21,6 +24,7 @@ namespace TOH
     public class BattleInfo
     {
         public string BattleId { get; set; }
+        public List<PlayerModel> Players { get; set; }
     }
 
     public class HomeUIScript : SyncScript
@@ -78,7 +82,8 @@ namespace TOH
             {
                 BattleInfo = new BattleInfo
                 {
-                    BattleId = battleInfoPacket.BattleId
+                    BattleId = battleInfoPacket.BattleId,
+                    Players = battleInfoPacket.Players
                 };
 
                 HomeState = HomeState.MatchFound;
@@ -121,10 +126,16 @@ namespace TOH
 
                 //TODO, listen for packet that shows opponents units and update UI
 
+                var session = GameDatabase.Instance.GetSession();
+
+                var player = BattleInfo.Players.FirstOrDefault(p => p.Id == session.PlayerId);
+
+                var playerUnitIds = player.Units.Select(u => u.Id).ToList();
+
                 GameManager.NetworkClient.Connection.Send(new SetBattleUnitsPacket()
                 {
                     BattleId = BattleInfo.BattleId,
-                    Units = new System.Collections.Generic.List<int> { 1, 2, 3 }
+                    Units = playerUnitIds.Take(3).ToList()
                 });
 
                 HomeState = HomeState.MatchReadyWait;

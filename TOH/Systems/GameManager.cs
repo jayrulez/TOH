@@ -147,15 +147,15 @@ namespace TOH.Systems
         {
             base.Update(gameTime);
 
-            if (DataManager.Instance.Initialized)
+            if (ConfigManager.Instance.Initialized)
             {
                 if (ServiceClient == null)
                 {
                     ServiceClient = new GameServiceClient(new GameServiceClientOptions
                     {
-                        Protocol = DataManager.Instance.ServerConfig.ServiceProtocol,
-                        Host = DataManager.Instance.ServerConfig.ServiceHost,
-                        Port = DataManager.Instance.ServerConfig.ServicePort
+                        Protocol = ConfigManager.Instance.ServerConfig.ServiceProtocol,
+                        Host = ConfigManager.Instance.ServerConfig.ServiceHost,
+                        Port = ConfigManager.Instance.ServerConfig.ServicePort
                     });
                 }
 
@@ -163,8 +163,8 @@ namespace TOH.Systems
                 {
                     NetworkClient = new GameTcpClient(new TcpClientOptions
                     {
-                        Host = DataManager.Instance.ServerConfig.TcpServerHost,
-                        Port = DataManager.Instance.ServerConfig.TcpServerPort
+                        Host = ConfigManager.Instance.ServerConfig.TcpServerHost,
+                        Port = ConfigManager.Instance.ServerConfig.TcpServerPort
                     });
                 }
             }
