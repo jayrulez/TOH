@@ -35,6 +35,8 @@ namespace TOH
         public List<ClientBattleUnit> Units { get; private set; }
 
         public ClientBattleUnit ActiveUnit { get; set; }
+        public SkillModel SelectedSkill { get; set; }
+        public ClientBattleUnit SelectedTarget { get; set; }
 
         public bool Win { get; set; }
 

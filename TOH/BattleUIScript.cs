@@ -2,7 +2,11 @@
 using Stride.Engine.Events;
 using Stride.UI;
 using Stride.UI.Controls;
+using Stride.UI.Events;
+using Stride.UI.Panels;
+using System;
 using System.Linq;
+using TOH.Common.Data;
 using TOH.Network.Packets;
 using TOH.Systems;
 
@@ -33,6 +37,10 @@ namespace TOH
         private EventReceiver<BattleUnitTurnPacket> BattleUnitTurnEventListener = new EventReceiver<BattleUnitTurnPacket>(NetworkEvents.BattleUnitTurnPacketEventKey);
         private EventReceiver<BattleResultPacket> BattleResultEventListener = new EventReceiver<BattleResultPacket>(NetworkEvents.BattleResultPacketEventKey);
 
+
+        private StackPanel SkillsListContainer;
+
+
         public override void Start()
         {
             BattleInfoUI = Entity.Get<UIComponent>();
@@ -40,6 +48,7 @@ namespace TOH
             if (BattleInfoUI != null)
             {
                 BattleInfoText = BattleInfoUI.Page.RootElement.FindVisualChildOfType<TextBlock>();
+                SkillsListContainer = BattleInfoUI.Page.RootElement.FindVisualChildOfType<StackPanel>();
             }
         }
 
@@ -120,18 +129,17 @@ namespace TOH
 
                 if (UIState == BattleUIState.None)
                 {
-
+                    HideSkillsList();
                 }
                 else if (UIState == BattleUIState.ShowSkillList)
                 {
-                    if(ClientPVPBattleManager.Instance.Battle.ActiveUnit != null)
+                    if (ClientPVPBattleManager.Instance.Battle.ActiveUnit != null)
                     {
                         PopulateSkillsList(ClientPVPBattleManager.Instance.Battle.ActiveUnit);
                     }
                 }
                 else
                 {
-
                 }
             }
             else if (ClientPVPBattleManager.Instance.Battle.State == ClientPVPBattle.BattleState.Result)
@@ -142,7 +150,39 @@ namespace TOH
 
         private void PopulateSkillsList(ClientBattleUnit unit)
         {
-            var skills = unit.PlayerUnit.Unit.Skills;
+            if (SkillsListContainer.Visibility != Visibility.Visible)
+            {
+                var skills = unit.PlayerUnit.Unit.Skills;
+
+                var skill1Button = SkillsListContainer.FindVisualChildOfType<Button>("Skill1");
+                skill1Button.FindVisualChildOfType<TextBlock>().Text = skills[UnitSkillSlot.Default]?.Name;
+                skill1Button.Click += delegate
+                {
+                    ClientPVPBattleManager.Instance.Battle.SelectedSkill = skills[UnitSkillSlot.Default];
+                };
+
+                var skill2Button = SkillsListContainer.FindVisualChildOfType<Button>("Skill2");
+                skill2Button.FindVisualChildOfType<TextBlock>().Text = skills[UnitSkillSlot.Second]?.Name;
+                skill2Button.Click += delegate
+                {
+                    ClientPVPBattleManager.Instance.Battle.SelectedSkill = skills[UnitSkillSlot.Second];
+                };
+
+                var skill3Button = SkillsListContainer.FindVisualChildOfType<Button>("Skill3");
+                skill3Button.FindVisualChildOfType<TextBlock>().Text = skills[UnitSkillSlot.Third]?.Name;
+                skill3Button.Click += delegate
+                {
+                    ClientPVPBattleManager.Instance.Battle.SelectedSkill = skills[UnitSkillSlot.Third];
+                };
+
+                SkillsListContainer.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void HideSkillsList()
+        {
+            if (SkillsListContainer.Visibility != Visibility.Collapsed)
+                SkillsListContainer.Visibility = Visibility.Collapsed;
         }
     }
 }

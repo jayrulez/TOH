@@ -46,5 +46,149 @@
         "Accuracy": 80
       }
     ]
+  },
+  {
+    "Id": 4,
+    "Name": "Bind",
+    "Description": "Lands a deadly kick on the target to deal 250% damage.",
+    "Target": "SingleEnemy",
+    "Cooldown": 0,
+    "Actions": [
+      {
+        "Type": "Damage",
+        "Target": "SkillTarget",
+        "DamageAmount": 250,
+        "ScaleType": "CasterAttack",
+        "Accuracy": 80
+      }
+    ]
+  },
+  {
+    "Id": 5,
+    "Name": "Tackle",
+    "Description": "Lands a deadly kick on the target to deal 250% damage.",
+    "Target": "SingleEnemy",
+    "Cooldown": 0,
+    "Actions": [
+      {
+        "Type": "Damage",
+        "Target": "SkillTarget",
+        "DamageAmount": 250,
+        "ScaleType": "CasterAttack",
+        "Accuracy": 80
+      }
+    ]
+  },
+  {
+    "Id": 6,
+    "Name": "Jolt",
+    "Description": "Lands a deadly kick on the target to deal 250% damage.",
+    "Target": "SingleEnemy",
+    "Cooldown": 0,
+    "Actions": [
+      {
+        "Type": "Damage",
+        "Target": "SkillTarget",
+        "DamageAmount": 250,
+        "ScaleType": "CasterAttack",
+        "Accuracy": 80
+      }
+    ]
+  },
+  {
+    "Id": 7,
+    "Name": "Brick Break",
+    "Description": "Lands a deadly kick on the target to deal 250% damage.",
+    "Target": "SingleEnemy",
+    "Cooldown": 0,
+    "Actions": [
+      {
+        "Type": "Damage",
+        "Target": "SkillTarget",
+        "DamageAmount": 250,
+        "ScaleType": "CasterAttack",
+        "Accuracy": 80
+      }
+    ]
+  },
+  {
+    "Id": 8,
+    "Name": "Calamity",
+    "Description": "Lands a deadly kick on the target to deal 250% damage.",
+    "Target": "SingleEnemy",
+    "Cooldown": 0,
+    "Actions": [
+      {
+        "Type": "Damage",
+        "Target": "SkillTarget",
+        "DamageAmount": 250,
+        "ScaleType": "CasterAttack",
+        "Accuracy": 80
+      }
+    ]
+  },
+  {
+    "Id": 9,
+    "Name": "Torch",
+    "Description": "Lands a deadly kick on the target to deal 250% damage.",
+    "Target": "SingleEnemy",
+    "Cooldown": 0,
+    "Actions": [
+      {
+        "Type": "Damage",
+        "Target": "SkillTarget",
+        "DamageAmount": 250,
+        "ScaleType": "CasterAttack",
+        "Accuracy": 80
+      }
+    ]
+  },
+  {
+    "Id": 10,
+    "Name": "Sucker Punch",
+    "Description": "Lands a deadly kick on the target to deal 250% damage.",
+    "Target": "SingleEnemy",
+    "Cooldown": 0,
+    "Actions": [
+      {
+        "Type": "Damage",
+        "Target": "SkillTarget",
+        "DamageAmount": 250,
+        "ScaleType": "CasterAttack",
+        "Accuracy": 80
+      }
+    ]
+  },
+  {
+    "Id": 11,
+    "Name": "Sweep",
+    "Description": "Lands a deadly kick on the target to deal 250% damage.",
+    "Target": "SingleEnemy",
+    "Cooldown": 0,
+    "Actions": [
+      {
+        "Type": "Damage",
+        "Target": "SkillTarget",
+        "DamageAmount": 250,
+        "ScaleType": "CasterAttack",
+        "Accuracy": 80
+      }
+    ]
+  },
+  {
+    "Id": 12,
+    "Name": "Slash",
+    "Description": "Lands a deadly kick on the target to deal 250% damage.",
+    "Target": "SingleEnemy",
+    "Cooldown": 0,
+    "Actions": [
+      {
+        "Type": "Damage",
+        "Target": "SkillTarget",
+        "DamageAmount": 250,
+        "ScaleType": "CasterAttack",
+        "Accuracy": 80
+      }
+    ]
   }
 ]

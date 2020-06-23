@@ -30,9 +30,9 @@
       "Speed": 75
     },
     "Skills": {
-      "Default": 1,
-      "Second": 2,
-      "Third": 3
+      "Default": 4,
+      "Second": 5,
+      "Third": 6
     }
   },
   {
@@ -48,9 +48,9 @@
       "Speed": 85
     },
     "Skills": {
-      "Default": 1,
-      "Second": 2,
-      "Third": 3
+      "Default": 7,
+      "Second": 8,
+      "Third": 9
     }
   },
   {
@@ -66,9 +66,9 @@
       "Speed": 120
     },
     "Skills": {
-      "Default": 1,
-      "Second": 2,
-      "Third": 3
+      "Default": 10,
+      "Second": 11,
+      "Third": 12
     }
   },
   {
@@ -85,8 +85,8 @@
     },
     "Skills": {
       "Default": 1,
-      "Second": 2,
-      "Third": 3
+      "Second": 5,
+      "Third": 7
     }
   },
   {
@@ -102,9 +102,9 @@
       "Speed": 80
     },
     "Skills": {
-      "Default": 1,
-      "Second": 2,
-      "Third": 3
+      "Default": 8,
+      "Second": 11,
+      "Third": 1
     }
   }
 ]

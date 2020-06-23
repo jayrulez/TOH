@@ -27,6 +27,7 @@ Hierarchy:
                 Id: 169f451b-31c4-4fd2-b92f-4acad372c132
                 DependencyProperties: {}
                 BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
+                Visibility: Collapsed
                 Width: 400.0
                 Height: 100.0
                 HorizontalAlignment: Right
