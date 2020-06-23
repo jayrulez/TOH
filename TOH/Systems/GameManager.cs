@@ -37,6 +37,7 @@ namespace TOH.Systems
         public static EventKey<BattleReadyPacket> BattleReadyPacketEventKey = new EventKey<BattleReadyPacket>();
         public static EventKey<BattleTurnInfoPacket> BattleTurnInfoPacketEventKey = new EventKey<BattleTurnInfoPacket>();
         public static EventKey<BattleUnitTurnPacket> BattleUnitTurnPacketEventKey = new EventKey<BattleUnitTurnPacket>();
+        public static EventKey<BattleResultPacket> BattleResultPacketEventKey = new EventKey<BattleResultPacket>();
         #endregion
 
         #region Session
@@ -225,6 +226,10 @@ namespace TOH.Systems
                             else if (NetworkClient.Connection.TryUnwrap<BattleUnitTurnPacket>(wrappedPacket, out var battleUnitTurnPacket))
                             {
                                 NetworkEvents.BattleUnitTurnPacketEventKey.Broadcast(battleUnitTurnPacket);
+                            }
+                            else if (NetworkClient.Connection.TryUnwrap<BattleResultPacket>(wrappedPacket, out var battleResultPacket))
+                            {
+                                NetworkEvents.BattleResultPacketEventKey.Broadcast(battleResultPacket);
                             }
                             else if (NetworkClient.Connection.TryUnwrap<JoinSessionFailedPacket>(wrappedPacket, out var joinSessionFailedPacket))
                             {

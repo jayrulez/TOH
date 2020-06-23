@@ -16,9 +16,9 @@ Hierarchy:
                 Height: 93.0
                 VerticalAlignment: Top
                 Margin: {Top: 89.0}
-                MaximumWidth: 3.40282347E+38
-                MaximumHeight: 3.40282347E+38
-                MaximumDepth: 3.40282347E+38
+                MaximumWidth: 3.4028235E+38
+                MaximumHeight: 3.4028235E+38
+                MaximumDepth: 3.4028235E+38
                 Font: c90f3988-0544-4cbe-993f-13af7d9c23c6:StrideDefaultFont
                 TextSize: 20.0
                 TextColor: {R: 240, G: 240, B: 240, A: 255}
@@ -32,9 +32,9 @@ Hierarchy:
                 HorizontalAlignment: Right
                 VerticalAlignment: Bottom
                 Margin: {}
-                MaximumWidth: 3.40282347E+38
-                MaximumHeight: 3.40282347E+38
-                MaximumDepth: 3.40282347E+38
+                MaximumWidth: 3.4028235E+38
+                MaximumHeight: 3.4028235E+38
+                MaximumDepth: 3.4028235E+38
                 Name: SkillButtonContainer
                 Children:
                     0b207c9071a8d2097fe4e44d7f2e5d93: !Button ref!! c9a4f062-86b1-4b72-a4cc-2de2fb3082d8
@@ -50,9 +50,9 @@ Hierarchy:
                 Height: 80.0
                 HorizontalAlignment: Right
                 Margin: {Top: 10.0, Bottom: 10.0}
-                MaximumWidth: 3.40282347E+38
-                MaximumHeight: 3.40282347E+38
-                MaximumDepth: 3.40282347E+38
+                MaximumWidth: 3.4028235E+38
+                MaximumHeight: 3.4028235E+38
+                MaximumDepth: 3.4028235E+38
                 Name: Skill2
                 Content: !TextBlock ref!! ed1b4372-a87f-468a-815a-c32d26f2fa24
                 PressedImage: !SpriteFromSheet
@@ -72,9 +72,9 @@ Hierarchy:
                 Height: 80.0
                 HorizontalAlignment: Right
                 Margin: {Left: 10.0, Top: 10.0, Right: 10.0, Bottom: 10.0}
-                MaximumWidth: 3.40282347E+38
-                MaximumHeight: 3.40282347E+38
-                MaximumDepth: 3.40282347E+38
+                MaximumWidth: 3.4028235E+38
+                MaximumHeight: 3.4028235E+38
+                MaximumDepth: 3.4028235E+38
                 Name: Skill3
                 Content: !TextBlock ref!! 9143aa0f-76d2-40b3-89e2-bfb7add697a4
                 PressedImage: !SpriteFromSheet
@@ -92,13 +92,14 @@ Hierarchy:
                 HorizontalAlignment: Center
                 VerticalAlignment: Center
                 Margin: {}
-                MaximumWidth: 3.40282347E+38
-                MaximumHeight: 3.40282347E+38
-                MaximumDepth: 3.40282347E+38
+                MaximumWidth: 3.4028235E+38
+                MaximumHeight: 3.4028235E+38
+                MaximumDepth: 3.4028235E+38
                 Text: Skill 3
                 Font: c90f3988-0544-4cbe-993f-13af7d9c23c6:StrideDefaultFont
                 TextSize: 20.0
                 TextColor: {R: 240, G: 240, B: 240, A: 255}
+                TextAlignment: Center
         -   UIElement: !TextBlock
                 Id: bd0cdb43-4237-4b74-99cf-e92d5ebe6e27
                 DependencyProperties: {}
@@ -106,13 +107,14 @@ Hierarchy:
                 HorizontalAlignment: Center
                 VerticalAlignment: Center
                 Margin: {}
-                MaximumWidth: 3.40282347E+38
-                MaximumHeight: 3.40282347E+38
-                MaximumDepth: 3.40282347E+38
+                MaximumWidth: 3.4028235E+38
+                MaximumHeight: 3.4028235E+38
+                MaximumDepth: 3.4028235E+38
                 Text: Skill 1
                 Font: c90f3988-0544-4cbe-993f-13af7d9c23c6:StrideDefaultFont
                 TextSize: 20.0
                 TextColor: {R: 240, G: 240, B: 240, A: 255}
+                TextAlignment: Center
         -   UIElement: !Button
                 Id: c9a4f062-86b1-4b72-a4cc-2de2fb3082d8
                 DependencyProperties: {}
@@ -122,9 +124,9 @@ Hierarchy:
                 Height: 80.0
                 HorizontalAlignment: Right
                 Margin: {Top: 10.0, Right: 10.0, Bottom: 10.0}
-                MaximumWidth: 3.40282347E+38
-                MaximumHeight: 3.40282347E+38
-                MaximumDepth: 3.40282347E+38
+                MaximumWidth: 3.4028235E+38
+                MaximumHeight: 3.4028235E+38
+                MaximumDepth: 3.4028235E+38
                 Name: Skill1
                 Content: !TextBlock ref!! bd0cdb43-4237-4b74-99cf-e92d5ebe6e27
                 PressedImage: !SpriteFromSheet
@@ -140,9 +142,9 @@ Hierarchy:
                 DependencyProperties: {}
                 BackgroundColor: {R: 0, G: 0, B: 0, A: 0}
                 Margin: {}
-                MaximumWidth: 3.40282347E+38
-                MaximumHeight: 3.40282347E+38
-                MaximumDepth: 3.40282347E+38
+                MaximumWidth: 3.4028235E+38
+                MaximumHeight: 3.4028235E+38
+                MaximumDepth: 3.4028235E+38
                 Children:
                     72d803bccae80dbb20d19145f05c9c56: !TextBlock ref!! 13d9633a-596b-4e0a-b994-29f569a8ea78
                     11adaf2912a3b1d3771a15705fef57dc: !StackPanel ref!! 169f451b-31c4-4fd2-b92f-4acad372c132
@@ -156,10 +158,11 @@ Hierarchy:
                 HorizontalAlignment: Center
                 VerticalAlignment: Center
                 Margin: {}
-                MaximumWidth: 3.40282347E+38
-                MaximumHeight: 3.40282347E+38
-                MaximumDepth: 3.40282347E+38
+                MaximumWidth: 3.4028235E+38
+                MaximumHeight: 3.4028235E+38
+                MaximumDepth: 3.4028235E+38
                 Text: Skill 2
                 Font: c90f3988-0544-4cbe-993f-13af7d9c23c6:StrideDefaultFont
                 TextSize: 20.0
                 TextColor: {R: 240, G: 240, B: 240, A: 255}
+                TextAlignment: Center

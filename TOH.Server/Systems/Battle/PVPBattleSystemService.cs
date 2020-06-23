@@ -84,9 +84,11 @@ namespace TOH.Server.Systems
 
                 //}
 
-                if (battle.Value.State == PVPBattle.PVPBattleState.Ended)
+                if (battle.Value.State == PVPBattle.PVPBattleState.Dispose)
                 {
-                    Battles.Remove(battle.Key, out var _);
+                    Battles.Remove(battle.Key, out var removedBattle);
+
+                    _logger.LogInformation($"Removed battle '{removedBattle.Id}' with State='{removedBattle.State}'.");
                 }
                 else
                 {

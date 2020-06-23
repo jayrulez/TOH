@@ -67,7 +67,10 @@ namespace TOH.Common.Data
 
         public List<StatModification> GetModifications(UnitStatType statType)
         {
-            return Modifications[statType];
+            if (Modifications.ContainsKey(statType))
+                return Modifications[statType];
+            else
+                return new List<StatModification>();
         }
 
         public void ClearModifications()

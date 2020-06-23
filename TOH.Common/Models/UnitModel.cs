@@ -42,8 +42,7 @@ namespace TOH.Common.Data
     {
         Default,
         Second,
-        Third,
-        Leader
+        Third
     }
 
     public class UnitModel

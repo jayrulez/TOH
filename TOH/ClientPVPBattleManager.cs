@@ -24,7 +24,8 @@ namespace TOH
         {
             None,
             LoadAssets,
-            Update
+            Update,
+            Result
         }
 
         public string BattleId { get; private set; }
@@ -32,6 +33,10 @@ namespace TOH
         public BattleState State { get; private set; }
         public List<ClientBattlePlayer> Players { get; private set; }
         public List<ClientBattleUnit> Units { get; private set; }
+
+        public ClientBattleUnit ActiveUnit { get; set; }
+
+        public bool Win { get; set; }
 
         public ClientPVPBattle(string battleId, List<BattlePlayerModel> players)
         {

@@ -20,7 +20,8 @@ namespace TOH.Server.Systems
             SelectUnits,
             Ready,
             Combat,
-            Ended
+            Ended,
+            Dispose
         };
 
         public enum PVPCombatState
@@ -30,8 +31,6 @@ namespace TOH.Server.Systems
             TurnWait,
             TurnEnded,
         }
-
-        private int DummyPlayerId = 0;
 
         private const int BattleTeamSize = 3;
 
@@ -148,7 +147,7 @@ namespace TOH.Server.Systems
 
                             var unitIds = player.Player.Units.Select(u => u.Id).Take(BattleTeamSize).ToList();
 
-                            if(unitIds.Count < BattleTeamSize)
+                            if (unitIds.Count < BattleTeamSize)
                             {
                                 // TODO: cannot continue battle because player has less then required number of units
                             }
@@ -230,6 +229,15 @@ namespace TOH.Server.Systems
 
         private void BattleCombatState()
         {
+            foreach (var player in Players)
+            {
+                if (player.Units.All(u => u.State == BattleUnitState.Dead))
+                {
+                    State = PVPBattleState.Ended;
+                    return;
+                }
+            }
+
             if (CurrentCombatState == PVPCombatState.None)
             {
                 foreach (var battleUnit in Units)
@@ -237,23 +245,43 @@ namespace TOH.Server.Systems
                     battleUnit.OnBattleStart();
                 }
 
-                // Advance turnbar of all units at the start of the battle
-                AdvanceTurnbars();
-
                 // Start the turn for the *fastest* unit
                 StartTurn();
             }
-
-            if (CurrentCombatState == PVPCombatState.TurnWait)
+            else if (CurrentCombatState == PVPCombatState.TurnWait)
             {
                 TurnWait();
             }
-
-            // Whenever a unit turn ends, start a turn for the next unit with the highest turnbar
-            if (CurrentCombatState == PVPCombatState.TurnEnded)
+            else if (CurrentCombatState == PVPCombatState.TurnEnded)
             {
+                // Whenever a unit turn ends, start a turn for the next unit with the highest turnbar
                 StartTurn();
             }
+        }
+
+        private void BattleEndedState()
+        {
+            foreach (var player in Players)
+            {
+                if (player.Units.All(u => u.State == BattleUnitState.Dead))
+                {
+                    player.Session.Connection.Send(new BattleResultPacket
+                    {
+                        BattleId = Id,
+                        Status = BattleResultStatus.Lose
+                    });
+                }
+                else
+                {
+                    player.Session.Connection.Send(new BattleResultPacket
+                    {
+                        BattleId = Id,
+                        Status = BattleResultStatus.Win
+                    });
+                }
+            }
+
+            State = PVPBattleState.Dispose;
         }
 
         #endregion
@@ -276,6 +304,9 @@ namespace TOH.Server.Systems
 
         private void StartTurn()
         {
+            // Advance turnbar of all units at the start of each turn
+            AdvanceTurnbars();
+
             var currentBattleUnit = GetCurrentBattleUnit();
 
             var unitPlayer = Players.FirstOrDefault(p => p.Units.Any(u => u.PlayerUnit.Id == currentBattleUnit.PlayerUnit.Id));
@@ -354,9 +385,6 @@ namespace TOH.Server.Systems
             _logger.LogInformation($"Unit '{currentBattleUnit.PlayerUnit.Unit.Name}' has ended a turn.");
 
             CurrentCombatState = PVPCombatState.TurnEnded;
-
-            // Advance the turnbar of all units after a unit ends a turn
-            AdvanceTurnbars();
         }
 
         private void AdvanceTurnbars()
@@ -390,7 +418,7 @@ namespace TOH.Server.Systems
         {
             var all = GetAllEnemies(nextBattleUnit);
 
-            return all.FirstOrDefault();
+            return all.FirstOrDefault(e => e.State == BattleUnitState.Alive);
         }
 
         private ServerBattleUnit GetRandomAlly(ServerBattleUnit nextBattleUnit)
@@ -530,6 +558,10 @@ namespace TOH.Server.Systems
 
                 case PVPBattleState.Combat:
                     BattleCombatState();
+                    break;
+
+                case PVPBattleState.Ended:
+                    BattleEndedState();
                     break;
             }
 
