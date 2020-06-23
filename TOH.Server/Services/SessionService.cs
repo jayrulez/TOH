@@ -1,14 +1,17 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TOH.Common.Data;
 using TOH.Network.Abstractions;
 using TOH.Network.Packets;
 
 namespace TOH.Server.Services
 {
-    public class ActiveSession
+    public class Session
     {
         public string SessionId { get; set; }
         public int PlayerId { get; set; }
@@ -17,21 +20,23 @@ namespace TOH.Server.Services
 
     public class SessionService
     {
-        private ConcurrentDictionary<string, ActiveSession> ActiveSessions { get; } = new ConcurrentDictionary<string, ActiveSession>();
+        private ConcurrentDictionary<string, Session> ActiveSessions { get; } = new ConcurrentDictionary<string, Session>();
 
         private readonly ILogger _logger;
 
-        private readonly PlayerManager _playerManager;
+        private readonly IServiceProvider _serviceProvider;
 
-        public SessionService(PlayerManager playerManager, ILogger<SessionService> logger)
+        public SessionService(IServiceScopeFactory serviceScopeFactory)
         {
-            _playerManager = playerManager;
-            _logger = logger;
+            _serviceProvider = serviceScopeFactory.CreateScope().ServiceProvider;
+            _logger = _serviceProvider.GetRequiredService<ILogger<SessionService>>();
         }
 
         public async Task JoinSession(IConnection connection, JoinSessionPacket packet)
         {
-            var playerSession = _playerManager.GetPlayerSessionById(packet.Token);
+            var playerManager = _serviceProvider.GetRequiredService<PlayerManager>();
+
+            var playerSession = playerManager.GetPlayerSessionById(packet.Token);
 
             if (playerSession == null || playerSession.IsExpired)
             {
@@ -44,16 +49,20 @@ namespace TOH.Server.Services
             }
             else
             {
+                var newSession = new Session
+                {
+                    SessionId = packet.Token,
+                    PlayerId = playerSession.PlayerId,
+                    Connection = connection
+                };
+
                 if (ActiveSessions.TryGetValue(packet.Token, out var activeSession))
                 {
                     if (!activeSession.Connection.Id.Equals(connection.Id))
                     {
-                        if (ActiveSessions.TryUpdate(packet.Token, new ActiveSession
-                        {
-                            SessionId = packet.Token,
-                            PlayerId = playerSession.PlayerId,
-                            Connection = connection
-                        }, activeSession))
+
+
+                        if (ActiveSessions.TryUpdate(packet.Token, newSession, activeSession))
                         {
                             await connection.Send(new JoinSessionSuccessPacket()
                             {
@@ -73,12 +82,7 @@ namespace TOH.Server.Services
                 }
                 else
                 {
-                    if (ActiveSessions.TryAdd(packet.Token, new ActiveSession
-                    {
-                        SessionId = packet.Token,
-                        PlayerId = playerSession.PlayerId,
-                        Connection = connection
-                    }))
+                    if (ActiveSessions.TryAdd(packet.Token, newSession))
                     {
                         await connection.Send(new JoinSessionSuccessPacket()
                         {
@@ -117,7 +121,7 @@ namespace TOH.Server.Services
             await Task.Yield();
         }
 
-        public Task<ActiveSession> GetActiveSession(IConnection connection)
+        public Task<Session> GetActiveSession(IConnection connection)
         {
             var activeSession = ActiveSessions.FirstOrDefault(a => a.Value.Connection.Id.Equals(connection.Id)).Value;
 

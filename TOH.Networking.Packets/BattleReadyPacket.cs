@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using TOH.Common.BattleSystem;
+using TOH.Common.Data;
 using TOH.Network.Abstractions;
 
 namespace TOH.Network.Packets

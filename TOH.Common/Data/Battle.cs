@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using TOH.Common.Data;
 
 namespace TOH.Common.BattleSystem
 {
@@ -15,8 +17,7 @@ namespace TOH.Common.BattleSystem
     {
         public string Id { get; private set; }
         public BattleState State { get; private set; }
-        public BattlePlayer Player1 { get; private set; }
-        public BattlePlayer Player2 { get; private set; }
+        public List<BattlePlayer> Players { get; private set; }
 
         private DateTime StartTime;
 

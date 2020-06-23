@@ -15,4 +15,8 @@
     <PackageReference Include="protobuf-net.Grpc" Version="1.0.90" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="4.7.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TOH.Networking\TOH.Network.csproj" />
+  </ItemGroup>
 </Project>

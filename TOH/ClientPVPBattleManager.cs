@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using TOH.Common.BattleSystem;
+using TOH.Common.Data;
 
 namespace TOH
 {
     public class ClientBattleUnit : BattleUnit
     {
-        public BattleUnit BattleUnit { get; set; }
-        public ClientBattleUnit(BattleUnit battleUnit) : base(battleUnit.PlayerUnit)
+        public ClientBattleUnit(PlayerUnit playerUnit) : base(playerUnit)
         {
-            BattleUnit = battleUnit;
         }
     }
 
@@ -50,7 +49,7 @@ namespace TOH
 
                 foreach (var battleUnit in player.Units)
                 {
-                    var clientBattleUnit = new ClientBattleUnit(battleUnit);
+                    var clientBattleUnit = new ClientBattleUnit(battleUnit.PlayerUnit);
                     clientBattlePlayer.Units.Add(clientBattleUnit);
 
                     Units.Add(clientBattleUnit);

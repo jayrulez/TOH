@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TOH.Common.Data;
 using TOH.Network.Packets;
 using TOH.Server.Services;
 
@@ -13,17 +14,19 @@ namespace TOH.Server.Systems
         private readonly ILogger _logger;
         private readonly PVPBattleSystemService _battleSystemService;
         private readonly SessionService _sessionService;
+        private readonly PlayerManager _playerManager;
 
-        public List<ActiveSession> Sessions { get; private set; } = new List<ActiveSession>();
+        public List<Session> Sessions { get; private set; } = new List<Session>();
 
-        public PVPBattleLobbyService(PVPBattleSystemService battleSystemService, SessionService sessionService, ILogger<PVPBattleLobbyService> logger)
+        public PVPBattleLobbyService(PVPBattleSystemService battleSystemService, PlayerManager playerManager, SessionService sessionService, ILogger<PVPBattleLobbyService> logger)
         {
             _battleSystemService = battleSystemService;
+            _playerManager = playerManager;
             _sessionService = sessionService;
             _logger = logger;
         }
 
-        public Task JoinQueue(ActiveSession session)
+        public Task JoinQueue(Session session)
         {
             if (!Sessions.Any(c => c.SessionId.Equals(session.SessionId)))
             {
@@ -33,20 +36,35 @@ namespace TOH.Server.Systems
             return Task.CompletedTask;
         }
 
-        private async Task CreateBattle(ActiveSession session1, ActiveSession session2)
-        {
-            var battle = await _battleSystemService.CreateBattle(session1, session2);
+        //public Player GetPlayerFromSession(string sessionId)
+        //{
+        //    if (string.IsNullOrEmpty(sessionId))
+        //        return null;
 
-            var matchInfoPacket = new BattleInfoPacket
-            {
-                BattleId = battle.Id
-            };
+        //    var session = ActiveSessions[sessionId];
+        //    if (session == null)
+        //        return null;
 
-            await session1.Connection.Send(matchInfoPacket);
-            await session2.Connection.Send(matchInfoPacket);
+        //    var playerManager = _serviceProvider.GetRequiredService<PlayerManager>();
 
-            _logger.LogInformation($"Battle created: {battle.Id} with players '{session1.PlayerId}' and '{session2.PlayerId}'.");
-        }
+        //    var playerData = playerManager.GetPlayerById(session.PlayerId);
+
+        //    if (playerData == null)
+        //        return null;
+
+        //    var player = new Player
+        //    {
+        //        Id = playerData.Id,
+        //        Units = new List<PlayerUnit>()
+        //    };
+
+        //    foreach (var playerUnitData in playerData.Units)
+        //    {
+        //        player.Units.Add(new PlayerUnit(playerUnitData.Id, playerUnitData.Level, DataManager.Instance.GetUnit(playerUnitData.Id)));
+        //    }
+
+        //    return player;
+        //}
 
         public async Task Tick()
         {
@@ -69,7 +87,20 @@ namespace TOH.Server.Systems
                 {
                     Sessions.RemoveAll(session => matches.Any(m => m.SessionId.Equals(session.SessionId)));
 
-                    await CreateBattle(matches[0], matches[1]);
+                    var session1 = matches[0];
+                    var session2 = matches[1];
+
+                    var battle = await _battleSystemService.CreateBattle(session1, session2);
+
+                    var matchInfoPacket = new BattleInfoPacket
+                    {
+                        BattleId = battle.Id
+                    };
+
+                    await session1.Connection.Send(matchInfoPacket);
+                    await session2.Connection.Send(matchInfoPacket);
+
+                    _logger.LogInformation($"Battle created: {battle.Id} with players '{session1.PlayerId}' and '{session2.PlayerId}'.");
                 }
             }
         }

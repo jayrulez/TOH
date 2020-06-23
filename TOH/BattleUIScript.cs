@@ -2,7 +2,6 @@
 using Stride.Engine.Events;
 using Stride.UI;
 using Stride.UI.Controls;
-using System.Collections.Generic;
 using System.Linq;
 using TOH.Network.Packets;
 using TOH.Systems;
@@ -73,7 +72,7 @@ namespace TOH
 
                 if (BattleUnitTurnEventListener.TryReceive(out BattleUnitTurnPacket battleUnitTurnPacket))
                 {
-                    var unit = ClientPVPBattleManager.Instance.Battle.Units.FirstOrDefault(u => u.BattleUnit.PlayerUnit.Id == battleUnitTurnPacket.UnitId);
+                    var unit = ClientPVPBattleManager.Instance.Battle.Units.FirstOrDefault(u => u.PlayerUnit.Id == battleUnitTurnPacket.UnitId);
 
                     if (BattleInfoText != null && unit != null) // TODO: Unit id on server is different from one on client. Fix that
                     {

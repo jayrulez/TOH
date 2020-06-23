@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TOH.Network.Packets;
 using TOH.Server.Services;
+using static TOH.Server.Systems.PVPBattle;
 
 namespace TOH.Server.Systems
 {
@@ -11,18 +13,25 @@ namespace TOH.Server.Systems
     {
         private readonly ILogger _logger;
         private readonly SessionService _sessionService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
         private ConcurrentDictionary<string, PVPBattle> Battles = new ConcurrentDictionary<string, PVPBattle>();
 
-        public PVPBattleSystemService(SessionService sessionService, ILogger<PVPBattleSystemService> logger)
+        public PVPBattleSystemService(IServiceScopeFactory serviceScopeFactory, SessionService sessionService, ILogger<PVPBattleSystemService> logger)
         {
+            _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
             _sessionService = sessionService;
         }
 
-        public Task<PVPBattle> CreateBattle(ActiveSession session1, ActiveSession session2)
+        public Task<PVPBattle> CreateBattle(Session session1, Session session2)
         {
-            var battle = new PVPBattle(session1, session2, _logger);
+            var battlePlayers = new List<ServerBattlePlayer>();
+
+            battlePlayers.Add(new ServerBattlePlayer(session1));
+            battlePlayers.Add(new ServerBattlePlayer(session2));
+
+            var battle = new PVPBattle(_serviceScopeFactory, battlePlayers);
 
             Battles.TryAdd(battle.Id, battle);
 
@@ -68,7 +77,7 @@ namespace TOH.Server.Systems
 
                 //}
 
-                if (battle.Value.State == PVPBattle.BattleState.Ended)
+                if (battle.Value.State == PVPBattle.PVPBattleState.Ended)
                 {
                     Battles.Remove(battle.Key, out var _);
                 }

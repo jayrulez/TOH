@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TOH.Common.Data;
 
-namespace TOH.Common.BattleSystem
+namespace TOH.Common.Data
 {
     public enum BattleUnitState
     {

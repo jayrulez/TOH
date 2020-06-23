@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TOH.Common.BattleSystem
+namespace TOH.Common.Data
 {
     public class BattlePlayer
     {

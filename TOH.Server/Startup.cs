@@ -40,7 +40,7 @@ namespace TOH.Server
             {
                 options.UseLazyLoadingProxies();
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly(migrationsAssembly));
-            }, ServiceLifetime.Singleton);
+            });
 
             services.AddCodeFirstGrpc(config =>
             {
