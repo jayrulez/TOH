@@ -10,179 +10,178 @@ using TOH.Common.Data;
 using TOH.Network.Packets;
 using TOH.Systems;
 
-namespace TOH
+namespace TOH;
+
+public class BattleUIScript : SyncScript
 {
-    public class BattleUIScript : SyncScript
+    private UIComponent BattleInfoUI;
+    private TextBlock BattleInfoText;
+
+    private enum AssetLoadState
     {
-        private UIComponent BattleInfoUI;
-        private TextBlock BattleInfoText;
+        None,
+        Loading,
+        Loaded
+    }
 
-        private enum AssetLoadState
+    private enum BattleUIState
+    {
+        None,
+        ShowSkillList
+    }
+
+    private AssetLoadState LoadAssetState = AssetLoadState.None;
+    private BattleUIState UIState = BattleUIState.None;
+
+    private EventReceiver<BattleTurnInfoPacket> BattleTurnInfoEventListener = new EventReceiver<BattleTurnInfoPacket>(NetworkEvents.BattleTurnInfoPacketEventKey);
+    private EventReceiver<BattleUnitTurnPacket> BattleUnitTurnEventListener = new EventReceiver<BattleUnitTurnPacket>(NetworkEvents.BattleUnitTurnPacketEventKey);
+    private EventReceiver<BattleResultPacket> BattleResultEventListener = new EventReceiver<BattleResultPacket>(NetworkEvents.BattleResultPacketEventKey);
+
+
+    private StackPanel SkillsListContainer;
+
+
+    public override void Start()
+    {
+        BattleInfoUI = Entity.Get<UIComponent>();
+
+        if (BattleInfoUI != null)
         {
-            None,
-            Loading,
-            Loaded
+            BattleInfoText = BattleInfoUI.Page.RootElement.FindVisualChildOfType<TextBlock>();
+            SkillsListContainer = BattleInfoUI.Page.RootElement.FindVisualChildOfType<StackPanel>();
         }
+    }
 
-        private enum BattleUIState
+    private void LoadBattleAssets()
+    {
+        LoadAssetState = AssetLoadState.Loading;
+
+        // load assets here
+
+        LoadAssetState = AssetLoadState.Loaded;
+    }
+
+    public override void Update()
+    {
+        if (ClientPVPBattleManager.Instance.Battle.State == ClientPVPBattle.BattleState.None)
         {
-            None,
-            ShowSkillList
+            ClientPVPBattleManager.Instance.Battle.SetState(ClientPVPBattle.BattleState.LoadAssets);
         }
-
-        private AssetLoadState LoadAssetState = AssetLoadState.None;
-        private BattleUIState UIState = BattleUIState.None;
-
-        private EventReceiver<BattleTurnInfoPacket> BattleTurnInfoEventListener = new EventReceiver<BattleTurnInfoPacket>(NetworkEvents.BattleTurnInfoPacketEventKey);
-        private EventReceiver<BattleUnitTurnPacket> BattleUnitTurnEventListener = new EventReceiver<BattleUnitTurnPacket>(NetworkEvents.BattleUnitTurnPacketEventKey);
-        private EventReceiver<BattleResultPacket> BattleResultEventListener = new EventReceiver<BattleResultPacket>(NetworkEvents.BattleResultPacketEventKey);
-
-
-        private StackPanel SkillsListContainer;
-
-
-        public override void Start()
+        else if (ClientPVPBattleManager.Instance.Battle.State == ClientPVPBattle.BattleState.LoadAssets)
         {
-            BattleInfoUI = Entity.Get<UIComponent>();
-
-            if (BattleInfoUI != null)
+            if (LoadAssetState == AssetLoadState.None)
+                LoadBattleAssets();
+            if (LoadAssetState == AssetLoadState.Loading)
             {
-                BattleInfoText = BattleInfoUI.Page.RootElement.FindVisualChildOfType<TextBlock>();
-                SkillsListContainer = BattleInfoUI.Page.RootElement.FindVisualChildOfType<StackPanel>();
+                // update UI with progress
+            }
+
+            if (LoadAssetState == AssetLoadState.Loaded)
+            {
+                ClientPVPBattleManager.Instance.Battle.SetState(ClientPVPBattle.BattleState.Update);
             }
         }
-
-        private void LoadBattleAssets()
+        else if (ClientPVPBattleManager.Instance.Battle.State == ClientPVPBattle.BattleState.Update)
         {
-            LoadAssetState = AssetLoadState.Loading;
+            // update battle ui state here
 
-            // load assets here
-
-            LoadAssetState = AssetLoadState.Loaded;
-        }
-
-        public override void Update()
-        {
-            if (ClientPVPBattleManager.Instance.Battle.State == ClientPVPBattle.BattleState.None)
+            if (BattleUnitTurnEventListener.TryReceive(out BattleUnitTurnPacket battleUnitTurnPacket))
             {
-                ClientPVPBattleManager.Instance.Battle.SetState(ClientPVPBattle.BattleState.LoadAssets);
-            }
-            else if (ClientPVPBattleManager.Instance.Battle.State == ClientPVPBattle.BattleState.LoadAssets)
-            {
-                if (LoadAssetState == AssetLoadState.None)
-                    LoadBattleAssets();
-                if (LoadAssetState == AssetLoadState.Loading)
+                var unit = ClientPVPBattleManager.Instance.Battle.Units.FirstOrDefault(u => u.PlayerUnit.Id == battleUnitTurnPacket.UnitId);
+
+                ClientPVPBattleManager.Instance.Battle.ActiveUnit = unit;
+
+                var session = GameDatabase.Instance.GetSession();
+
+                var myUnits = ClientPVPBattleManager.Instance.Battle.Players.FirstOrDefault(p => p.Id == session.PlayerId)?.Units;
+
+                var currentUnit = myUnits.FirstOrDefault(u => u.PlayerUnit.Id == unit.PlayerUnit.Id);
+
+                if (currentUnit != null)
                 {
-                    // update UI with progress
-                }
+                    // This is my unit
+                    BattleInfoText.Text += $"My Unit '{unit.PlayerUnit.Unit.Name}' is taking a turn.\n";
 
-                if (LoadAssetState == AssetLoadState.Loaded)
-                {
-                    ClientPVPBattleManager.Instance.Battle.SetState(ClientPVPBattle.BattleState.Update);
-                }
-            }
-            else if (ClientPVPBattleManager.Instance.Battle.State == ClientPVPBattle.BattleState.Update)
-            {
-                // update battle ui state here
-
-                if (BattleUnitTurnEventListener.TryReceive(out BattleUnitTurnPacket battleUnitTurnPacket))
-                {
-                    var unit = ClientPVPBattleManager.Instance.Battle.Units.FirstOrDefault(u => u.PlayerUnit.Id == battleUnitTurnPacket.UnitId);
-
-                    ClientPVPBattleManager.Instance.Battle.ActiveUnit = unit;
-
-                    var session = GameDatabase.Instance.GetSession();
-
-                    var myUnits = ClientPVPBattleManager.Instance.Battle.Players.FirstOrDefault(p => p.Id == session.PlayerId)?.Units;
-
-                    var currentUnit = myUnits.FirstOrDefault(u => u.PlayerUnit.Id == unit.PlayerUnit.Id);
-
-                    if (currentUnit != null)
-                    {
-                        // This is my unit
-                        BattleInfoText.Text += $"My Unit '{unit.PlayerUnit.Unit.Name}' is taking a turn.\n";
-
-                        // Update skill list UI
-                        UIState = BattleUIState.ShowSkillList;
-                    }
-                    else
-                    {
-                        // This is the opponent's unit.
-                        BattleInfoText.Text += $"Opponent's Unit '{unit.PlayerUnit.Unit.Name}' is taking a turn.\n";
-
-                        //Hide skill list UI
-                        UIState = BattleUIState.None;
-                    }
-                }
-                else if (BattleTurnInfoEventListener.TryReceive(out BattleTurnInfoPacket battleTurnInfoPacket))
-                {
-                    if (BattleInfoText != null)
-                    {
-                        BattleInfoText.Text += $"'{battleTurnInfoPacket.Unit.PlayerUnit.Unit.Name}' used '{battleTurnInfoPacket.SkillId}' on '{string.Join(", ", battleTurnInfoPacket.Targets.Select(t => t.PlayerUnit.Unit.Name).ToList())}'\n";
-                    }
-                }
-                else if (BattleResultEventListener.TryReceive(out BattleResultPacket battleResultPacket))
-                {
-                    ClientPVPBattleManager.Instance.Battle.Win = battleResultPacket.Status == BattleResultStatus.Win;
-                    ClientPVPBattleManager.Instance.Battle.SetState(ClientPVPBattle.BattleState.Result);
-                }
-
-                if (UIState == BattleUIState.None)
-                {
-                    HideSkillsList();
-                }
-                else if (UIState == BattleUIState.ShowSkillList)
-                {
-                    if (ClientPVPBattleManager.Instance.Battle.ActiveUnit != null)
-                    {
-                        PopulateSkillsList(ClientPVPBattleManager.Instance.Battle.ActiveUnit);
-                    }
+                    // Update skill list UI
+                    UIState = BattleUIState.ShowSkillList;
                 }
                 else
                 {
+                    // This is the opponent's unit.
+                    BattleInfoText.Text += $"Opponent's Unit '{unit.PlayerUnit.Unit.Name}' is taking a turn.\n";
+
+                    //Hide skill list UI
+                    UIState = BattleUIState.None;
                 }
             }
-            else if (ClientPVPBattleManager.Instance.Battle.State == ClientPVPBattle.BattleState.Result)
+            else if (BattleTurnInfoEventListener.TryReceive(out BattleTurnInfoPacket battleTurnInfoPacket))
             {
-                BattleInfoText.Text = ClientPVPBattleManager.Instance.Battle.Win ? "Victory" : "Defeated";
+                if (BattleInfoText != null)
+                {
+                    BattleInfoText.Text += $"'{battleTurnInfoPacket.Unit.PlayerUnit.Unit.Name}' used '{battleTurnInfoPacket.SkillId}' on '{string.Join(", ", battleTurnInfoPacket.Targets.Select(t => t.PlayerUnit.Unit.Name).ToList())}'\n";
+                }
+            }
+            else if (BattleResultEventListener.TryReceive(out BattleResultPacket battleResultPacket))
+            {
+                ClientPVPBattleManager.Instance.Battle.Win = battleResultPacket.Status == BattleResultStatus.Win;
+                ClientPVPBattleManager.Instance.Battle.SetState(ClientPVPBattle.BattleState.Result);
+            }
+
+            if (UIState == BattleUIState.None)
+            {
+                HideSkillsList();
+            }
+            else if (UIState == BattleUIState.ShowSkillList)
+            {
+                if (ClientPVPBattleManager.Instance.Battle.ActiveUnit != null)
+                {
+                    PopulateSkillsList(ClientPVPBattleManager.Instance.Battle.ActiveUnit);
+                }
+            }
+            else
+            {
             }
         }
-
-        private void PopulateSkillsList(ClientBattleUnit unit)
+        else if (ClientPVPBattleManager.Instance.Battle.State == ClientPVPBattle.BattleState.Result)
         {
-            if (SkillsListContainer.Visibility != Visibility.Visible)
+            BattleInfoText.Text = ClientPVPBattleManager.Instance.Battle.Win ? "Victory" : "Defeated";
+        }
+    }
+
+    private void PopulateSkillsList(ClientBattleUnit unit)
+    {
+        if (SkillsListContainer.Visibility != Visibility.Visible)
+        {
+            var skills = unit.PlayerUnit.Unit.Skills;
+
+            var skill1Button = SkillsListContainer.FindVisualChildOfType<Button>("Skill1");
+            skill1Button.FindVisualChildOfType<TextBlock>().Text = skills[UnitSkillSlot.Default]?.Name;
+            skill1Button.Click += delegate
             {
-                var skills = unit.PlayerUnit.Unit.Skills;
+                ClientPVPBattleManager.Instance.Battle.SelectedSkill = skills[UnitSkillSlot.Default];
+            };
 
-                var skill1Button = SkillsListContainer.FindVisualChildOfType<Button>("Skill1");
-                skill1Button.FindVisualChildOfType<TextBlock>().Text = skills[UnitSkillSlot.Default]?.Name;
-                skill1Button.Click += delegate
-                {
-                    ClientPVPBattleManager.Instance.Battle.SelectedSkill = skills[UnitSkillSlot.Default];
-                };
+            var skill2Button = SkillsListContainer.FindVisualChildOfType<Button>("Skill2");
+            skill2Button.FindVisualChildOfType<TextBlock>().Text = skills[UnitSkillSlot.Second]?.Name;
+            skill2Button.Click += delegate
+            {
+                ClientPVPBattleManager.Instance.Battle.SelectedSkill = skills[UnitSkillSlot.Second];
+            };
 
-                var skill2Button = SkillsListContainer.FindVisualChildOfType<Button>("Skill2");
-                skill2Button.FindVisualChildOfType<TextBlock>().Text = skills[UnitSkillSlot.Second]?.Name;
-                skill2Button.Click += delegate
-                {
-                    ClientPVPBattleManager.Instance.Battle.SelectedSkill = skills[UnitSkillSlot.Second];
-                };
+            var skill3Button = SkillsListContainer.FindVisualChildOfType<Button>("Skill3");
+            skill3Button.FindVisualChildOfType<TextBlock>().Text = skills[UnitSkillSlot.Third]?.Name;
+            skill3Button.Click += delegate
+            {
+                ClientPVPBattleManager.Instance.Battle.SelectedSkill = skills[UnitSkillSlot.Third];
+            };
 
-                var skill3Button = SkillsListContainer.FindVisualChildOfType<Button>("Skill3");
-                skill3Button.FindVisualChildOfType<TextBlock>().Text = skills[UnitSkillSlot.Third]?.Name;
-                skill3Button.Click += delegate
-                {
-                    ClientPVPBattleManager.Instance.Battle.SelectedSkill = skills[UnitSkillSlot.Third];
-                };
-
-                SkillsListContainer.Visibility = Visibility.Visible;
-            }
+            SkillsListContainer.Visibility = Visibility.Visible;
         }
+    }
 
-        private void HideSkillsList()
-        {
-            if (SkillsListContainer.Visibility != Visibility.Collapsed)
-                SkillsListContainer.Visibility = Visibility.Collapsed;
-        }
+    private void HideSkillsList()
+    {
+        if (SkillsListContainer.Visibility != Visibility.Collapsed)
+            SkillsListContainer.Visibility = Visibility.Collapsed;
     }
 }

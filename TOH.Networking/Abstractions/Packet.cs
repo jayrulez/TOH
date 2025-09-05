@@ -1,39 +1,38 @@
 ﻿using System;
 
-namespace TOH.Network.Abstractions
+namespace TOH.Network.Abstractions;
+
+public class Packet
 {
-    public class Packet
+    private string _packetId;
+    private byte[] _data;
+
+    public string PacketId
     {
-        private string _packetId;
-        private byte[] _data;
-
-        public string PacketId
+        get
         {
-            get
+            if (string.IsNullOrEmpty(_packetId))
             {
-                if (string.IsNullOrEmpty(_packetId))
-                {
-                    _packetId = Guid.NewGuid().ToString();
-                }
-
-                return _packetId;
+                _packetId = Guid.NewGuid().ToString();
             }
 
-            set
-            {
-                _packetId = value;
-            }
+            return _packetId;
         }
 
-        public string Type { get; set; }
-        public byte[] GetData()
+        set
         {
-            return _data;
+            _packetId = value;
         }
+    }
 
-        public void SetData(byte[] data)
-        {
-            _data = data;
-        }
+    public string Type { get; set; }
+    public byte[] GetData()
+    {
+        return _data;
+    }
+
+    public void SetData(byte[] data)
+    {
+        _data = data;
     }
 }

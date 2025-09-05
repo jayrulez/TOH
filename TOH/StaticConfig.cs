@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TOH
+namespace TOH;
+
+public static class StaticConfig
 {
-    public static class StaticConfig
-    {
-        public static string SessionId { get; set; }
-    }
+    public static string SessionId { get; set; }
 }

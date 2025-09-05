@@ -1,8 +1,7 @@
-﻿namespace TOH.Network.Server
+﻿namespace TOH.Network.Server;
+
+public class ServerOptions
 {
-    public class ServerOptions
-    {
-        public string IpAddress { get; set; }
-        public int Port { get; set; }
-    }
+    public string IpAddress { get; set; }
+    public int Port { get; set; }
 }

@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace TOH.Common.Data
+namespace TOH.Common.Data;
+
+public class PlayerModel
 {
-    public class PlayerModel
-    {
-        public int Id { get; set; }
-        public List<PlayerUnitModel> Units { get; set; }
-    }
+    public int Id { get; set; }
+    public List<PlayerUnitModel> Units { get; set; }
 }

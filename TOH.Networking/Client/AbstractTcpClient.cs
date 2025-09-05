@@ -2,44 +2,43 @@
 using TOH.Network.Abstractions;
 using TOH.Network.Common;
 
-namespace TOH.Network.Client
+namespace TOH.Network.Client;
+
+public enum TcpClientState
 {
-    public enum TcpClientState
+    None,
+    Connecting,
+    Connected
+}
+
+public abstract class AbstractTcpClient
+{
+    private readonly TcpClientOptions _clientOptions;
+
+    public TcpClientState State;
+
+    public AbstractTcpClient(TcpClientOptions clientOptions)
     {
-        None,
-        Connecting,
-        Connected
+        _clientOptions = clientOptions;
+        State = TcpClientState.None;
     }
 
-    public abstract class AbstractTcpClient
+    public IConnection Connection { get; private set; }
+
+    public IConnection Connect()
     {
-        private readonly TcpClientOptions _clientOptions;
+        State = TcpClientState.Connecting;
 
-        public TcpClientState State;
-
-        public AbstractTcpClient(TcpClientOptions clientOptions)
+        if (Connection == null || Connection.IsClosed)
         {
-            _clientOptions = clientOptions;
-            State = TcpClientState.None;
+            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            socket.Connect(_clientOptions.Host, _clientOptions.Port);
+
+            Connection = new TcpConnection(socket, new JsonPacketConverter());
         }
 
-        public IConnection Connection { get; private set; }
+        State = TcpClientState.Connected;
 
-        public IConnection Connect()
-        {
-            State = TcpClientState.Connecting;
-
-            if (Connection == null || Connection.IsClosed)
-            {
-                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                socket.Connect(_clientOptions.Host, _clientOptions.Port);
-
-                Connection = new TcpConnection(socket, new JsonPacketConverter());
-            }
-
-            State = TcpClientState.Connected;
-
-            return Connection;
-        }
+        return Connection;
     }
 }

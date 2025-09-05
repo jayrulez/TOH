@@ -13,208 +13,207 @@ using TOH.Network.Client;
 using TOH.Network.Packets;
 using TOH.Systems;
 
-namespace TOH
+namespace TOH;
+
+public class StartupManagerScript : SyncScript
 {
-    public class StartupManagerScript : SyncScript
+    public enum StartupState
     {
-        public enum StartupState
+        None,
+        InitializeData,
+        ConnectToServer,
+        CheckSession
+    }
+
+    public enum CheckSessionState
+    {
+        None,
+        Checking,
+        CheckFailed,
+        Joining,
+        JoinFailed,
+        JoinSucceeded
+    }
+
+    private StartupState State = StartupState.None;
+    private CheckSessionState SessionState;
+    private UIComponent StartupUI;
+    private TextBlock StartupStatusText;
+
+    private GameManager GameManager;
+
+
+    private EventReceiver<JoinSessionSuccessPacket> JoinSessionSuccessEventListener = new EventReceiver<JoinSessionSuccessPacket>(NetworkEvents.JoinSessionSuccessPacketEventKey);
+    private EventReceiver<JoinSessionFailedPacket> JoinSessionFailedEventListener = new EventReceiver<JoinSessionFailedPacket>(NetworkEvents.JoinSessionFailedPacketEventKey);
+
+    public override void Start()
+    {
+        StartupUI = Entity.Get<UIComponent>();
+
+        if (StartupUI != null)
         {
-            None,
-            InitializeData,
-            ConnectToServer,
-            CheckSession
+            StartupStatusText = StartupUI.Page.RootElement.FindVisualChildOfType<TextBlock>();
         }
 
-        public enum CheckSessionState
+        var game = (TOHGame)Game;
+
+        GameManager = game.GameManager;
+    }
+
+    public override void Update()
+    {
+        if (State == StartupState.None)
         {
-            None,
-            Checking,
-            CheckFailed,
-            Joining,
-            JoinFailed,
-            JoinSucceeded
+            State = StartupState.InitializeData;
         }
-
-        private StartupState State = StartupState.None;
-        private CheckSessionState SessionState;
-        private UIComponent StartupUI;
-        private TextBlock StartupStatusText;
-
-        private GameManager GameManager;
-
-
-        private EventReceiver<JoinSessionSuccessPacket> JoinSessionSuccessEventListener = new EventReceiver<JoinSessionSuccessPacket>(NetworkEvents.JoinSessionSuccessPacketEventKey);
-        private EventReceiver<JoinSessionFailedPacket> JoinSessionFailedEventListener = new EventReceiver<JoinSessionFailedPacket>(NetworkEvents.JoinSessionFailedPacketEventKey);
-
-        public override void Start()
+        else if (State == StartupState.InitializeData)
         {
-            StartupUI = Entity.Get<UIComponent>();
-
-            if (StartupUI != null)
-            {
-                StartupStatusText = StartupUI.Page.RootElement.FindVisualChildOfType<TextBlock>();
-            }
-
-            var game = (TOHGame)Game;
-
-            GameManager = game.GameManager;
+            InitializeData();
         }
-
-        public override void Update()
+        else if (State == StartupState.ConnectToServer)
         {
-            if (State == StartupState.None)
-            {
-                State = StartupState.InitializeData;
-            }
-            else if (State == StartupState.InitializeData)
-            {
-                InitializeData();
-            }
-            else if (State == StartupState.ConnectToServer)
-            {
-                ConnectToServer();
-            }
-            else if (State == StartupState.CheckSession)
-            {
-                CheckSession();
-            }
+            ConnectToServer();
         }
-
-        private void InitializeData()
+        else if (State == StartupState.CheckSession)
         {
-            if (ConfigManager.Instance.State == ConfigManagerState.None)
+            CheckSession();
+        }
+    }
+
+    private void InitializeData()
+    {
+        if (ConfigManager.Instance.State == ConfigManagerState.None)
+        {
+            Task.Run(async () =>
             {
-                Task.Run(async () =>
+                try
                 {
-                    try
-                    {
-                        var dataPath = Path.Combine(PlatformFolders.ApplicationDataDirectory, "Config");
+                    var dataPath = Path.Combine(PlatformFolders.ApplicationDataDirectory, "Config");
 
-                        await ConfigManager.Instance.Initialize(dataPath);
-                    }
-                    catch (Exception ex)
-                    {
-                        StartupStatusText.Text = "Failed to initialize game data.";
+                    await ConfigManager.Instance.Initialize(dataPath);
+                }
+                catch (Exception ex)
+                {
+                    StartupStatusText.Text = "Failed to initialize game data.";
 
-                        Log.Error(ex.Message);
-                    }
-                });
-            }
-            else if (ConfigManager.Instance.State == ConfigManagerState.Initialized)
+                    Log.Error(ex.Message);
+                }
+            });
+        }
+        else if (ConfigManager.Instance.State == ConfigManagerState.Initialized)
+        {
+            State = StartupState.ConnectToServer;
+        }
+        else
+        {
+            StartupStatusText.Text = "Initializing game data.";
+        }
+    }
+
+    private void ConnectToServer()
+    {
+        if (GameManager.NetworkClient != null)
+        {
+            if (GameManager.NetworkClient.State == TcpClientState.None)
             {
-                State = StartupState.ConnectToServer;
+                try
+                {
+                    GameManager.StartNetworkTask();
+                }
+                catch (Exception)
+                {
+                    StartupStatusText.Text = "An error occured while connecting to the network.";
+                }
+            }
+            else if (GameManager.NetworkClient.State == TcpClientState.Connected)
+            {
+                SessionState = CheckSessionState.None;
+
+                State = StartupState.CheckSession;
             }
             else
             {
-                StartupStatusText.Text = "Initializing game data.";
+                StartupStatusText.Text = "Connecting to server.";
             }
         }
+    }
 
-        private void ConnectToServer()
+    private void CheckSession()
+    {
+        if (SessionState == CheckSessionState.None)
         {
-            if (GameManager.NetworkClient != null)
-            {
-                if (GameManager.NetworkClient.State == TcpClientState.None)
-                {
-                    try
-                    {
-                        GameManager.StartNetworkTask();
-                    }
-                    catch (Exception)
-                    {
-                        StartupStatusText.Text = "An error occured while connecting to the network.";
-                    }
-                }
-                else if (GameManager.NetworkClient.State == TcpClientState.Connected)
-                {
-                    SessionState = CheckSessionState.None;
+            SessionState = CheckSessionState.Checking;
 
-                    State = StartupState.CheckSession;
-                }
-                else
-                {
-                    StartupStatusText.Text = "Connecting to server.";
-                }
+            var session = GameDatabase.Instance.GetSession();
+            //var sessionId = StaticConfig.SessionId;
+
+            if (session == null)
+            {
+                SessionState = CheckSessionState.CheckFailed;
             }
-        }
-
-        private void CheckSession()
-        {
-            if (SessionState == CheckSessionState.None)
+            else
             {
-                SessionState = CheckSessionState.Checking;
+                var response = GameManager.ServiceClient.PlayerService.GetPlayerSessionById(new IdentifierData<string> { Identifier = session.SessionId });
 
-                var session = GameDatabase.Instance.GetSession();
-                //var sessionId = StaticConfig.SessionId;
-
-                if (session == null)
+                if (!response.IsSuccessful || response.Data.IsExpired)
                 {
                     SessionState = CheckSessionState.CheckFailed;
                 }
                 else
                 {
-                    var response = GameManager.ServiceClient.PlayerService.GetPlayerSessionById(new IdentifierData<string> { Identifier = session.SessionId });
-
-                    if (!response.IsSuccessful || response.Data.IsExpired)
+                    GameManager.NetworkClient.Connection.Send(new JoinSessionPacket
                     {
-                        SessionState = CheckSessionState.CheckFailed;
-                    }
-                    else
-                    {
-                        GameManager.NetworkClient.Connection.Send(new JoinSessionPacket
-                        {
-                            Token = session.SessionId
-                        });
+                        Token = session.SessionId
+                    });
 
 
-                        StartupStatusText.Text = "Joining session.";
+                    StartupStatusText.Text = "Joining session.";
 
-                        SessionState = CheckSessionState.Joining;
-                    }
+                    SessionState = CheckSessionState.Joining;
                 }
             }
-            else if (SessionState == CheckSessionState.Checking)
+        }
+        else if (SessionState == CheckSessionState.Checking)
+        {
+            StartupStatusText.Text = "Checking player data.";
+        }
+        else if (SessionState == CheckSessionState.CheckFailed)
+        {
+            GameEvents.ChangeStateEventKey.Broadcast(GameState.Login);
+        }
+        else if (SessionState == CheckSessionState.Joining)
+        {
+            if (JoinSessionFailedEventListener.TryReceive(out JoinSessionFailedPacket joinSessionFailedPacket))
             {
-                StartupStatusText.Text = "Checking player data.";
-            }
-            else if (SessionState == CheckSessionState.CheckFailed)
-            {
-                GameEvents.ChangeStateEventKey.Broadcast(GameState.Login);
-            }
-            else if (SessionState == CheckSessionState.Joining)
-            {
-                if (JoinSessionFailedEventListener.TryReceive(out JoinSessionFailedPacket joinSessionFailedPacket))
+                SessionState = CheckSessionState.JoinFailed;
+
+                if (joinSessionFailedPacket.Code == JoinSessionFailCode.InvalidSession)
                 {
-                    SessionState = CheckSessionState.JoinFailed;
+                    GameDatabase.Instance.RemoveSession();
 
-                    if (joinSessionFailedPacket.Code == JoinSessionFailCode.InvalidSession)
-                    {
-                        GameDatabase.Instance.RemoveSession();
-
-                        // Kick back to startup
-                        GameEvents.ChangeStateEventKey.Broadcast(GameState.Startup);
-                    }
-                    else
-                    {
-                        StartupStatusText.Text = "Failed to join session on server.";
-
-                        //TODO: Setup retry UI
-                    }
+                    // Kick back to startup
+                    GameEvents.ChangeStateEventKey.Broadcast(GameState.Startup);
                 }
-
-                if (JoinSessionSuccessEventListener.TryReceive(out JoinSessionSuccessPacket joinSessionSuccessPacket))
+                else
                 {
-                    SessionState = CheckSessionState.JoinSucceeded;
+                    StartupStatusText.Text = "Failed to join session on server.";
+
+                    //TODO: Setup retry UI
                 }
             }
-            else if (SessionState == CheckSessionState.JoinSucceeded)
+
+            if (JoinSessionSuccessEventListener.TryReceive(out JoinSessionSuccessPacket joinSessionSuccessPacket))
             {
-                GameEvents.ChangeStateEventKey.Broadcast(GameState.Home);
+                SessionState = CheckSessionState.JoinSucceeded;
             }
-            else if (SessionState == CheckSessionState.JoinFailed)
-            {
-                //
-            }
+        }
+        else if (SessionState == CheckSessionState.JoinSucceeded)
+        {
+            GameEvents.ChangeStateEventKey.Broadcast(GameState.Home);
+        }
+        else if (SessionState == CheckSessionState.JoinFailed)
+        {
+            //
         }
     }
 }

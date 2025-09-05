@@ -1,9 +1,8 @@
 ﻿using TOH.Network.Abstractions;
 
-namespace TOH.Network.Packets
+namespace TOH.Network.Packets;
+
+public class JoinSessionPacket : Packet
 {
-    public class JoinSessionPacket : Packet
-    {
-        public string Token { get; set; }
-    }
+    public string Token { get; set; }
 }

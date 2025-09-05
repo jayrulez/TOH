@@ -1,9 +1,8 @@
 ﻿using TOH.Network.Abstractions;
 
-namespace TOH.Network.Packets
+namespace TOH.Network.Packets;
+
+public class PongPacket : Packet
 {
-    public class PongPacket : Packet
-    {
-        public string PingId { get; set; }
-    }
+    public string PingId { get; set; }
 }

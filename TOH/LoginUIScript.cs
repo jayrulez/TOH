@@ -5,113 +5,112 @@ using Stride.UI.Events;
 using System.Threading.Tasks;
 using TOH.Systems;
 
-namespace TOH
+namespace TOH;
+
+public class LoginUIScript : SyncScript
 {
-    public class LoginUIScript : SyncScript
+    // Declared public member fields and properties will show in the game studio
+    private UIComponent LoginUI;
+    private EditText UsernameInput;
+    private Button LoginButton;
+    private TextBlock LoginStatusText;
+
+    private enum LoginState
     {
-        // Declared public member fields and properties will show in the game studio
-        private UIComponent LoginUI;
-        private EditText UsernameInput;
-        private Button LoginButton;
-        private TextBlock LoginStatusText;
+        None,
+        Processing,
+        Successful,
+        Failed
+    }
 
-        private enum LoginState
+    private LoginState PlayerLoginState = LoginState.None;
+    private GameManager GameManager;
+
+    public override void Start()
+    {
+
+        var game = (TOHGame)Game;
+
+        GameManager = game.GameManager;
+
+
+        // Initialization of the script.
+        LoginUI = Entity.Get<UIComponent>();
+
+        if (LoginUI != null)
         {
-            None,
-            Processing,
-            Successful,
-            Failed
-        }
+            UsernameInput = LoginUI.Page.RootElement.FindVisualChildOfType<EditText>();
+            LoginButton = LoginUI.Page.RootElement.FindVisualChildOfType<Button>();
 
-        private LoginState PlayerLoginState = LoginState.None;
-        private GameManager GameManager;
+            LoginStatusText = LoginUI.Page.RootElement.FindVisualChildOfType<TextBlock>("LoginStatusText");
+            LoginStatusText.Visibility = Visibility.Collapsed;
 
-        public override void Start()
-        {
-
-            var game = (TOHGame)Game;
-
-            GameManager = game.GameManager;
-
-
-            // Initialization of the script.
-            LoginUI = Entity.Get<UIComponent>();
-
-            if (LoginUI != null)
+            if (LoginButton != null)
             {
-                UsernameInput = LoginUI.Page.RootElement.FindVisualChildOfType<EditText>();
-                LoginButton = LoginUI.Page.RootElement.FindVisualChildOfType<Button>();
-
-                LoginStatusText = LoginUI.Page.RootElement.FindVisualChildOfType<TextBlock>("LoginStatusText");
-                LoginStatusText.Visibility = Visibility.Collapsed;
-
-                if (LoginButton != null)
+                LoginButton.Click += (object sender, RoutedEventArgs args) =>
                 {
-                    LoginButton.Click += (object sender, RoutedEventArgs args) =>
+                    DoLogin();
+                };
+            }
+        }
+    }
+
+    private void DoLogin()
+    {
+        if (!string.IsNullOrEmpty(UsernameInput?.Text))
+        {
+            LoginButton.IsEnabled = false;
+
+            PlayerLoginState = LoginState.Processing;
+
+            Task.Factory.StartNew(() =>
+            {
+                var loginResponse = GameManager.ServiceClient.PlayerService.Login(new Common.Services.IdentifierData<string> { Identifier = UsernameInput.Text.Trim() });
+
+                if (loginResponse.IsSuccessful)
+                {
+                    GameDatabase.Instance.SetSession(new GameDatabase.Session
                     {
-                        DoLogin();
-                    };
+                        SessionId = loginResponse.Data.Id,
+                        PlayerId = loginResponse.Data.PlayerId
+                    });
+
+                    PlayerLoginState = LoginState.Successful;
                 }
-            }
-        }
-
-        private void DoLogin()
-        {
-            if (!string.IsNullOrEmpty(UsernameInput?.Text))
-            {
-                LoginButton.IsEnabled = false;
-
-                PlayerLoginState = LoginState.Processing;
-
-                Task.Factory.StartNew(() =>
+                else
                 {
-                    var loginResponse = GameManager.ServiceClient.PlayerService.Login(new Common.Services.IdentifierData<string> { Identifier = UsernameInput.Text.Trim() });
-
-                    if (loginResponse.IsSuccessful)
-                    {
-                        GameDatabase.Instance.SetSession(new GameDatabase.Session
-                        {
-                            SessionId = loginResponse.Data.Id,
-                            PlayerId = loginResponse.Data.PlayerId
-                        });
-
-                        PlayerLoginState = LoginState.Successful;
-                    }
-                    else
-                    {
-                        PlayerLoginState = LoginState.Failed;
-                    }
-                }).ContinueWith((Task task) =>
-                {
-                    LoginButton.IsEnabled = true;
-                });
-            }
+                    PlayerLoginState = LoginState.Failed;
+                }
+            }).ContinueWith((Task task) =>
+            {
+                LoginButton.IsEnabled = true;
+            });
         }
+    }
 
-        public override void Update()
+    public override void Update()
+    {
+        if (PlayerLoginState == LoginState.None)
         {
-            if (PlayerLoginState == LoginState.None)
-            {
 
-            }
-            else if (PlayerLoginState == LoginState.Processing)
-            {
-                LoginStatusText.Visibility = Visibility.Visible;
-                LoginStatusText.Text = "Processing login.";
-            }
-            else if (PlayerLoginState == LoginState.Successful)
-            {
-                LoginStatusText.Visibility = Visibility.Visible;
-                LoginStatusText.Text = "Login Successful";
-                PlayerLoginState = LoginState.None;
-                GameEvents.ChangeStateEventKey.Broadcast(GameState.Startup);
-            }
-            else if (PlayerLoginState == LoginState.Failed)
-            {
+        }
+        else if (PlayerLoginState == LoginState.Processing)
+        {
+            LoginStatusText.Visibility = Visibility.Visible;
+            LoginStatusText.Text = "Processing login.";
+        }
+        else if (PlayerLoginState == LoginState.Successful)
+        {
+            LoginStatusText.Visibility = Visibility.Visible;
+            LoginStatusText.Text = "Login Successful";
+            PlayerLoginState = LoginState.None;
+            GameEvents.ChangeStateEventKey.Broadcast(GameState.Startup);
+        }
+        else if (PlayerLoginState == LoginState.Failed)
+        {
 
-                LoginStatusText.Visibility = Visibility.Visible;
-                LoginStatusText.Text = "Login failed.";
-            }
+            LoginStatusText.Visibility = Visibility.Visible;
+            LoginStatusText.Text = "Login failed.";
         }
     }
 }

@@ -6,99 +6,98 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TOH.Network.Common
+namespace TOH.Network.Common;
+
+public class JsonPacketConverter : IPacketConverter
 {
-    public class JsonPacketConverter : IPacketConverter
+    private const string PacketTerminator = "::+**+::";
+    public T FromBytes<T>(byte[] packetBytes) where T : Packet
     {
-        private const string PacketTerminator = "::+**+::";
-        public T FromBytes<T>(byte[] packetBytes) where T : Packet
+        try
         {
-            try
-            {
-                var data = Encoding.UTF8.GetString(packetBytes).Trim('\0');
+            var data = Encoding.UTF8.GetString(packetBytes).Trim('\0');
 
-                var packet = JsonConvert.DeserializeObject<T>(data);
+            var packet = JsonConvert.DeserializeObject<T>(data);
 
-                packet.SetData(packetBytes);
+            packet.SetData(packetBytes);
 
-                return packet;
-            }
-            catch (Exception)
-            {
-                return default(T);
-            }
+            return packet;
+        }
+        catch (Exception)
+        {
+            return default(T);
+        }
+    }
+
+    public bool CanUnwrap<T>(Packet packet) where T : Packet
+    {
+        return packet.Type.Equals(typeof(T).FullName);
+    }
+
+    public async IAsyncEnumerable<T> StreamFromBytes<T>(byte[] streamBytes) where T : Packet
+    {
+        var packets = new List<Packet>();
+        var data = Encoding.UTF8.GetString(streamBytes).Trim('\0');
+
+        var packetsData = data.Split(new string[] { PacketTerminator }, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var packetData in packetsData)
+        {
+            if (string.IsNullOrEmpty(packetData))
+                continue;
+
+            var packet = JsonConvert.DeserializeObject<T>(packetData);
+            var packetBytes = Encoding.UTF8.GetBytes(packetData);
+            packet.SetData(packetBytes);
+            packets.Add(packet);
+
+            yield return packet;
         }
 
-        public bool CanUnwrap<T>(Packet packet) where T : Packet
+        await Task.Yield();
+    }
+
+    public byte[] ToBytes<T>(T packet) where T : Packet
+    {
+        packet.Type = packet.GetType().FullName;
+
+        var data = JsonConvert.SerializeObject(packet);
+
+        data += PacketTerminator;
+
+        return Encoding.UTF8.GetBytes(data);
+    }
+
+    public T Unwrap<T>(Packet packet) where T : Packet
+    {
+        try
         {
-            return packet.Type.Equals(typeof(T).FullName);
+            var packetBytes = packet.GetData();
+
+            var data = Encoding.UTF8.GetString(packetBytes).Trim('\0');
+
+            var unwrappedPacket = JsonConvert.DeserializeObject(data) as JObject;
+
+            return unwrappedPacket.ToObject<T>();
         }
-
-        public async IAsyncEnumerable<T> StreamFromBytes<T>(byte[] streamBytes) where T : Packet
+        catch (Exception ex)
         {
-            var packets = new List<Packet>();
-            var data = Encoding.UTF8.GetString(streamBytes).Trim('\0');
-
-            var packetsData = data.Split(new string[] { PacketTerminator }, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (var packetData in packetsData)
-            {
-                if (string.IsNullOrEmpty(packetData))
-                    continue;
-
-                var packet = JsonConvert.DeserializeObject<T>(packetData);
-                var packetBytes = Encoding.UTF8.GetBytes(packetData);
-                packet.SetData(packetBytes);
-                packets.Add(packet);
-
-                yield return packet;
-            }
-
-            await Task.Yield();
+            return default(T);
         }
+    }
 
-        public byte[] ToBytes<T>(T packet) where T : Packet
+    public bool TryUnwrap<T>(Packet packet, out T unwrappedPacket) where T : Packet
+    {
+        if (CanUnwrap<T>(packet))
         {
-            packet.Type = packet.GetType().FullName;
+            unwrappedPacket = Unwrap<T>(packet);
 
-            var data = JsonConvert.SerializeObject(packet);
-
-            data += PacketTerminator;
-
-            return Encoding.UTF8.GetBytes(data);
+            return true;
         }
-
-        public T Unwrap<T>(Packet packet) where T : Packet
+        else
         {
-            try
-            {
-                var packetBytes = packet.GetData();
-
-                var data = Encoding.UTF8.GetString(packetBytes).Trim('\0');
-
-                var unwrappedPacket = JsonConvert.DeserializeObject(data) as JObject;
-
-                return unwrappedPacket.ToObject<T>();
-            }
-            catch (Exception ex)
-            {
-                return default(T);
-            }
-        }
-
-        public bool TryUnwrap<T>(Packet packet, out T unwrappedPacket) where T : Packet
-        {
-            if (CanUnwrap<T>(packet))
-            {
-                unwrappedPacket = Unwrap<T>(packet);
-
-                return true;
-            }
-            else
-            {
-                unwrappedPacket = default;
-                return false;
-            }
+            unwrappedPacket = default;
+            return false;
         }
     }
 }

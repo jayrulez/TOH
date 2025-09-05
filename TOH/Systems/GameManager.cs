@@ -10,253 +10,252 @@ using TOH.Network;
 using TOH.Network.Client;
 using TOH.Network.Packets;
 
-namespace TOH.Systems
+namespace TOH.Systems;
+
+public enum GameState
 {
-    public enum GameState
+    None,
+    Startup,
+    Login,
+    Home,
+    Battle
+}
+
+public class GameEvents
+{
+    public static EventKey<GameState> ChangeStateEventKey = new EventKey<GameState>();
+}
+
+public class NetworkEvents
+{
+    public static EventKey<PongPacket> PongPacketEventKey = new EventKey<PongPacket>();
+
+    #region PVPBattle
+    public static EventKey<BattleInfoPacket> BattleInfoPacketEventKey = new EventKey<BattleInfoPacket>();
+    public static EventKey<BattleCountdownPacket> BattleCountdownPacketEventKey = new EventKey<BattleCountdownPacket>();
+    public static EventKey<BattleUnitSelectionReadyPacket> BattleUnitSelectionReadyPacketEventKey = new EventKey<BattleUnitSelectionReadyPacket>();
+    public static EventKey<BattleReadyPacket> BattleReadyPacketEventKey = new EventKey<BattleReadyPacket>();
+    public static EventKey<BattleTurnInfoPacket> BattleTurnInfoPacketEventKey = new EventKey<BattleTurnInfoPacket>();
+    public static EventKey<BattleUnitTurnPacket> BattleUnitTurnPacketEventKey = new EventKey<BattleUnitTurnPacket>();
+    public static EventKey<BattleResultPacket> BattleResultPacketEventKey = new EventKey<BattleResultPacket>();
+    #endregion
+
+    #region Session
+    public static EventKey<JoinSessionFailedPacket> JoinSessionFailedPacketEventKey = new EventKey<JoinSessionFailedPacket>();
+    public static EventKey<JoinSessionSuccessPacket> JoinSessionSuccessPacketEventKey = new EventKey<JoinSessionSuccessPacket>();
+    public static EventKey<SessionDisconnectedPacket> SessionDisconnectedPacketEventKey = new EventKey<SessionDisconnectedPacket>();
+    #endregion
+}
+
+public class GameManager : GameSystemBase
+{
+    public GameTcpClient NetworkClient { get; private set; }
+    public GameServiceClient ServiceClient { get; private set; }
+
+    public GameState CurrentGameState { get; private set; }
+    public GameState NextGameState { get; private set; }
+
+    private Task NetworkTask;
+    private bool NetworkTaskRunning = false;
+
+    private CancellationTokenSource NetworkTaskCancellationTokenSource = new CancellationTokenSource();
+
+    private Scene StateScene = null;
+
+    private EventReceiver<GameState> OnGameStateChangedEventListener = new EventReceiver<GameState>(GameEvents.ChangeStateEventKey);
+
+    public GameManager(IServiceRegistry registry) : base(registry)
     {
-        None,
-        Startup,
-        Login,
-        Home,
-        Battle
+        CurrentGameState = GameState.None;
+        NextGameState = GameState.Startup;
     }
 
-    public class GameEvents
+    public override void Initialize()
     {
-        public static EventKey<GameState> ChangeStateEventKey = new EventKey<GameState>();
+        base.Initialize();
+
+        Enabled = true;
+        Visible = false;
+
+        if (Game != null)
+        {
+            Game.Activated += OnApplicationResumed;
+            Game.Deactivated += OnApplicationPaused;
+        }
     }
 
-    public class NetworkEvents
+    protected override void Destroy()
     {
-        public static EventKey<PongPacket> PongPacketEventKey = new EventKey<PongPacket>();
+        if (Game != null)
+        {
+            Game.Activated -= OnApplicationResumed;
+            Game.Deactivated -= OnApplicationPaused;
+        }
 
-        #region PVPBattle
-        public static EventKey<BattleInfoPacket> BattleInfoPacketEventKey = new EventKey<BattleInfoPacket>();
-        public static EventKey<BattleCountdownPacket> BattleCountdownPacketEventKey = new EventKey<BattleCountdownPacket>();
-        public static EventKey<BattleUnitSelectionReadyPacket> BattleUnitSelectionReadyPacketEventKey = new EventKey<BattleUnitSelectionReadyPacket>();
-        public static EventKey<BattleReadyPacket> BattleReadyPacketEventKey = new EventKey<BattleReadyPacket>();
-        public static EventKey<BattleTurnInfoPacket> BattleTurnInfoPacketEventKey = new EventKey<BattleTurnInfoPacket>();
-        public static EventKey<BattleUnitTurnPacket> BattleUnitTurnPacketEventKey = new EventKey<BattleUnitTurnPacket>();
-        public static EventKey<BattleResultPacket> BattleResultPacketEventKey = new EventKey<BattleResultPacket>();
-        #endregion
+        // ensure that OnApplicationPaused is called before destruction, when Game.Deactivated event is not triggered.
+        OnApplicationPaused(this, EventArgs.Empty);
 
-        #region Session
-        public static EventKey<JoinSessionFailedPacket> JoinSessionFailedPacketEventKey = new EventKey<JoinSessionFailedPacket>();
-        public static EventKey<JoinSessionSuccessPacket> JoinSessionSuccessPacketEventKey = new EventKey<JoinSessionSuccessPacket>();
-        public static EventKey<SessionDisconnectedPacket> SessionDisconnectedPacketEventKey = new EventKey<SessionDisconnectedPacket>();
-        #endregion
+        base.Destroy();
     }
 
-    public class GameManager : GameSystemBase
+    private static void OnApplicationPaused(object sender, EventArgs e)
     {
-        public GameTcpClient NetworkClient { get; private set; }
-        public GameServiceClient ServiceClient { get; private set; }
+    }
 
-        public GameState CurrentGameState { get; private set; }
-        public GameState NextGameState { get; private set; }
+    private static void OnApplicationResumed(object sender, EventArgs e)
+    {
+        // revert the state of the edit text here?
+    }
 
-        private Task NetworkTask;
-        private bool NetworkTaskRunning = false;
-
-        private CancellationTokenSource NetworkTaskCancellationTokenSource = new CancellationTokenSource();
-
-        private Scene StateScene = null;
-
-        private EventReceiver<GameState> OnGameStateChangedEventListener = new EventReceiver<GameState>(GameEvents.ChangeStateEventKey);
-
-        public GameManager(IServiceRegistry registry) : base(registry)
+    private void LoadGameState(GameState state)
+    {
+        if (NextGameState == CurrentGameState)
         {
-            CurrentGameState = GameState.None;
-            NextGameState = GameState.Startup;
+            return;
         }
 
-        public override void Initialize()
+        var game = Game as TOHGame;
+
+        if (StateScene != null)
         {
-            base.Initialize();
-
-            Enabled = true;
-            Visible = false;
-
-            if (Game != null)
-            {
-                Game.Activated += OnApplicationResumed;
-                Game.Deactivated += OnApplicationPaused;
-            }
+            StateScene.Parent = null;
+            game.Content.Unload(StateScene);
         }
 
-        protected override void Destroy()
+        switch (state)
         {
-            if (Game != null)
-            {
-                Game.Activated -= OnApplicationResumed;
-                Game.Deactivated -= OnApplicationPaused;
-            }
-
-            // ensure that OnApplicationPaused is called before destruction, when Game.Deactivated event is not triggered.
-            OnApplicationPaused(this, EventArgs.Empty);
-
-            base.Destroy();
+            case GameState.Startup:
+                StateScene = game.Content.Load<Scene>("Scenes/StartupScene");
+                break;
+            case GameState.Login:
+                StateScene = game.Content.Load<Scene>("Scenes/LoginScene");
+                break;
+            case GameState.Home:
+                StateScene = game.Content.Load<Scene>("Scenes/HomeScene");
+                break;
+            case GameState.Battle:
+                StateScene = game.Content.Load<Scene>("Scenes/BattleScene");
+                break;
         }
 
-        private static void OnApplicationPaused(object sender, EventArgs e)
+        if (StateScene != null)
+            StateScene.Parent = game.SceneSystem.SceneInstance.RootScene;
+
+        CurrentGameState = NextGameState;
+    }
+
+    public override void Update(GameTime gameTime)
+    {
+        base.Update(gameTime);
+
+        if (ConfigManager.Instance.Initialized)
         {
-        }
-
-        private static void OnApplicationResumed(object sender, EventArgs e)
-        {
-            // revert the state of the edit text here?
-        }
-
-        private void LoadGameState(GameState state)
-        {
-            if (NextGameState == CurrentGameState)
+            if (ServiceClient == null)
             {
-                return;
-            }
-
-            var game = Game as TOHGame;
-
-            if (StateScene != null)
-            {
-                StateScene.Parent = null;
-                game.Content.Unload(StateScene);
-            }
-
-            switch (state)
-            {
-                case GameState.Startup:
-                    StateScene = game.Content.Load<Scene>("Scenes/StartupScene");
-                    break;
-                case GameState.Login:
-                    StateScene = game.Content.Load<Scene>("Scenes/LoginScene");
-                    break;
-                case GameState.Home:
-                    StateScene = game.Content.Load<Scene>("Scenes/HomeScene");
-                    break;
-                case GameState.Battle:
-                    StateScene = game.Content.Load<Scene>("Scenes/BattleScene");
-                    break;
-            }
-
-            if (StateScene != null)
-                StateScene.Parent = game.SceneSystem.SceneInstance.RootScene;
-
-            CurrentGameState = NextGameState;
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-
-            if (ConfigManager.Instance.Initialized)
-            {
-                if (ServiceClient == null)
+                ServiceClient = new GameServiceClient(new GameServiceClientOptions
                 {
-                    ServiceClient = new GameServiceClient(new GameServiceClientOptions
-                    {
-                        Protocol = ConfigManager.Instance.ServerConfig.ServiceProtocol,
-                        Host = ConfigManager.Instance.ServerConfig.ServiceHost,
-                        Port = ConfigManager.Instance.ServerConfig.ServicePort
-                    });
-                }
+                    Protocol = ConfigManager.Instance.ServerConfig.ServiceProtocol,
+                    Host = ConfigManager.Instance.ServerConfig.ServiceHost,
+                    Port = ConfigManager.Instance.ServerConfig.ServicePort
+                });
+            }
 
-                if (NetworkClient == null)
+            if (NetworkClient == null)
+            {
+                NetworkClient = new GameTcpClient(new TcpClientOptions
                 {
-                    NetworkClient = new GameTcpClient(new TcpClientOptions
-                    {
-                        Host = ConfigManager.Instance.ServerConfig.TcpServerHost,
-                        Port = ConfigManager.Instance.ServerConfig.TcpServerPort
-                    });
-                }
-            }
-
-            if (OnGameStateChangedEventListener.TryReceive(out GameState gameState))
-            {
-                NextGameState = gameState;
-            }
-
-            if (CurrentGameState != NextGameState)
-            {
-                LoadGameState(NextGameState);
+                    Host = ConfigManager.Instance.ServerConfig.TcpServerHost,
+                    Port = ConfigManager.Instance.ServerConfig.TcpServerPort
+                });
             }
         }
 
-        public void StartNetworkTask()
+        if (OnGameStateChangedEventListener.TryReceive(out GameState gameState))
         {
-            if (!NetworkTaskRunning)
-            {
-                NetworkClient.Connect();
-                NetworkTaskRunning = true;
+            NextGameState = gameState;
+        }
 
-                NetworkTask = Task.Factory.StartNew(async () =>
+        if (CurrentGameState != NextGameState)
+        {
+            LoadGameState(NextGameState);
+        }
+    }
+
+    public void StartNetworkTask()
+    {
+        if (!NetworkTaskRunning)
+        {
+            NetworkClient.Connect();
+            NetworkTaskRunning = true;
+
+            NetworkTask = Task.Factory.StartNew(async () =>
+            {
+                while (!NetworkClient.Connection.IsClosed)
                 {
-                    while (!NetworkClient.Connection.IsClosed)
+                    if (NetworkTaskRunning == false)
                     {
-                        if (NetworkTaskRunning == false)
+                        break;
+                    }
+
+                    await foreach (var wrappedPacket in NetworkClient.Connection.GetPackets())
+                    {
+                        if (NetworkClient.Connection.TryUnwrap<PongPacket>(wrappedPacket, out var pongPacket))
                         {
-                            break;
+                            NetworkEvents.PongPacketEventKey.Broadcast(pongPacket);
                         }
-
-                        await foreach (var wrappedPacket in NetworkClient.Connection.GetPackets())
+                        else if (NetworkClient.Connection.TryUnwrap<BattleInfoPacket>(wrappedPacket, out var battleInfoPacket))
                         {
-                            if (NetworkClient.Connection.TryUnwrap<PongPacket>(wrappedPacket, out var pongPacket))
-                            {
-                                NetworkEvents.PongPacketEventKey.Broadcast(pongPacket);
-                            }
-                            else if (NetworkClient.Connection.TryUnwrap<BattleInfoPacket>(wrappedPacket, out var battleInfoPacket))
-                            {
-                                NetworkEvents.BattleInfoPacketEventKey.Broadcast(battleInfoPacket);
-                            }
-                            else if (NetworkClient.Connection.TryUnwrap<BattleCountdownPacket>(wrappedPacket, out var battleCountdownPacket))
-                            {
-                                NetworkEvents.BattleCountdownPacketEventKey.Broadcast(battleCountdownPacket);
-                            }
-                            else if (NetworkClient.Connection.TryUnwrap<BattleUnitSelectionReadyPacket>(wrappedPacket, out var battleUnitSelectionReadyPacket))
-                            {
-                                NetworkEvents.BattleUnitSelectionReadyPacketEventKey.Broadcast(battleUnitSelectionReadyPacket);
-                            }
-                            else if (NetworkClient.Connection.TryUnwrap<BattleReadyPacket>(wrappedPacket, out var battleReadyPacket))
-                            {
-                                NetworkEvents.BattleReadyPacketEventKey.Broadcast(battleReadyPacket);
-                            }
-                            else if (NetworkClient.Connection.TryUnwrap<BattleTurnInfoPacket>(wrappedPacket, out var battleTurnInfoPacket))
-                            {
-                                NetworkEvents.BattleTurnInfoPacketEventKey.Broadcast(battleTurnInfoPacket);
-                            }
-                            else if (NetworkClient.Connection.TryUnwrap<BattleUnitTurnPacket>(wrappedPacket, out var battleUnitTurnPacket))
-                            {
-                                NetworkEvents.BattleUnitTurnPacketEventKey.Broadcast(battleUnitTurnPacket);
-                            }
-                            else if (NetworkClient.Connection.TryUnwrap<BattleResultPacket>(wrappedPacket, out var battleResultPacket))
-                            {
-                                NetworkEvents.BattleResultPacketEventKey.Broadcast(battleResultPacket);
-                            }
-                            else if (NetworkClient.Connection.TryUnwrap<JoinSessionFailedPacket>(wrappedPacket, out var joinSessionFailedPacket))
-                            {
-                                NetworkEvents.JoinSessionFailedPacketEventKey.Broadcast(joinSessionFailedPacket);
-                            }
-                            else if (NetworkClient.Connection.TryUnwrap<JoinSessionSuccessPacket>(wrappedPacket, out var joinSessionSuccessPacket))
-                            {
-                                NetworkEvents.JoinSessionSuccessPacketEventKey.Broadcast(joinSessionSuccessPacket);
-                            }
-                            else if (NetworkClient.Connection.TryUnwrap<SessionDisconnectedPacket>(wrappedPacket, out var sessionDisconnectedPacket))
-                            {
-                                NetworkEvents.SessionDisconnectedPacketEventKey.Broadcast(sessionDisconnectedPacket);
-                            }
-                            else
-                            {
+                            NetworkEvents.BattleInfoPacketEventKey.Broadcast(battleInfoPacket);
+                        }
+                        else if (NetworkClient.Connection.TryUnwrap<BattleCountdownPacket>(wrappedPacket, out var battleCountdownPacket))
+                        {
+                            NetworkEvents.BattleCountdownPacketEventKey.Broadcast(battleCountdownPacket);
+                        }
+                        else if (NetworkClient.Connection.TryUnwrap<BattleUnitSelectionReadyPacket>(wrappedPacket, out var battleUnitSelectionReadyPacket))
+                        {
+                            NetworkEvents.BattleUnitSelectionReadyPacketEventKey.Broadcast(battleUnitSelectionReadyPacket);
+                        }
+                        else if (NetworkClient.Connection.TryUnwrap<BattleReadyPacket>(wrappedPacket, out var battleReadyPacket))
+                        {
+                            NetworkEvents.BattleReadyPacketEventKey.Broadcast(battleReadyPacket);
+                        }
+                        else if (NetworkClient.Connection.TryUnwrap<BattleTurnInfoPacket>(wrappedPacket, out var battleTurnInfoPacket))
+                        {
+                            NetworkEvents.BattleTurnInfoPacketEventKey.Broadcast(battleTurnInfoPacket);
+                        }
+                        else if (NetworkClient.Connection.TryUnwrap<BattleUnitTurnPacket>(wrappedPacket, out var battleUnitTurnPacket))
+                        {
+                            NetworkEvents.BattleUnitTurnPacketEventKey.Broadcast(battleUnitTurnPacket);
+                        }
+                        else if (NetworkClient.Connection.TryUnwrap<BattleResultPacket>(wrappedPacket, out var battleResultPacket))
+                        {
+                            NetworkEvents.BattleResultPacketEventKey.Broadcast(battleResultPacket);
+                        }
+                        else if (NetworkClient.Connection.TryUnwrap<JoinSessionFailedPacket>(wrappedPacket, out var joinSessionFailedPacket))
+                        {
+                            NetworkEvents.JoinSessionFailedPacketEventKey.Broadcast(joinSessionFailedPacket);
+                        }
+                        else if (NetworkClient.Connection.TryUnwrap<JoinSessionSuccessPacket>(wrappedPacket, out var joinSessionSuccessPacket))
+                        {
+                            NetworkEvents.JoinSessionSuccessPacketEventKey.Broadcast(joinSessionSuccessPacket);
+                        }
+                        else if (NetworkClient.Connection.TryUnwrap<SessionDisconnectedPacket>(wrappedPacket, out var sessionDisconnectedPacket))
+                        {
+                            NetworkEvents.SessionDisconnectedPacketEventKey.Broadcast(sessionDisconnectedPacket);
+                        }
+                        else
+                        {
 
-                            }
                         }
                     }
-                }, NetworkTaskCancellationTokenSource.Token);
-            }
+                }
+            }, NetworkTaskCancellationTokenSource.Token);
         }
+    }
 
-        public void StopNetworkTask()
-        {
-            NetworkTaskRunning = false;
-            NetworkTaskCancellationTokenSource.Cancel();
-        }
+    public void StopNetworkTask()
+    {
+        NetworkTaskRunning = false;
+        NetworkTaskCancellationTokenSource.Cancel();
     }
 }

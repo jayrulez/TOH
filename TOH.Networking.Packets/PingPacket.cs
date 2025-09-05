@@ -1,9 +1,8 @@
 ﻿using System;
 using TOH.Network.Abstractions;
 
-namespace TOH.Network.Packets
+namespace TOH.Network.Packets;
+
+public class PingPacket : Packet
 {
-    public class PingPacket : Packet
-    {
-    }
 }

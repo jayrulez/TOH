@@ -6,33 +6,32 @@ using System.Threading.Tasks;
 using TOH.Server.Systems;
 using TOH.Server.Services;
 
-namespace TOH.Server.PacketHandlers
+namespace TOH.Server.PacketHandlers;
+
+public class FindBattlePacketHandler : PacketHandler<FindBattlePacket>
 {
-    public class FindBattlePacketHandler : PacketHandler<FindBattlePacket>
+    private readonly ILogger _logger;
+    private readonly PVPBattleLobbyService _battleLobbyService;
+    private readonly SessionService _sessionService;
+
+    public FindBattlePacketHandler(PVPBattleLobbyService battleLobbyService, SessionService sessionService, IPacketConverter packetConverter, ILogger<PingPacketHandler> logger) : base(packetConverter)
     {
-        private readonly ILogger _logger;
-        private readonly PVPBattleLobbyService _battleLobbyService;
-        private readonly SessionService _sessionService;
+        _battleLobbyService = battleLobbyService;
+        _sessionService = sessionService;
+        _logger = logger;
+    }
 
-        public FindBattlePacketHandler(PVPBattleLobbyService battleLobbyService, SessionService sessionService, IPacketConverter packetConverter, ILogger<PingPacketHandler> logger) : base(packetConverter)
+    public override async Task HandleImp(IConnection connection, FindBattlePacket packet)
+    {
+        var session = await _sessionService.GetActiveSession(connection);
+
+        if (session != null)
         {
-            _battleLobbyService = battleLobbyService;
-            _sessionService = sessionService;
-            _logger = logger;
+            await _battleLobbyService.JoinQueue(session);
         }
-
-        public override async Task HandleImp(IConnection connection, FindBattlePacket packet)
+        else
         {
-            var session = await _sessionService.GetActiveSession(connection);
-
-            if (session != null)
-            {
-                await _battleLobbyService.JoinQueue(session);
-            }
-            else
-            {
-                // connection has no session, Kick them?
-            }
+            // connection has no session, Kick them?
         }
     }
 }

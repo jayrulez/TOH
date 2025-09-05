@@ -4,22 +4,21 @@ using TOH.Network.Packets;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
-namespace TOH.Server.PacketHandlers
+namespace TOH.Server.PacketHandlers;
+
+public class PingPacketHandler : PacketHandler<PingPacket>
 {
-    public class PingPacketHandler : PacketHandler<PingPacket>
+    private readonly ILogger _logger;
+
+    public PingPacketHandler(ILogger<PingPacketHandler> logger, IPacketConverter packetConverter) : base(packetConverter)
     {
-        private readonly ILogger _logger;
+        _logger = logger;
+    }
 
-        public PingPacketHandler(ILogger<PingPacketHandler> logger, IPacketConverter packetConverter) : base(packetConverter)
-        {
-            _logger = logger;
-        }
+    public override async Task HandleImp(IConnection connection, PingPacket packet)
+    {
+        _logger.LogInformation($"{packet} {packet.PacketId}");
 
-        public override async Task HandleImp(IConnection connection, PingPacket packet)
-        {
-            _logger.LogInformation($"{packet} {packet.PacketId}");
-
-            await connection.Send(new PongPacket { PingId = packet.PacketId });
-        }
+        await connection.Send(new PongPacket { PingId = packet.PacketId });
     }
 }

@@ -1,9 +1,8 @@
 ﻿using TOH.Network.Abstractions;
 
-namespace TOH.Network.Packets
+namespace TOH.Network.Packets;
+
+public class BattleUnitTurnPacket : Packet
 {
-    public class BattleUnitTurnPacket : Packet
-    {
-        public int UnitId { get; set; }
-    }
+    public int UnitId { get; set; }
 }

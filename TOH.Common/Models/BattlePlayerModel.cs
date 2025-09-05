@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace TOH.Common.Data
-{
-    public class BattlePlayerModel
-    {
-        public int Id { get; set; }
+namespace TOH.Common.Data;
 
-        public List<BattleUnitModel> Units { get; set; }
-    }
+public class BattlePlayerModel
+{
+    public int Id { get; set; }
+
+    public List<BattleUnitModel> Units { get; set; }
 }

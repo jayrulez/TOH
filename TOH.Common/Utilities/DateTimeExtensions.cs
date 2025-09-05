@@ -1,16 +1,15 @@
 ﻿using System;
 
-namespace TOH.Common.Utilities
+namespace TOH.Common.Utilities;
+
+public static class DateTimeExtensions
 {
-    public static class DateTimeExtensions
+    public static long ToUnixTimestamp(this DateTime dateTime)
     {
-        public static long ToUnixTimestamp(this DateTime dateTime)
-        {
-            var epoch = new DateTime(1970, 1, 1);
+        var epoch = new DateTime(1970, 1, 1);
 
-            var timeSpan = dateTime - epoch;
+        var timeSpan = dateTime - epoch;
 
-            return (long)timeSpan.TotalSeconds;
-        }
+        return (long)timeSpan.TotalSeconds;
     }
 }

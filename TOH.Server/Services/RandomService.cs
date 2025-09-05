@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TOH.Server.Services
+namespace TOH.Server.Services;
+
+public class RandomService
 {
-    public class RandomService
+    private readonly Random _randomSource;
+
+    public RandomService()
     {
-        private readonly Random _randomSource;
+        _randomSource = new Random(DateTime.UtcNow.Millisecond);
+    }
 
-        public RandomService()
-        {
-            _randomSource = new Random(DateTime.UtcNow.Millisecond);
-        }
+    public T GetRandom<T>(List<T> sample)
+    {
+        var index = _randomSource.Next(sample.Count);
 
-        public T GetRandom<T>(List<T> sample)
-        {
-            var index = _randomSource.Next(sample.Count);
-
-            return sample[index];
-        }
+        return sample[index];
     }
 }

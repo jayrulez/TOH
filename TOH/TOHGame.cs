@@ -1,22 +1,21 @@
 ﻿using TOH.Systems;
 
-namespace TOH
+namespace TOH;
+
+public class TOHGame : Stride.Engine.Game
 {
-    public class TOHGame : Stride.Engine.Game
+    public GameManager GameManager { get; }
+
+    public TOHGame() : base()
     {
-        public GameManager GameManager { get; }
+        GameManager = new GameManager(Services);
+        Services.AddService(GameManager);
+    }
 
-        public TOHGame() : base()
-        {
-            GameManager = new GameManager(Services);
-            Services.AddService(GameManager);
-        }
+    protected override void Initialize()
+    {
+        base.Initialize();
 
-        protected override void Initialize()
-        {
-            base.Initialize();
-
-            GameSystems.Add(GameManager);
-        }
+        GameSystems.Add(GameManager);
     }
 }

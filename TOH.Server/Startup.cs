@@ -18,82 +18,81 @@ using TOH.Server.PacketHandlers;
 using TOH.Server.Services;
 using TOH.Server.Systems;
 
-namespace TOH.Server
+namespace TOH.Server;
+
+class Startup
 {
-    class Startup
+    public Startup(IConfiguration configuration)
     {
-        public Startup(IConfiguration configuration)
+        Configuration = configuration;
+    }
+
+    public IConfiguration Configuration { get; }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddOptions();
+        services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
+
+        var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+
+        services.AddDbContext<GameDbContext>(options =>
         {
-            Configuration = configuration;
+            options.UseLazyLoadingProxies();
+            options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly(migrationsAssembly));
+        });
+
+        services.AddCodeFirstGrpc(config =>
+        {
+            config.ResponseCompressionLevel = System.IO.Compression.CompressionLevel.Optimal;
+        });
+
+        services.AddDataProtection()
+            .SetApplicationName("TOH.Server")
+            .PersistKeysToDbContext<GameDbContext>()
+            .SetDefaultKeyLifetime(TimeSpan.FromDays(1825));
+
+
+        services.AddSingleton<RandomService, RandomService>();
+        services.AddSingleton<ConnectionManager, ConnectionManager>();
+        services.AddSingleton<SessionService, SessionService>();
+
+        services.AddSingleton<PVPBattleLobbyService, PVPBattleLobbyService>();
+        services.AddSingleton<PVPBattleSystemService, PVPBattleSystemService>();
+
+        services.AddTransient<PlayerManager, PlayerManager>();
+        services.AddTransient<PlayerService, PlayerService>();
+
+        services.AddTransient<TimerService, TimerService>();
+        services.AddTransient<IPacketConverter, JsonPacketConverter>();
+
+        services.AddTransient<IPacketHandler<PingPacket>, PingPacketHandler>();
+        services.AddTransient<IPacketHandler<FindBattlePacket>, FindBattlePacketHandler>();
+        services.AddTransient<IPacketHandler<SetBattleUnitsPacket>, SetBattleUnitsPacketHandler>();
+        services.AddTransient<IPacketHandler<BattleTurnCommandPacket>, BattleTurnCommandPacketHandler>();
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
         }
 
-        public IConfiguration Configuration { get; }
+        app.UseRouting();
 
-        public void ConfigureServices(IServiceCollection services)
+        app.UseEndpoints(endpoints =>
         {
-            services.AddOptions();
-            services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
+            endpoints.MapGrpcService<PlayerService>();
 
-            var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-
-            services.AddDbContext<GameDbContext>(options =>
+            endpoints.MapGet("/", async context =>
             {
-                options.UseLazyLoadingProxies();
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly(migrationsAssembly));
+                await context.Response.WriteAsync("TOH.Server");
             });
+        });
 
-            services.AddCodeFirstGrpc(config =>
-            {
-                config.ResponseCompressionLevel = System.IO.Compression.CompressionLevel.Optimal;
-            });
+        var dbInitializer = new DBInitializer(app);
 
-            services.AddDataProtection()
-                .SetApplicationName("TOH.Server")
-                .PersistKeysToDbContext<GameDbContext>()
-                .SetDefaultKeyLifetime(TimeSpan.FromDays(1825));
-
-
-            services.AddSingleton<RandomService, RandomService>();
-            services.AddSingleton<ConnectionManager, ConnectionManager>();
-            services.AddSingleton<SessionService, SessionService>();
-
-            services.AddSingleton<PVPBattleLobbyService, PVPBattleLobbyService>();
-            services.AddSingleton<PVPBattleSystemService, PVPBattleSystemService>();
-
-            services.AddTransient<PlayerManager, PlayerManager>();
-            services.AddTransient<PlayerService, PlayerService>();
-
-            services.AddTransient<TimerService, TimerService>();
-            services.AddTransient<IPacketConverter, JsonPacketConverter>();
-
-            services.AddTransient<IPacketHandler<PingPacket>, PingPacketHandler>();
-            services.AddTransient<IPacketHandler<FindBattlePacket>, FindBattlePacketHandler>();
-            services.AddTransient<IPacketHandler<SetBattleUnitsPacket>, SetBattleUnitsPacketHandler>();
-            services.AddTransient<IPacketHandler<BattleTurnCommandPacket>, BattleTurnCommandPacketHandler>();
-        }
-
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseRouting();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapGrpcService<PlayerService>();
-
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("TOH.Server");
-                });
-            });
-
-            var dbInitializer = new DBInitializer(app);
-
-            dbInitializer.Run();
-        }
+        dbInitializer.Run();
     }
 }

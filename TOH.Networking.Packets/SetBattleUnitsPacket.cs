@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using TOH.Network.Abstractions;
 
-namespace TOH.Network.Packets
-{
-    public class SetBattleUnitsPacket : Packet
-    {
-        public string BattleId { get; set; }
+namespace TOH.Network.Packets;
 
-        public List<int> Units { get; set; }
-    }
+public class SetBattleUnitsPacket : Packet
+{
+    public string BattleId { get; set; }
+
+    public List<int> Units { get; set; }
 }

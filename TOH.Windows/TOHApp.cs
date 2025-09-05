@@ -1,13 +1,12 @@
-namespace TOH.Windows
+namespace TOH.Windows;
+
+class TOHApp
 {
-    class TOHApp
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        using (var game = new TOHGame())
         {
-            using (var game = new TOHGame())
-            {
-                game.Run();
-            }
+            game.Run();
         }
     }
 }

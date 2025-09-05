@@ -3,12 +3,11 @@ using TOH.Common.BattleSystem;
 using TOH.Common.Data;
 using TOH.Network.Abstractions;
 
-namespace TOH.Network.Packets
-{
-    public class BattleReadyPacket : Packet
-    {
-        public string BattleId { get; set; }
+namespace TOH.Network.Packets;
 
-        public List<BattlePlayerModel> Players { get; set; }
-    }
+public class BattleReadyPacket : Packet
+{
+    public string BattleId { get; set; }
+
+    public List<BattlePlayerModel> Players { get; set; }
 }

@@ -10,60 +10,59 @@ using TOH.Network.Server;
 using TOH.Server.Services;
 using TOH.Server.Systems;
 
-namespace TOH.Server
+namespace TOH.Server;
+
+public class GameServer : AbstractTcpServer
 {
-    public class GameServer : AbstractTcpServer
+    private readonly PVPBattleLobbyService _matchLobbyService;
+    private readonly PVPBattleSystemService _matchService;
+    private readonly SessionService _sessionService;
+
+    public GameServer(IHost host) : base(host)
     {
-        private readonly PVPBattleLobbyService _matchLobbyService;
-        private readonly PVPBattleSystemService _matchService;
-        private readonly SessionService _sessionService;
+        _matchLobbyService = host.Services.GetRequiredService<PVPBattleLobbyService>();
+        _matchService = host.Services.GetRequiredService<PVPBattleSystemService>();
+        _sessionService = host.Services.GetRequiredService<SessionService>();
 
-        public GameServer(IHost host) : base(host)
+        Logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger<GameServer>();
+    }
+
+    public async override Task StartAsync(CancellationToken cancellationToken = default)
+    {
+        Logger.LogInformation($"Loading data...");
+        await ConfigManager.Instance.Initialize("Config");
+
+        while (ConfigManager.Instance.State != ConfigManagerState.Initialized)
         {
-            _matchLobbyService = host.Services.GetRequiredService<PVPBattleLobbyService>();
-            _matchService = host.Services.GetRequiredService<PVPBattleSystemService>();
-            _sessionService = host.Services.GetRequiredService<SessionService>();
 
-            Logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger<GameServer>();
         }
 
-        public async override Task StartAsync(CancellationToken cancellationToken = default)
+        Logger.LogInformation($"Loaded data successfully.");
+
+        await base.StartAsync(cancellationToken);
+    }
+
+    protected override async Task TickSystems()
+    {
+        await _matchService.Tick();
+        await _matchLobbyService.Tick();
+    }
+
+    protected async override Task OnPacketReceived(IConnection connection, Packet packet)
+    {
+        if (_packetConverter.CanUnwrap<JoinSessionPacket>(packet))
         {
-            Logger.LogInformation($"Loading data...");
-            await ConfigManager.Instance.Initialize("Config");
-
-            while (ConfigManager.Instance.State != ConfigManagerState.Initialized)
-            {
-
-            }
-
-            Logger.LogInformation($"Loaded data successfully.");
-
-            await base.StartAsync(cancellationToken);
+            await _sessionService.JoinSession(connection, _packetConverter.Unwrap<JoinSessionPacket>(packet));
         }
-
-        protected override async Task TickSystems()
+        else
         {
-            await _matchService.Tick();
-            await _matchLobbyService.Tick();
+            await base.OnPacketReceived(connection, packet);
         }
+    }
 
-        protected async override Task OnPacketReceived(IConnection connection, Packet packet)
-        {
-            if (_packetConverter.CanUnwrap<JoinSessionPacket>(packet))
-            {
-                await _sessionService.JoinSession(connection, _packetConverter.Unwrap<JoinSessionPacket>(packet));
-            }
-            else
-            {
-                await base.OnPacketReceived(connection, packet);
-            }
-        }
-
-        protected async override Task OnDisconnected(IConnection connection)
-        {
-            await _sessionService.TryDisconnect(connection);
-            await base.OnDisconnected(connection);
-        }
+    protected async override Task OnDisconnected(IConnection connection)
+    {
+        await _sessionService.TryDisconnect(connection);
+        await base.OnDisconnected(connection);
     }
 }

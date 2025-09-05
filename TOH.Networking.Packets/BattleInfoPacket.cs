@@ -2,11 +2,10 @@
 using TOH.Common.Data;
 using TOH.Network.Abstractions;
 
-namespace TOH.Network.Packets
+namespace TOH.Network.Packets;
+
+public class BattleInfoPacket : Packet
 {
-    public class BattleInfoPacket : Packet
-    {
-        public string BattleId { get; set; }
-        public List<PlayerModel> Players { get; set; }
-    }
+    public string BattleId { get; set; }
+    public List<PlayerModel> Players { get; set; }
 }

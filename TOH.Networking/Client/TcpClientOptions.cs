@@ -1,8 +1,7 @@
-﻿namespace TOH.Network.Client
+﻿namespace TOH.Network.Client;
+
+public class TcpClientOptions
 {
-    public class TcpClientOptions
-    {
-        public string Host { get; set; }
-        public int Port { get; set; }
-    }
+    public string Host { get; set; }
+    public int Port { get; set; }
 }

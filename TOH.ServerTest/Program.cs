@@ -6,81 +6,80 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TOH.TestClient
+namespace TOH.TestClient;
+
+class Program
 {
-    class Program
+    static Socket Socket;
+
+    static async Task Main(string[] args)
     {
-        static Socket Socket;
+        Thread.Sleep(5000);
 
-        static async Task Main(string[] args)
+        Console.WriteLine("Connecting...");
+        Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        Socket.Connect("127.0.0.1", 5000);
+        Console.WriteLine("Connected.");
+
+        var connection = new TcpConnection(Socket, new JsonPacketConverter());
+
+        await Task.Factory.StartNew(() => GetMessages(connection));
+
+        try
         {
-            Thread.Sleep(5000);
+            while (true)
+            {
+                if (!connection.IsClosed)
+                {
+                    await PingServer(connection);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        finally
+        {
+        }
 
-            Console.WriteLine("Connecting...");
-            Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            Socket.Connect("127.0.0.1", 5000);
-            Console.WriteLine("Connected.");
+        //Console.ReadKey();
+    }
 
-            var connection = new TcpConnection(Socket, new JsonPacketConverter());
-
-            await Task.Factory.StartNew(() => GetMessages(connection));
-
+    public static async Task GetMessages(IConnection connection)
+    {
+        while (!connection.IsClosed)
+        {
             try
             {
-                while (true)
+                await foreach (var packet in connection.GetPackets())
                 {
-                    if (!connection.IsClosed)
-                    {
-                        await PingServer(connection);
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    Console.WriteLine($"Packet received: {packet.Type}");
                 }
             }
-            finally
+            catch (Exception ex)
             {
-            }
-
-            //Console.ReadKey();
-        }
-
-        public static async Task GetMessages(IConnection connection)
-        {
-            while (!connection.IsClosed)
-            {
-                try
-                {
-                    await foreach (var packet in connection.GetPackets())
-                    {
-                        Console.WriteLine($"Packet received: {packet.Type}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
+                Console.WriteLine(ex.Message);
             }
         }
+    }
 
-        public static async Task PingServer(IConnection connection)
+    public static async Task PingServer(IConnection connection)
+    {
+        while (!connection.IsClosed)
         {
-            while (!connection.IsClosed)
+            try
             {
-                try
+                await connection.Send(new PingPacket
                 {
-                    await connection.Send(new PingPacket
-                    {
-                    });
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-
-                Thread.Sleep(100);
+                });
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            Thread.Sleep(100);
         }
     }
 }

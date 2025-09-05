@@ -3,49 +3,48 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 
-namespace TOH.Network.Common
+namespace TOH.Network.Common;
+
+public class TimerService
 {
-    public class TimerService
+    private Stopwatch stopwatch = new Stopwatch();
+
+    private readonly ILogger _logger;
+
+    public long TimerFrequency { get { return Stopwatch.Frequency; } }
+
+    public TimerService(ILogger<TimerService> logger)
     {
-        private Stopwatch stopwatch = new Stopwatch();
+        _logger = logger;
+    }
 
-        private readonly ILogger _logger;
-
-        public long TimerFrequency { get { return Stopwatch.Frequency; } }
-
-        public TimerService(ILogger<TimerService> logger)
+    public void Start(CancellationToken cancellationToken)
+    {
+        if (!stopwatch.IsRunning)
         {
-            _logger = logger;
+            stopwatch.Start();
+        }
+        else
+        {
+            _logger.LogWarning("The stopwatch is already running.");
+        }
+    }
+
+    public long GetTicks()
+    {
+        if (!stopwatch.IsRunning)
+        {
+            throw new Exception("The stopwatch is not running.");
         }
 
-        public void Start(CancellationToken cancellationToken)
-        {
-            if (!stopwatch.IsRunning)
-            {
-                stopwatch.Start();
-            }
-            else
-            {
-                _logger.LogWarning("The stopwatch is already running.");
-            }
-        }
+        return stopwatch.ElapsedTicks;
+    }
 
-        public long GetTicks()
+    public void Stop()
+    {
+        if (stopwatch.IsRunning)
         {
-            if (!stopwatch.IsRunning)
-            {
-                throw new Exception("The stopwatch is not running.");
-            }
-
-            return stopwatch.ElapsedTicks;
-        }
-
-        public void Stop()
-        {
-            if (stopwatch.IsRunning)
-            {
-                stopwatch.Stop();
-            }
+            stopwatch.Stop();
         }
     }
 }

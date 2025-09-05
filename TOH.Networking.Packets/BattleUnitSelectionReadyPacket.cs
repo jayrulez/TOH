@@ -1,8 +1,7 @@
 ﻿using TOH.Network.Abstractions;
 
-namespace TOH.Network.Packets
+namespace TOH.Network.Packets;
+
+public class BattleUnitSelectionReadyPacket : Packet
 {
-    public class BattleUnitSelectionReadyPacket : Packet
-    {
-    }
 }

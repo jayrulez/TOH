@@ -1,12 +1,11 @@
 ﻿using TOH.Network.Client;
 
-namespace TOH.Network
-{
+namespace TOH.Network;
 
-    public class GameTcpClient : AbstractTcpClient
+
+public class GameTcpClient : AbstractTcpClient
+{
+    public GameTcpClient(TcpClientOptions clientOptions) : base(clientOptions)
     {
-        public GameTcpClient(TcpClientOptions clientOptions) : base(clientOptions)
-        {
-        }
     }
 }

@@ -3,83 +3,82 @@ using System.Collections.Generic;
 using System.Linq;
 using static TOH.Common.Data.ConfigManager;
 
-namespace TOH.Common.Data
+namespace TOH.Common.Data;
+
+public enum UnitType
 {
-    public enum UnitType
-    {
-        DPS,
-        Tank,
-        Support
-    }
+    DPS,
+    Tank,
+    Support
+}
 
-    public enum UnitElement
-    {
-        Fire,
-        Water,
-        Earth,
-        Light,
-        Dark
-    }
+public enum UnitElement
+{
+    Fire,
+    Water,
+    Earth,
+    Light,
+    Dark
+}
 
-    public enum UnitGrade
-    {
-        Fodder,
-        Normal,
-        Rare,
-        Hero,
-        Legendary
-    }
+public enum UnitGrade
+{
+    Fodder,
+    Normal,
+    Rare,
+    Hero,
+    Legendary
+}
 
-    public enum UnitStatType
-    {
-        HP,
-        Attack,
-        Defense,
-        Speed
-    }
+public enum UnitStatType
+{
+    HP,
+    Attack,
+    Defense,
+    Speed
+}
 
-    public enum UnitSkillSlot
-    {
-        Default,
-        Second,
-        Third
-    }
+public enum UnitSkillSlot
+{
+    Default,
+    Second,
+    Third
+}
 
-    public class UnitModel
-    {
-        public int UnitId { get; set; }
-        public UnitType Type { get; set; }
-        public UnitGrade Grade { get; set; }
-        public UnitElement Element { get; set; }
-        public string Name { get; set; }
-        public Dictionary<UnitStatType, int> Stats { get; set; } = new Dictionary<UnitStatType, int>();
-        public Dictionary<UnitSkillSlot, SkillModel> Skills { get; set; } = new Dictionary<UnitSkillSlot, SkillModel>();
+public class UnitModel
+{
+    public int UnitId { get; set; }
+    public UnitType Type { get; set; }
+    public UnitGrade Grade { get; set; }
+    public UnitElement Element { get; set; }
+    public string Name { get; set; }
+    public Dictionary<UnitStatType, int> Stats { get; set; } = new Dictionary<UnitStatType, int>();
+    public Dictionary<UnitSkillSlot, SkillModel> Skills { get; set; } = new Dictionary<UnitSkillSlot, SkillModel>();
 
-        public UnitModel()
+    public UnitModel()
+    {
+        foreach (var stat in Enum.GetValues(typeof(UnitStatType)).Cast<UnitStatType>())
         {
-            foreach (var stat in Enum.GetValues(typeof(UnitStatType)).Cast<UnitStatType>())
-            {
-                Stats.Add(stat, 0);
-            }
-
-            foreach (var skillSlot in Enum.GetValues(typeof(UnitSkillSlot)).Cast<UnitSkillSlot>())
-            {
-                Skills.Add(skillSlot, null);
-            }
+            Stats.Add(stat, 0);
         }
 
-        public int GetBaseStatValue(int level, UnitStatType statType)
+        foreach (var skillSlot in Enum.GetValues(typeof(UnitSkillSlot)).Cast<UnitSkillSlot>())
         {
-            var statValue = Stats[statType];
-
-            if (Instance.LevelConfig.ContainsKey(level))
-            {
-                var levelConfig = Instance.LevelConfig[level];
-
-                statValue = (int)(statValue * levelConfig[statType]);
-            }
-
-            return statValue;
+            Skills.Add(skillSlot, null);
         }
+    }
+
+    public int GetBaseStatValue(int level, UnitStatType statType)
+    {
+        var statValue = Stats[statType];
+
+        if (Instance.LevelConfig.ContainsKey(level))
+        {
+            var levelConfig = Instance.LevelConfig[level];
+
+            statValue = (int)(statValue * levelConfig[statType]);
+        }
+
+        return statValue;
     }
 }

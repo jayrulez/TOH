@@ -7,122 +7,121 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TOH.Server.Data;
 
-namespace TOH.Server.Migrations
+namespace TOH.Server.Migrations;
+
+[DbContext(typeof(GameDbContext))]
+[Migration("20200618055024_AddPlayerData")]
+partial class AddPlayerData
 {
-    [DbContext(typeof(GameDbContext))]
-    [Migration("20200618055024_AddPlayerData")]
-    partial class AddPlayerData
+    protected override void BuildTargetModel(ModelBuilder modelBuilder)
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
-        {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("Npgsql:PostgresExtension:uuid-ossp", ",,")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
-                .HasAnnotation("ProductVersion", "3.1.3")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+        modelBuilder
+            .HasAnnotation("Npgsql:PostgresExtension:uuid-ossp", ",,")
+            .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
+            .HasAnnotation("ProductVersion", "3.1.3")
+            .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+        modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("integer")
+                    .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<string>("FriendlyName")
-                        .HasColumnType("text");
+                b.Property<string>("FriendlyName")
+                    .HasColumnType("text");
 
-                    b.Property<string>("Xml")
-                        .HasColumnType("text");
+                b.Property<string>("Xml")
+                    .HasColumnType("text");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("DataProtectionKeys");
-                });
+                b.ToTable("DataProtectionKeys");
+            });
 
-            modelBuilder.Entity("TOH.Server.Data.Player", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+        modelBuilder.Entity("TOH.Server.Data.Player", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("integer")
+                    .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int>("Level")
-                        .HasColumnType("integer");
+                b.Property<int>("Level")
+                    .HasColumnType("integer");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Username")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasAlternateKey("Username");
+                b.HasAlternateKey("Username");
 
-                    b.ToTable("Players");
-                });
+                b.ToTable("Players");
+            });
 
-            modelBuilder.Entity("TOH.Server.Data.PlayerSession", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
+        modelBuilder.Entity("TOH.Server.Data.PlayerSession", b =>
+            {
+                b.Property<string>("Id")
+                    .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp without time zone");
+                b.Property<DateTime>("ExpiresAt")
+                    .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("integer");
+                b.Property<int>("PlayerId")
+                    .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("PlayerId");
+                b.HasIndex("PlayerId");
 
-                    b.ToTable("PlayerSessions");
-                });
+                b.ToTable("PlayerSessions");
+            });
 
-            modelBuilder.Entity("TOH.Server.Data.PlayerUnit", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+        modelBuilder.Entity("TOH.Server.Data.PlayerUnit", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("integer")
+                    .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int>("Level")
-                        .HasColumnType("integer");
+                b.Property<int>("Level")
+                    .HasColumnType("integer");
 
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("integer");
+                b.Property<int>("PlayerId")
+                    .HasColumnType("integer");
 
-                    b.Property<int>("UnitId")
-                        .HasColumnType("integer");
+                b.Property<int>("UnitId")
+                    .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("PlayerId");
+                b.HasIndex("PlayerId");
 
-                    b.ToTable("PlayerUnits");
-                });
+                b.ToTable("PlayerUnits");
+            });
 
-            modelBuilder.Entity("TOH.Server.Data.PlayerSession", b =>
-                {
-                    b.HasOne("TOH.Server.Data.Player", "Player")
-                        .WithMany()
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+        modelBuilder.Entity("TOH.Server.Data.PlayerSession", b =>
+            {
+                b.HasOne("TOH.Server.Data.Player", "Player")
+                    .WithMany()
+                    .HasForeignKey("PlayerId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
 
-            modelBuilder.Entity("TOH.Server.Data.PlayerUnit", b =>
-                {
-                    b.HasOne("TOH.Server.Data.Player", "Player")
-                        .WithMany("Units")
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+        modelBuilder.Entity("TOH.Server.Data.PlayerUnit", b =>
+            {
+                b.HasOne("TOH.Server.Data.Player", "Player")
+                    .WithMany("Units")
+                    .HasForeignKey("PlayerId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
 #pragma warning restore 612, 618
-        }
     }
 }

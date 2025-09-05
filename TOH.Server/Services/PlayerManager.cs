@@ -4,113 +4,112 @@ using System.Collections.Generic;
 using System.Linq;
 using TOH.Server.Data;
 
-namespace TOH.Server.Services
+namespace TOH.Server.Services;
+
+public class PlayerManager
 {
-    public class PlayerManager
+    private readonly GameDbContext _dbContext;
+    private readonly ILogger _logger;
+
+    public PlayerManager(GameDbContext dbContext, ILogger<PlayerManager> logger)
     {
-        private readonly GameDbContext _dbContext;
-        private readonly ILogger _logger;
+        _dbContext = dbContext;
+        _logger = logger;
+    }
 
-        public PlayerManager(GameDbContext dbContext, ILogger<PlayerManager> logger)
+    public Player CreatePlayer(string username)
+    {
+        username = username.Trim();
+
+        var player = _dbContext.Players.FirstOrDefault(p => p.Username.ToLower().Equals(username.ToLower()));
+
+        if (player != null)
         {
-            _dbContext = dbContext;
-            _logger = logger;
+            throw new EntityExistException();
         }
 
-        public Player CreatePlayer(string username)
+        player = new Player
         {
-            username = username.Trim();
+            Username = username,
+            Level = 1
+        };
 
-            var player = _dbContext.Players.FirstOrDefault(p => p.Username.ToLower().Equals(username.ToLower()));
+        _dbContext.Players.Add(player);
 
-            if (player != null)
-            {
-                throw new EntityExistException();
-            }
+        _dbContext.SaveChanges();
 
-            player = new Player
-            {
-                Username = username,
-                Level = 1
-            };
+        return player;
+    }
 
-            _dbContext.Players.Add(player);
+    public Player GetPlayerById(int id)
+    {
+        return _dbContext.Players.FirstOrDefault(p => p.Id == id);
+    }
 
-            _dbContext.SaveChanges();
+    public Player GetPlayerByUsername(string username)
+    {
+        username = username.Trim();
 
-            return player;
+        return _dbContext.Players.FirstOrDefault(p => p.Username.ToLower().Equals(username.ToLower()));
+    }
+
+    public PlayerUnit CreatePlayerUnit(int playerId, int unitId, int level)
+    {
+        var playerUnit = new PlayerUnit
+        {
+            PlayerId = playerId,
+            UnitId = unitId,
+            Level = level
+        };
+
+        _dbContext.PlayerUnits.Add(playerUnit);
+        _dbContext.SaveChanges();
+
+        return playerUnit;
+    }
+
+    public PlayerUnit GetPlayerUnitById(int id)
+    {
+        return _dbContext.PlayerUnits.FirstOrDefault(p => p.Id == id);
+    }
+
+    public List<PlayerUnit> GetPlayerUnitsByPlayerId(int playerId)
+    {
+        return _dbContext.PlayerUnits.Where(p => p.PlayerId == playerId).ToList();
+    }
+
+    public PlayerSession CreatePlayerSession(string username)
+    {
+        var player = GetPlayerByUsername(username);
+
+        if (player == null)
+        {
+            throw new EntityNotFoundException();
         }
 
-        public Player GetPlayerById(int id)
+        var activeSessions = _dbContext.PlayerSessions.Where(p => p.PlayerId == player.Id).ToList();
+
+        foreach (var activeSession in activeSessions)
         {
-            return _dbContext.Players.FirstOrDefault(p => p.Id == id);
+            _dbContext.Remove(activeSession);
         }
 
-        public Player GetPlayerByUsername(string username)
+        var session = new PlayerSession
         {
-            username = username.Trim();
+            Id = Guid.NewGuid().ToString(),
+            PlayerId = player.Id,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(30)
+        };
 
-            return _dbContext.Players.FirstOrDefault(p => p.Username.ToLower().Equals(username.ToLower()));
-        }
+        _dbContext.PlayerSessions.Add(session);
+        _dbContext.SaveChanges();
 
-        public PlayerUnit CreatePlayerUnit(int playerId, int unitId, int level)
-        {
-            var playerUnit = new PlayerUnit
-            {
-                PlayerId = playerId,
-                UnitId = unitId,
-                Level = level
-            };
+        return session;
+    }
 
-            _dbContext.PlayerUnits.Add(playerUnit);
-            _dbContext.SaveChanges();
-
-            return playerUnit;
-        }
-
-        public PlayerUnit GetPlayerUnitById(int id)
-        {
-            return _dbContext.PlayerUnits.FirstOrDefault(p => p.Id == id);
-        }
-
-        public List<PlayerUnit> GetPlayerUnitsByPlayerId(int playerId)
-        {
-            return _dbContext.PlayerUnits.Where(p => p.PlayerId == playerId).ToList();
-        }
-
-        public PlayerSession CreatePlayerSession(string username)
-        {
-            var player = GetPlayerByUsername(username);
-
-            if (player == null)
-            {
-                throw new EntityNotFoundException();
-            }
-
-            var activeSessions = _dbContext.PlayerSessions.Where(p => p.PlayerId == player.Id).ToList();
-
-            foreach (var activeSession in activeSessions)
-            {
-                _dbContext.Remove(activeSession);
-            }
-
-            var session = new PlayerSession
-            {
-                Id = Guid.NewGuid().ToString(),
-                PlayerId = player.Id,
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddDays(30)
-            };
-
-            _dbContext.PlayerSessions.Add(session);
-            _dbContext.SaveChanges();
-
-            return session;
-        }
-
-        public PlayerSession GetPlayerSessionById(string id)
-        {
-            return _dbContext.PlayerSessions.FirstOrDefault(s => s.Id.Equals(id));
-        }
+    public PlayerSession GetPlayerSessionById(string id)
+    {
+        return _dbContext.PlayerSessions.FirstOrDefault(s => s.Id.Equals(id));
     }
 }

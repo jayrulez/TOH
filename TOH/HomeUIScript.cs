@@ -9,147 +9,146 @@ using TOH.Common.Data;
 using TOH.Network.Packets;
 using TOH.Systems;
 
-namespace TOH
+namespace TOH;
+
+public enum HomeState
 {
-    public enum HomeState
+    None,
+    Matching,
+    MatchFound,
+    Countdown,
+    SelectUnits,
+    MatchReadyWait
+}
+
+public class BattleInfo
+{
+    public string BattleId { get; set; }
+    public List<PlayerModel> Players { get; set; }
+}
+
+public class HomeUIScript : SyncScript
+{
+    private EventReceiver<BattleCountdownPacket> BattleCountdownEventListener = new EventReceiver<BattleCountdownPacket>(NetworkEvents.BattleCountdownPacketEventKey);
+    private EventReceiver<BattleUnitSelectionReadyPacket> BattleUnitSelectionReadyEventListener = new EventReceiver<BattleUnitSelectionReadyPacket>(NetworkEvents.BattleUnitSelectionReadyPacketEventKey);
+    private EventReceiver<BattleInfoPacket> BattleInfoEventListener = new EventReceiver<BattleInfoPacket>(NetworkEvents.BattleInfoPacketEventKey);
+    private EventReceiver<BattleReadyPacket> BattleReadyEventListener = new EventReceiver<BattleReadyPacket>(NetworkEvents.BattleReadyPacketEventKey);
+
+    private HomeState HomeState;
+    private GameManager GameManager;
+    private Button MatchButton;
+    private TextBlock CountdownText;
+    private BattleInfo BattleInfo;
+
+    // Declared public member fields and properties will show in the game studio
+    private UIComponent HomeUI;
+
+    public override void Start()
     {
-        None,
-        Matching,
-        MatchFound,
-        Countdown,
-        SelectUnits,
-        MatchReadyWait
-    }
+        HomeState = HomeState.None;
+        var game = (TOHGame)Game;
 
-    public class BattleInfo
-    {
-        public string BattleId { get; set; }
-        public List<PlayerModel> Players { get; set; }
-    }
+        GameManager = game.GameManager;
 
-    public class HomeUIScript : SyncScript
-    {
-        private EventReceiver<BattleCountdownPacket> BattleCountdownEventListener = new EventReceiver<BattleCountdownPacket>(NetworkEvents.BattleCountdownPacketEventKey);
-        private EventReceiver<BattleUnitSelectionReadyPacket> BattleUnitSelectionReadyEventListener = new EventReceiver<BattleUnitSelectionReadyPacket>(NetworkEvents.BattleUnitSelectionReadyPacketEventKey);
-        private EventReceiver<BattleInfoPacket> BattleInfoEventListener = new EventReceiver<BattleInfoPacket>(NetworkEvents.BattleInfoPacketEventKey);
-        private EventReceiver<BattleReadyPacket> BattleReadyEventListener = new EventReceiver<BattleReadyPacket>(NetworkEvents.BattleReadyPacketEventKey);
+        // Initialization of the script.
+        HomeUI = Entity.Get<UIComponent>();
 
-        private HomeState HomeState;
-        private GameManager GameManager;
-        private Button MatchButton;
-        private TextBlock CountdownText;
-        private BattleInfo BattleInfo;
-
-        // Declared public member fields and properties will show in the game studio
-        private UIComponent HomeUI;
-
-        public override void Start()
+        if (HomeUI != null)
         {
-            HomeState = HomeState.None;
-            var game = (TOHGame)Game;
+            MatchButton = HomeUI.Page.RootElement.FindVisualChildOfType<Button>();
+            CountdownText = HomeUI.Page.RootElement.FindVisualChildOfType<TextBlock>("Countdown");
 
-            GameManager = game.GameManager;
-
-            // Initialization of the script.
-            HomeUI = Entity.Get<UIComponent>();
-
-            if (HomeUI != null)
+            if (MatchButton != null)
             {
-                MatchButton = HomeUI.Page.RootElement.FindVisualChildOfType<Button>();
-                CountdownText = HomeUI.Page.RootElement.FindVisualChildOfType<TextBlock>("Countdown");
-
-                if (MatchButton != null)
+                MatchButton.Click += (object sender, RoutedEventArgs args) =>
                 {
-                    MatchButton.Click += (object sender, RoutedEventArgs args) =>
+                    if (HomeState == HomeState.None)
                     {
-                        if (HomeState == HomeState.None)
-                        {
-                            GameManager.NetworkClient.Connection.Send(new FindBattlePacket());
+                        GameManager.NetworkClient.Connection.Send(new FindBattlePacket());
 
-                            HomeState = HomeState.Matching;
+                        HomeState = HomeState.Matching;
 
-                            MatchButton.IsEnabled = false;
-                        }
-                    };
-                }
+                        MatchButton.IsEnabled = false;
+                    }
+                };
             }
         }
+    }
 
-        public override void Update()
+    public override void Update()
+    {
+
+        if (BattleInfoEventListener.TryReceive(out var battleInfoPacket))
         {
-
-            if (BattleInfoEventListener.TryReceive(out var battleInfoPacket))
+            BattleInfo = new BattleInfo
             {
-                BattleInfo = new BattleInfo
-                {
-                    BattleId = battleInfoPacket.BattleId,
-                    Players = battleInfoPacket.Players
-                };
+                BattleId = battleInfoPacket.BattleId,
+                Players = battleInfoPacket.Players
+            };
 
-                HomeState = HomeState.MatchFound;
-            }
-            else if (BattleCountdownEventListener.TryReceive(out var battleCountdownPacket))
-            {
-                if (HomeState != HomeState.Countdown)
-                    HomeState = HomeState.Countdown;
-
-                CountdownText.Text = $"Battle will start in {battleCountdownPacket.Count}";
-            }
-            else if (BattleUnitSelectionReadyEventListener.TryReceive(out var battleUnitSelectionReadyPacket))
-            {
-                HomeState = HomeState.SelectUnits;
-            }
-
+            HomeState = HomeState.MatchFound;
+        }
+        else if (BattleCountdownEventListener.TryReceive(out var battleCountdownPacket))
+        {
             if (HomeState != HomeState.Countdown)
-            {
-                CountdownText.Visibility = Visibility.Collapsed;
-            }
-
-            if (HomeState == HomeState.Matching)
-            {
-                var buttonText = MatchButton.FindVisualChildOfType<TextBlock>();
-                buttonText.Text = "Matching";
-            }
-            else if (HomeState == HomeState.MatchFound)
-            {
-                MatchButton.Visibility = Visibility.Collapsed;
                 HomeState = HomeState.Countdown;
-            }
-            else if (HomeState == HomeState.Countdown)
+
+            CountdownText.Text = $"Battle will start in {battleCountdownPacket.Count}";
+        }
+        else if (BattleUnitSelectionReadyEventListener.TryReceive(out var battleUnitSelectionReadyPacket))
+        {
+            HomeState = HomeState.SelectUnits;
+        }
+
+        if (HomeState != HomeState.Countdown)
+        {
+            CountdownText.Visibility = Visibility.Collapsed;
+        }
+
+        if (HomeState == HomeState.Matching)
+        {
+            var buttonText = MatchButton.FindVisualChildOfType<TextBlock>();
+            buttonText.Text = "Matching";
+        }
+        else if (HomeState == HomeState.MatchFound)
+        {
+            MatchButton.Visibility = Visibility.Collapsed;
+            HomeState = HomeState.Countdown;
+        }
+        else if (HomeState == HomeState.Countdown)
+        {
+            CountdownText.Visibility = Visibility.Visible;
+        }
+        else if (HomeState == HomeState.SelectUnits)
+        {
+            //if(MatchInfo == null)
+            //TODO: Send back to state before find match
+
+            //TODO, listen for packet that shows opponents units and update UI
+
+            var session = GameDatabase.Instance.GetSession();
+
+            var player = BattleInfo.Players.FirstOrDefault(p => p.Id == session.PlayerId);
+
+            var playerUnitIds = player.Units.Select(u => u.Id).ToList();
+
+            GameManager.NetworkClient.Connection.Send(new SetBattleUnitsPacket()
             {
-                CountdownText.Visibility = Visibility.Visible;
-            }
-            else if (HomeState == HomeState.SelectUnits)
+                BattleId = BattleInfo.BattleId,
+                Units = playerUnitIds.Take(3).ToList()
+            });
+
+            HomeState = HomeState.MatchReadyWait;
+        }
+        else if (HomeState == HomeState.MatchReadyWait)
+        {
+            if (BattleReadyEventListener.TryReceive(out BattleReadyPacket battleReadyPacket))
             {
-                //if(MatchInfo == null)
-                //TODO: Send back to state before find match
+                var battle = new ClientPVPBattle(battleReadyPacket.BattleId, battleReadyPacket.Players);
 
-                //TODO, listen for packet that shows opponents units and update UI
+                ClientPVPBattleManager.Instance.SetBattle(battle);
 
-                var session = GameDatabase.Instance.GetSession();
-
-                var player = BattleInfo.Players.FirstOrDefault(p => p.Id == session.PlayerId);
-
-                var playerUnitIds = player.Units.Select(u => u.Id).ToList();
-
-                GameManager.NetworkClient.Connection.Send(new SetBattleUnitsPacket()
-                {
-                    BattleId = BattleInfo.BattleId,
-                    Units = playerUnitIds.Take(3).ToList()
-                });
-
-                HomeState = HomeState.MatchReadyWait;
-            }
-            else if (HomeState == HomeState.MatchReadyWait)
-            {
-                if (BattleReadyEventListener.TryReceive(out BattleReadyPacket battleReadyPacket))
-                {
-                    var battle = new ClientPVPBattle(battleReadyPacket.BattleId, battleReadyPacket.Players);
-
-                    ClientPVPBattleManager.Instance.SetBattle(battle);
-
-                    GameEvents.ChangeStateEventKey.Broadcast(GameState.Battle);
-                }
+                GameEvents.ChangeStateEventKey.Broadcast(GameState.Battle);
             }
         }
     }
